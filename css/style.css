@@ -17,6 +17,9 @@
   --ok-bg: #edf6ef;
   --rs: #b26a00;
   --rs-bg: #fbf4e6;
+  --hs: #2f6db5;
+  --hs-bg: #edf3fb;
+  --hot: #c0392b;
   --it-s: 62%;
   --it-l: 40%;
   --it-bg-s: 70%;
@@ -43,6 +46,9 @@
     --ok-bg: #1b2a1f;
     --rs: #f0b45a;
     --rs-bg: #2b2416;
+    --hs: #7fb2ee;
+    --hs-bg: #18222f;
+    --hot: #f07a6a;
     --it-s: 70%;
     --it-l: 72%;
     --it-bg-s: 30%;
@@ -69,6 +75,9 @@
   --ok-bg: #1b2a1f;
   --rs: #f0b45a;
   --rs-bg: #2b2416;
+  --hs: #7fb2ee;
+  --hs-bg: #18222f;
+  --hot: #f07a6a;
   --it-s: 70%;
   --it-l: 72%;
   --it-bg-s: 30%;
@@ -582,6 +591,39 @@ h1 {
 .ev-doubt b { background: var(--surface-2); color: var(--muted); }
 .ev-text b { background: var(--ok); color: var(--surface); }
 
+/* 역사 기록 */
+.hs-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  border-radius: 3px;
+  background: var(--hs);
+  color: var(--surface);
+  font-size: 9.5px;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: 1px;
+}
+.d-history {
+  margin-top: 18px;
+  padding: 14px 14px 10px;
+  border-radius: 12px;
+  background: var(--hs-bg);
+  border: 1px solid color-mix(in srgb, var(--hs) 35%, transparent);
+}
+.d-history h3 { margin: 0 0 6px; font-size: 13.5px; color: var(--hs); }
+.d-history .ev-text { margin-top: 0; }
+
+/* 출처 */
+.src { margin-top: 8px; font-size: 12px; display: flex; gap: 6px; }
+.src-label { flex: none; color: var(--muted); font-weight: 700; padding-top: 1px; }
+.src ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; min-width: 0; }
+.src a { color: var(--muted); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--muted) 45%, transparent); text-underline-offset: 2px; overflow-wrap: anywhere; }
+.src a:hover { color: var(--text); }
+.d-evidence + .d-research, .d-history + .d-evidence, .d-history + .d-research { margin-top: 12px; }
+
 /* 진행 중인 연구 (미확인) */
 .rs-mark {
   display: inline-block;
@@ -603,6 +645,7 @@ h1 {
 .rs-note { margin: 0 0 10px; font-size: 12px; color: var(--muted); line-height: 1.5; }
 .rs-card { padding: 10px 0; border-top: 1px solid color-mix(in srgb, var(--rs) 22%, transparent); }
 .rs-head { display: flex; gap: 8px; align-items: baseline; }
+.rs-status.hot { background: var(--hot); }
 .rs-status {
   flex: none;
   font-size: 11px;

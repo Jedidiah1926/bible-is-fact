@@ -84,21 +84,29 @@
     DATA.nt.items.forEach((i) => index.nt.set(i.id, { ...i, group: i.lane }));
 
     // 성경 밖 자료로 확인된 내용 (js/evidence.js)
-    Object.entries(window.TIMELINE_EVIDENCE || {}).forEach(([id, ev]) => {
-      ["ot", "nt"].forEach((v) => {
-        const it = index[v].get(id);
-        if (it) it.evidence = ev;
+    // 진행 중인 연구·논쟁 (js/research.js) — 확인된 사실이 아님
+    [
+      ["evidence", window.TIMELINE_EVIDENCE],
+      ["research", window.TIMELINE_RESEARCH]
+    ].forEach(([key, map]) => {
+      Object.entries(map || {}).forEach(([id, list]) => {
+        ["ot", "nt"].forEach((v) => {
+          const it = index[v].get(id);
+          if (it) it[key] = list;
+        });
       });
     });
   })();
 
-  const EV_W = 18; // 확인 표시(✓) 폭
+  // 제목 옆 표시(✓ 확인됨, ○ 연구 중)의 폭
+  const markW = (it) => (it.evidence ? 18 : 0) + (it.research ? 14 : 0);
 
-  // 제목 + (증거가 있으면) 확인 표시
+  // 제목 + 표시
   function titleNodes(it) {
     const frag = document.createDocumentFragment();
     frag.append(it.title);
     if (it.evidence) frag.append(el("span", "ev-mark", { textContent: "✓", title: "성경 밖 자료로 확인됨" }));
+    if (it.research) frag.append(el("span", "rs-mark", { title: "진행 중인 연구 (미확인)" }));
     return frag;
   }
 
@@ -235,7 +243,7 @@
       // 각 항목의 차지 영역 계산
       const layout = items.map((it) => {
         const x = xOf(it.start);
-        const ew = it.evidence ? EV_W : 0;
+        const ew = markW(it);
         const tw = textWidth(it.title, 12.5, 700) + 18 + ew;
         if (it.end != null) {
           const w = Math.max(6, xOf(it.end) - x);
@@ -400,6 +408,33 @@
         if (ev.doubt) t.append(el("b", "", { textContent: "확인 " }));
         t.append(ev.text);
         card.appendChild(t);
+        box.appendChild(card);
+      });
+      detailBody.appendChild(box);
+    }
+
+    if (it.research) {
+      const box = el("section", "d-research");
+      box.appendChild(el("h3", "", { textContent: "진행 중인 연구 · 미확인" }));
+      box.appendChild(
+        el("p", "rs-note", {
+          textContent: `아래 내용은 확인된 사실이 아니라 조사·논쟁 중인 주장입니다. (${window.TIMELINE_RESEARCH_DATE} 기준)`
+        })
+      );
+      it.research.forEach((r) => {
+        const card = el("div", "rs-card");
+        const head = el("div", "rs-head");
+        head.append(el("span", "rs-status", { textContent: r.status }), el("span", "rs-title", { textContent: r.title }));
+        card.appendChild(head);
+        if (r.who) card.appendChild(el("div", "ev-year", { textContent: r.who }));
+        const t = el("p", "ev-text");
+        t.append(el("b", "rs-tag", { textContent: "내용" }), r.text);
+        card.appendChild(t);
+        if (r.view) {
+          const v = el("p", "ev-text");
+          v.append(el("b", "rs-tag view", { textContent: "현재 평가" }), r.view);
+          card.appendChild(v);
+        }
         box.appendChild(card);
       });
       detailBody.appendChild(box);

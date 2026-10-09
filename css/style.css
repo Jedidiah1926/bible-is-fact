@@ -15,6 +15,8 @@
   /* 항목 색: hsl(var(--h) S L) */
   --ok: #2f7d4f;
   --ok-bg: #edf6ef;
+  --rs: #b26a00;
+  --rs-bg: #fbf4e6;
   --it-s: 62%;
   --it-l: 40%;
   --it-bg-s: 70%;
@@ -39,6 +41,8 @@
     --shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     --ok: #6fcf97;
     --ok-bg: #1b2a1f;
+    --rs: #f0b45a;
+    --rs-bg: #2b2416;
     --it-s: 70%;
     --it-l: 72%;
     --it-bg-s: 30%;
@@ -63,6 +67,8 @@
   --shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
   --ok: #6fcf97;
   --ok-bg: #1b2a1f;
+  --rs: #f0b45a;
+  --rs-bg: #2b2416;
   --it-s: 70%;
   --it-l: 72%;
   --it-bg-s: 30%;
@@ -575,6 +581,40 @@ h1 {
 }
 .ev-doubt b { background: var(--surface-2); color: var(--muted); }
 .ev-text b { background: var(--ok); color: var(--surface); }
+
+/* 진행 중인 연구 (미확인) */
+.rs-mark {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 4px;
+  border-radius: 50%;
+  border: 2px solid var(--rs);
+  vertical-align: 0;
+}
+.d-research {
+  margin-top: 14px;
+  padding: 14px 14px 4px;
+  border-radius: 12px;
+  background: var(--rs-bg);
+  border: 1px dashed color-mix(in srgb, var(--rs) 55%, transparent);
+}
+.d-research h3 { margin: 0 0 4px; font-size: 13.5px; color: var(--rs); }
+.rs-note { margin: 0 0 10px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.rs-card { padding: 10px 0; border-top: 1px solid color-mix(in srgb, var(--rs) 22%, transparent); }
+.rs-head { display: flex; gap: 8px; align-items: baseline; }
+.rs-status {
+  flex: none;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: var(--rs);
+  color: var(--surface);
+}
+.rs-title { font-size: 14.5px; font-weight: 800; }
+.ev-text b.rs-tag { background: color-mix(in srgb, var(--rs) 18%, transparent); color: var(--rs); }
+.ev-text b.rs-tag.view { background: var(--surface-2); color: var(--muted); }
 
 /* ───────── 하단 안내 ───────── */
 .hint {

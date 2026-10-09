@@ -1,7 +1,7 @@
 # 성경 타임라인 (bible-is-fact)
 
 구약과 신약의 사건·인물을 연대순으로 살펴보는 인터랙티브 웹 타임라인입니다.
-빌드 과정 없이 `index.html`을 브라우저로 열면 바로 동작합니다 (GitHub Pages로 그대로 배포 가능).
+빌드 과정 없이 `index.html`을 브라우저로 열면 바로 동작하는 정적 웹사이트입니다. [Vercel](https://vercel.com)로 배포합니다 (아래 "배포" 참고).
 
 ## 구성
 
@@ -70,6 +70,24 @@
 - `research.js`의 기준 시점은 `TIMELINE_RESEARCH_DATE`(현재 2026년 10월)이며, 내용을 갱신할 때 함께 바꿉니다.
 - 출처 형식: `sources: [{ label, url }]` — 위키백과 링크는 `W("문서_제목")` 도우미를 씁니다.
 
+## 배포 (Vercel)
+
+빌드가 없는 정적 사이트라 저장소를 연결하기만 하면 됩니다.
+
+1. [vercel.com](https://vercel.com)에 GitHub 계정으로 로그인
+2. **Add New… → Project** → `bible-is-fact` 저장소 **Import**
+3. 설정은 기본값 그대로 둡니다
+   - Framework Preset: **Other**
+   - Root Directory: `./`
+   - Build Command / Output Directory: 비워 둠
+4. **Deploy** → `https://<프로젝트이름>.vercel.app` 주소가 생깁니다
+
+이후 `main`에 푸시할 때마다 자동으로 다시 배포됩니다 (다른 브랜치는 미리보기 주소로 배포).
+도메인을 연결하려면 Vercel 프로젝트의 **Settings → Domains**에서 추가합니다.
+
+- [`vercel.json`](vercel.json): 깔끔한 주소(`cleanUrls`)와 기본 보안 헤더
+- [`.vercelignore`](.vercelignore): 배포에서 뺄 파일 (`CLAUDE.md`, `README.md`)
+
 ## 파일
 
 ```
@@ -79,5 +97,7 @@ js/data.js      타임라인 데이터
 js/history.js   역사 기록 (史)
 js/evidence.js  성경 밖 자료로 확인된 내용 (✓)
 js/research.js  진행 중인 연구·논쟁 (○, 미확인)
+img/favicon.svg 브라우저 탭 아이콘
+vercel.json     Vercel 배포 설정
 js/app.js       렌더링·인터랙션
 ```

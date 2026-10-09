@@ -443,6 +443,35 @@ h1 {
   height: 24px;
 }
 
+/* 접기/펼치기 (예수의 기적·공생애) */
+.lane-head { flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; }
+.fold-btn {
+  border: 1px solid color-mix(in srgb, var(--c, var(--accent)) 50%, transparent);
+  background: var(--surface);
+  color: var(--c, var(--accent));
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.fold-btn:hover { background: var(--surface-2); }
+.fold-bar {
+  --c: hsl(var(--h) var(--it-s) var(--it-l));
+  --cbar: hsl(var(--h) var(--it-bg-s) var(--it-bar-l));
+  background: repeating-linear-gradient(135deg, var(--cbar) 0 8px, color-mix(in srgb, var(--cbar) 60%, transparent) 8px 16px);
+  border: 1px dashed var(--c);
+  z-index: 3;
+}
+.fold-bar-label { color: hsl(var(--h) var(--it-s) var(--it-l)); font-weight: 800; z-index: 3; }
+.v-fold {
+  --c: hsl(45 var(--it-s) var(--it-l));
+  display: block;
+  margin: 8px 16px 2px 116px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+}
+
 /* ───────── 세로 보기 (모바일 기본) ───────── */
 .mode-btn {
   border: 1px solid var(--line);
@@ -826,6 +855,7 @@ body.mode-v .hint > span:first-child { display: none; }
   }
   .v-row { grid-template-columns: 74px 20px 1fr; padding: 0 12px 0 6px; }
   .v-head { padding: 9px 16px 8px; }
+  .v-fold { margin-left: 100px; }
   .mode-btn { padding: 0 9px; font-size: 12.5px; }
   .tools { gap: 6px; }
   h1 { font-size: 17px; }

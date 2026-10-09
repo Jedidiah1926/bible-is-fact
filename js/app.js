@@ -23,6 +23,7 @@
         { ...otLane("king"), name: "왕·통치자" },
         otLane("prophet"),
         ntLane("jesus"),
+        ntLane("miracle"),
         ntLane("church"),
         ntLane("paul"),
         ntLane("writings"),
@@ -56,6 +57,7 @@
     selected: null,
     query: "",
     hidden: { all: new Set() },
+    expanded: { jesus: false }, // 접기/펼치기 묶음 (예수의 기적·공생애 보충)
     mode: "h" // "h" 가로 타임라인, "v" 세로 목록 (모바일 기본)
   };
 
@@ -67,7 +69,8 @@
   }
 
   function fmtYear(y) {
-    const r = Math.round(y);
+    // AD의 소수 연도(같은 해 안의 순서)는 그해로 표시
+    const r = y >= 0 ? Math.floor(y) : Math.round(y);
     if (r < 0) return `BC ${-r}`;
     if (r === 0) return "BC 1";
     return `AD ${r}`;
@@ -199,7 +202,29 @@
     return u + (d - zw) / ppy();
   }
 
-  const isVisible = (it) => !state.hidden[state.view].has(it.group);
+  const isVisible = (it) => !state.hidden[state.view].has(it.group) && !(it.fold && !state.expanded[it.fold]);
+
+  // 접기/펼치기 묶음
+  const FOLD_INFO = { jesus: { label: "예수의 기적·공생애", range: [27, 30.4] } };
+  // 묶음에 속한 항목 수 (lane을 주면 그 줄에 있는 것만)
+  const foldCount = (f, lane) => [...index.all.values()].filter((it) => it.fold === f && (!lane || it.lane === lane)).length;
+  // 그 줄에 접히는 항목이 있으면 묶음 이름을 돌려줌
+  const laneFold = (lane) => lane.fold || [...index.all.values()].find((it) => it.lane === lane.id && it.fold)?.fold;
+
+  function setFold(f, open) {
+    if (state.expanded[f] === open) return;
+    state.expanded[f] = open;
+    rerenderKeepingCenter();
+  }
+
+  function foldButton(f, long, lane) {
+    const open = state.expanded[f];
+    const n = foldCount(f, lane);
+    return el("button", "fold-btn" + (open ? " open" : ""), {
+      textContent: open ? "▾ 접기" : long ? `▸ ${FOLD_INFO[f].label} ${n}개 펼치기` : `▸ 펼치기 (${n})`,
+      title: open ? "기적·공생애 항목 접기" : "기적·공생애 항목 펼치기"
+    });
+  }
 
   function visibleTimed() {
     return [...index[state.view].values()]
@@ -343,7 +368,7 @@
     c.lanes.forEach((lane) => {
       if (state.hidden[state.view].has(lane.id)) return;
       const items = [...index[state.view].values()]
-        .filter((i) => i.lane === lane.id)
+        .filter((i) => i.lane === lane.id && isVisible(i))
         .sort((a, b) => a.start - b.start || (b.end ?? b.start) - (a.end ?? a.start));
 
       // 각 항목의 차지 영역 계산
@@ -358,6 +383,13 @@
         }
         return { it, x, left: x - 7, right: x + 8 + pointLabelW(it) };
       });
+      // 접힌 줄: 묶음 전체를 요약 막대 하나로 표시 (누르면 펼침)
+      const fold = laneFold(lane);
+      const collapsedBar = lane.fold && !state.expanded[lane.fold];
+      if (collapsedBar) {
+        const [a, b] = FOLD_INFO[lane.fold].range;
+        layout.push({ summary: true, x: xOf(a), w: Math.max(6, xOf(b) - xOf(a)), left: xOf(a), right: xOf(b) + 260 });
+      }
       const rows = packRows(layout);
       const rowCount = Math.max(1, items.length ? Math.max(...rows) + 1 : 1);
       const laneH = rowCount * ROW + 14;
@@ -367,7 +399,13 @@
       band.style.top = y + "px";
       band.style.height = laneH + "px";
       band.style.width = totalW + "px";
-      const head = el("div", "lane-head", { textContent: lane.name });
+      const head = el("div", "lane-head");
+      head.appendChild(el("span", "", { textContent: lane.name }));
+      if (fold) {
+        const fb = foldButton(fold, false, lane.id);
+        fb.dataset.fold = fold;
+        head.appendChild(fb);
+      }
       head.style.setProperty("--h", lane.hue);
       band.appendChild(head);
       canvas.appendChild(band);
@@ -375,6 +413,20 @@
       layout.forEach((L, i) => {
         const it = L.it;
         const rowTop = y + 7 + rows[i] * ROW + 3;
+        if (L.summary) {
+          const bar = el("div", "bar fold-bar");
+          bar.dataset.fold = lane.fold;
+          bar.style.setProperty("--h", lane.hue);
+          bar.style.left = L.x + "px";
+          bar.style.top = rowTop + "px";
+          bar.style.width = L.w + "px";
+          const lbl = el("div", "bar-label fold-bar-label", { textContent: `${lane.name} ${foldCount(lane.fold, lane.id)}가지 · 눌러서 펼치기 ▸` });
+          lbl.dataset.fold = lane.fold;
+          lbl.style.left = L.x + L.w + 6 + "px";
+          lbl.style.top = rowTop + "px";
+          canvas.append(bar, lbl);
+          return;
+        }
         const wrap = el("div", "item");
         wrap.dataset.id = it.id;
         wrap.style.setProperty("--h", it.hue ?? lane.hue);
@@ -519,6 +571,12 @@
         nodes.set(s.id, head);
       }
       sec.appendChild(head);
+      if (s.id === "p-jesus") {
+        const fb = foldButton("jesus", true);
+        fb.dataset.fold = "jesus";
+        fb.classList.add("v-fold");
+        sec.appendChild(fb);
+      }
 
       const ul = el("ol", "v-list");
       s.items
@@ -776,6 +834,11 @@
   function select(id, { scroll = false } = {}) {
     state.selected = id;
     const it = id && index[state.view].get(id);
+    // 접혀 있는 항목을 고르면(검색·이전/다음·링크) 그 묶음을 펼침
+    if (it && it.fold && !state.expanded[it.fold]) {
+      state.expanded[it.fold] = true;
+      render();
+    }
     history.replaceState(null, "", it ? `#${id}` : location.pathname + location.search);
     // 가이드 선을 다시 그리기 위해 기존 가이드만 교체
     canvas.querySelectorAll(".guide, .guide-band").forEach((n) => n.remove());
@@ -901,7 +964,9 @@
       const q = searchInput.value.trim().toLowerCase();
       if (!q) return;
       // Enter를 누를 때마다 다음 검색 결과로 이동
-      const hits = visibleTimed().filter((it) => matchesQuery(it, q));
+      const hits = [...index.all.values()]
+        .filter((it) => !state.hidden.all.has(it.group) && matchesQuery(it, q))
+        .sort((a, b) => a.start - b.start);
       if (!hits.length) return;
       const cur = hits.findIndex((h) => h.id === state.selected);
       state.query = q;
@@ -917,6 +982,8 @@
   // 항목 클릭
   canvas.addEventListener("click", (e) => {
     if (dragMoved) return;
+    const fb = e.target.closest("[data-fold]");
+    if (fb) return setFold(fb.dataset.fold, !state.expanded[fb.dataset.fold]);
     const node = e.target.closest("[data-id]");
     // 모바일 세로 보기에서는 아래에서 올라오는 패널에 가리지 않도록 누른 항목을 위로 올림
     if (node) select(node.dataset.id, { scroll: state.mode === "v" && isMobile() });

@@ -6,17 +6,18 @@
  * 학자마다 수년~수십 년 차이가 있으며, approx: true 는 "약/추정" 연대입니다.
  *
  * 항목 형식
- *   { id, start, end?, title, ref?, desc?, approx? , cat? (구약) | lane? (신약) }
+ *   { id, lane, start, end?, title, ref?, desc?, approx? }
  *   end 가 있으면 기간(막대), 없으면 시점(점)으로 그려집니다.
  */
 window.TIMELINE_DATA = {
   ot: {
     name: "구약",
-    range: [-2250, 0],
+    range: [-2450, 0],
+    undatedBefore: -2200, // 이 연도 이전은 연대 미상(?) 구간
     zoom: { min: 0.35, max: 24, initial: 2.4 },
     concurrentPad: 12,
 
-    // 연대를 특정할 수 없는 원역사 (창 1–11장)
+    // 연대를 특정할 수 없는 원역사 (창 1–11장) — 타임라인 맨 앞 '?' 구간에 순서대로 배치
     prologue: [
       { id: "creation", title: "천지창조", ref: "창 1–2장", desc: "하나님이 엿새 동안 천지와 만물을 창조하시고 일곱째 날에 안식하심. 사람을 하나님의 형상대로 지으심." },
       { id: "fall", title: "인간의 타락", ref: "창 3장", desc: "아담과 하와가 선악을 알게 하는 나무의 열매를 먹음. 에덴에서 쫓겨나고, 여자의 후손에 대한 첫 복음(창 3:15)이 주어짐." },
@@ -25,16 +26,18 @@ window.TIMELINE_DATA = {
       { id: "babel", title: "바벨탑", ref: "창 11:1–9", desc: "사람들이 하늘에 닿는 탑을 쌓으려 하자 언어를 혼잡하게 하여 온 땅에 흩으심. 이어 셈의 족보가 아브람으로 연결됨." }
     ],
 
-    categories: [
+    lanes: [
+      { id: "period", name: "시대", hue: 35 },
       { id: "event", name: "주요 사건", hue: 18 },
       { id: "people", name: "인물", hue: 205 },
       { id: "king", name: "왕·왕국", hue: 275 },
       { id: "prophet", name: "선지자", hue: 150 },
-      { id: "world", name: "세계사·중간기", hue: 40 }
+      { id: "world", name: "주변 세계", hue: 40 }
     ],
 
-    // 시대 구분 (위쪽 띠)
+    // 시대 구분 ('시대' 줄)
     periods: [
+      { id: "p-primeval", start: -2450, end: -2200, undated: true, title: "원역사", hue: 18, desc: "창조부터 바벨탑까지. 성경의 족보로 연대를 계산하는 견해도 있으나 여기서는 연대 미상으로 둠.", ref: "창 1–11장" },
       { id: "p-patriarchs", start: -2166, end: -1876, title: "족장 시대", hue: 35, desc: "아브라함·이삭·야곱·요셉으로 이어지는 족장들의 시대. 땅과 자손과 복의 언약이 주어짐.", ref: "창 12–50장" },
       { id: "p-egypt", start: -1876, end: -1446, title: "이집트 체류", hue: 25, desc: "야곱의 가족 70명이 이집트로 내려가 큰 민족으로 번성. 후에 바로의 압제 아래 노예가 됨. 430년(출 12:40).", ref: "출 1장; 출 12:40" },
       { id: "p-wilderness", start: -1446, end: -1406, title: "광야 40년", hue: 55, desc: "출애굽 후 시내산 언약, 성막 건축, 불신앙으로 인한 40년 광야 방황.", ref: "출–신명기" },
@@ -52,91 +55,99 @@ window.TIMELINE_DATA = {
 
     items: [
       // 족장 시대
-      { id: "abram-born", start: -2166, cat: "people", title: "아브람 출생", ref: "창 11:26–27", desc: "갈대아 우르에서 데라의 아들로 태어남." },
-      { id: "abram-call", start: -2091, cat: "event", title: "아브람의 부르심", ref: "창 12:1–4", desc: "75세에 하란을 떠나 가나안으로. '큰 민족을 이루고 너로 말미암아 땅의 모든 족속이 복을 얻을 것이라.'" },
-      { id: "covenant", start: -2081, cat: "event", approx: true, title: "횃불 언약", ref: "창 15장", desc: "아브람이 여호와를 믿으니 이를 의로 여기심(15:6). 쪼갠 고기 사이로 횃불이 지나가며 언약을 맺으심." },
-      { id: "ishmael", start: -2080, cat: "people", title: "이스마엘 출생", ref: "창 16:16", desc: "아브람 86세에 하갈에게서 태어남." },
-      { id: "sodom", start: -2067, cat: "event", approx: true, title: "소돔과 고모라 멸망", ref: "창 18–19장", desc: "아브라함의 중보 기도 후 유황불 심판. 롯은 구원받고 롯의 아내는 소금 기둥이 됨." },
-      { id: "isaac-born", start: -2066, cat: "people", title: "이삭 출생", ref: "창 21:1–5", desc: "아브라함 100세, 사라 90세에 약속의 아들이 태어남." },
-      { id: "moriah", start: -2050, cat: "event", approx: true, title: "모리아산 이삭 번제", ref: "창 22장", desc: "하나님이 아브라함을 시험하심. '여호와 이레' — 숫양을 대신 준비하심." },
-      { id: "jacob-born", start: -2006, cat: "people", title: "야곱과 에서 출생", ref: "창 25:21–26", desc: "이삭 60세에 쌍둥이가 태어남. '큰 자가 어린 자를 섬기리라.'" },
-      { id: "bethel", start: -1929, cat: "event", approx: true, title: "야곱, 벧엘의 사닥다리", ref: "창 28장", desc: "형 에서를 피해 하란으로 가던 중 꿈에 하늘에 닿은 사닥다리를 봄." },
-      { id: "joseph-born", start: -1915, cat: "people", title: "요셉 출생", ref: "창 30:22–24", desc: "야곱과 라헬 사이에서 태어남." },
-      { id: "joseph-sold", start: -1898, cat: "event", title: "요셉, 이집트에 팔림", ref: "창 37장", desc: "17세에 형들의 시기로 은 20에 이스마엘 상인에게 팔림." },
-      { id: "joseph-ruler", start: -1885, cat: "people", title: "요셉, 이집트 총리", ref: "창 41:46", desc: "30세에 바로의 꿈을 해석하고 이집트의 총리가 됨." },
-      { id: "to-egypt", start: -1876, cat: "event", title: "야곱 가족 이집트 이주", ref: "창 46–47장", desc: "7년 흉년 중 야곱(130세)과 가족 70명이 고센 땅에 정착." },
-      { id: "jacob-dies", start: -1859, cat: "people", title: "야곱의 죽음", ref: "창 49장", desc: "147세에 열두 아들을 축복하고 죽음. 유다에게 '규'의 예언(49:10)." },
-      { id: "joseph-dies", start: -1805, cat: "people", title: "요셉의 죽음", ref: "창 50:22–26", desc: "110세에 죽으며 자기 해골을 가나안으로 가져가라고 유언." },
+      { id: "abram-born", start: -2166, lane: "people", title: "아브람 출생", ref: "창 11:26–27", desc: "갈대아 우르에서 데라의 아들로 태어남." },
+      { id: "abram-call", start: -2091, lane: "event", title: "아브람의 부르심", ref: "창 12:1–4", desc: "75세에 하란을 떠나 가나안으로. '큰 민족을 이루고 너로 말미암아 땅의 모든 족속이 복을 얻을 것이라.'" },
+      { id: "covenant", start: -2081, lane: "event", approx: true, title: "횃불 언약", ref: "창 15장", desc: "아브람이 여호와를 믿으니 이를 의로 여기심(15:6). 쪼갠 고기 사이로 횃불이 지나가며 언약을 맺으심." },
+      { id: "ishmael", start: -2080, lane: "people", title: "이스마엘 출생", ref: "창 16:16", desc: "아브람 86세에 하갈에게서 태어남." },
+      { id: "sodom", start: -2067, lane: "event", approx: true, title: "소돔과 고모라 멸망", ref: "창 18–19장", desc: "아브라함의 중보 기도 후 유황불 심판. 롯은 구원받고 롯의 아내는 소금 기둥이 됨." },
+      { id: "isaac-born", start: -2066, lane: "people", title: "이삭 출생", ref: "창 21:1–5", desc: "아브라함 100세, 사라 90세에 약속의 아들이 태어남." },
+      { id: "moriah", start: -2050, lane: "event", approx: true, title: "모리아산 이삭 번제", ref: "창 22장", desc: "하나님이 아브라함을 시험하심. '여호와 이레' — 숫양을 대신 준비하심." },
+      { id: "jacob-born", start: -2006, lane: "people", title: "야곱과 에서 출생", ref: "창 25:21–26", desc: "이삭 60세에 쌍둥이가 태어남. '큰 자가 어린 자를 섬기리라.'" },
+      { id: "bethel", start: -1929, lane: "event", approx: true, title: "야곱, 벧엘의 사닥다리", ref: "창 28장", desc: "형 에서를 피해 하란으로 가던 중 꿈에 하늘에 닿은 사닥다리를 봄." },
+      { id: "joseph-born", start: -1915, lane: "people", title: "요셉 출생", ref: "창 30:22–24", desc: "야곱과 라헬 사이에서 태어남." },
+      { id: "joseph-sold", start: -1898, lane: "event", title: "요셉, 이집트에 팔림", ref: "창 37장", desc: "17세에 형들의 시기로 은 20에 이스마엘 상인에게 팔림." },
+      { id: "joseph-ruler", start: -1885, lane: "people", title: "요셉, 이집트 총리", ref: "창 41:46", desc: "30세에 바로의 꿈을 해석하고 이집트의 총리가 됨." },
+      { id: "to-egypt", start: -1876, lane: "event", title: "야곱 가족 이집트 이주", ref: "창 46–47장", desc: "7년 흉년 중 야곱(130세)과 가족 70명이 고센 땅에 정착." },
+      { id: "jacob-dies", start: -1859, lane: "people", title: "야곱의 죽음", ref: "창 49장", desc: "147세에 열두 아들을 축복하고 죽음. 유다에게 '규'의 예언(49:10)." },
+      { id: "joseph-dies", start: -1805, lane: "people", title: "요셉의 죽음", ref: "창 50:22–26", desc: "110세에 죽으며 자기 해골을 가나안으로 가져가라고 유언." },
 
       // 출애굽과 광야
-      { id: "moses-born", start: -1526, cat: "people", title: "모세 출생", ref: "출 2:1–10", desc: "히브리 남아 학살 명령 속에서 갈대 상자로 살아나 바로의 공주의 아들로 자람." },
-      { id: "moses-midian", start: -1486, cat: "people", title: "모세, 미디안 도피", ref: "출 2:11–22; 행 7:23", desc: "40세에 이집트인을 죽이고 미디안으로 도망하여 40년간 양을 침." },
-      { id: "burning-bush", start: -1447, cat: "event", title: "떨기나무 부르심", ref: "출 3–4장", desc: "'나는 스스로 있는 자니라' — 호렙산에서 모세를 부르심." },
-      { id: "exodus", start: -1446, cat: "event", title: "열 재앙과 출애굽", ref: "출 7–14장", desc: "유월절 어린양의 피, 홍해를 건넘. 이스라엘 구원 역사의 중심 사건. (왕상 6:1 기준 BC 1446)" },
-      { id: "sinai", start: -1446, cat: "event", title: "시내산 언약·십계명", ref: "출 19–24장", desc: "출애굽 셋째 달 시내산에서 율법과 언약을 주심." },
-      { id: "tabernacle", start: -1445, cat: "event", title: "성막 완성", ref: "출 40장", desc: "출애굽 둘째 해 첫째 달 초하루에 성막을 세우고 여호와의 영광이 충만함." },
-      { id: "kadesh", start: -1444, cat: "event", approx: true, title: "가데스 바네아 정탐", ref: "민 13–14장", desc: "12명의 정탐꾼 중 여호수아·갈렙을 제외한 10명의 악평으로 백성이 원망. 40년 방황의 심판." },
-      { id: "jordan", start: -1406, cat: "event", title: "모세의 죽음, 요단 도하", ref: "신 34장; 수 3장", desc: "모세가 느보산에서 120세로 죽고, 여호수아가 백성을 이끌고 요단강을 건넘." },
-      { id: "jericho", start: -1406, cat: "event", title: "여리고 함락", ref: "수 6장", desc: "7일 동안 성을 돌고 나팔과 함성으로 성벽이 무너짐. 라합의 구원." },
+      { id: "moses-born", start: -1526, lane: "people", title: "모세 출생", ref: "출 2:1–10", desc: "히브리 남아 학살 명령 속에서 갈대 상자로 살아나 바로의 공주의 아들로 자람." },
+      { id: "moses-midian", start: -1486, lane: "people", title: "모세, 미디안 도피", ref: "출 2:11–22; 행 7:23", desc: "40세에 이집트인을 죽이고 미디안으로 도망하여 40년간 양을 침." },
+      { id: "burning-bush", start: -1447, lane: "event", title: "떨기나무 부르심", ref: "출 3–4장", desc: "'나는 스스로 있는 자니라' — 호렙산에서 모세를 부르심." },
+      { id: "exodus", start: -1446, lane: "event", title: "열 재앙과 출애굽", ref: "출 7–14장", desc: "유월절 어린양의 피, 홍해를 건넘. 이스라엘 구원 역사의 중심 사건. (왕상 6:1 기준 BC 1446)" },
+      { id: "sinai", start: -1446, lane: "event", title: "시내산 언약·십계명", ref: "출 19–24장", desc: "출애굽 셋째 달 시내산에서 율법과 언약을 주심." },
+      { id: "tabernacle", start: -1445, lane: "event", title: "성막 완성", ref: "출 40장", desc: "출애굽 둘째 해 첫째 달 초하루에 성막을 세우고 여호와의 영광이 충만함." },
+      { id: "kadesh", start: -1444, lane: "event", approx: true, title: "가데스 바네아 정탐", ref: "민 13–14장", desc: "12명의 정탐꾼 중 여호수아·갈렙을 제외한 10명의 악평으로 백성이 원망. 40년 방황의 심판." },
+      { id: "jordan", start: -1406, lane: "event", title: "모세의 죽음, 요단 도하", ref: "신 34장; 수 3장", desc: "모세가 느보산에서 120세로 죽고, 여호수아가 백성을 이끌고 요단강을 건넘." },
+      { id: "jericho", start: -1406, lane: "event", title: "여리고 함락", ref: "수 6장", desc: "7일 동안 성을 돌고 나팔과 함성으로 성벽이 무너짐. 라합의 구원." },
 
       // 사사 시대
-      { id: "othniel", start: -1373, cat: "people", approx: true, title: "옷니엘 (첫 사사)", ref: "삿 3:7–11", desc: "갈렙의 조카. 메소보다미아 왕 구산 리사다임에게서 이스라엘을 구원." },
-      { id: "deborah", start: -1209, cat: "people", approx: true, title: "드보라와 바락", ref: "삿 4–5장", desc: "여선지자 드보라가 바락과 함께 하솔 왕 야빈의 군대장관 시스라를 물리침." },
-      { id: "gideon", start: -1162, cat: "people", approx: true, title: "기드온", ref: "삿 6–8장", desc: "300명의 용사로 미디안 대군을 물리침." },
-      { id: "ruth", start: -1100, cat: "people", approx: true, title: "룻과 보아스", ref: "룻기", desc: "모압 여인 룻이 시어머니 나오미를 따라 베들레헴으로. 보아스와 결혼하여 다윗의 증조모가 됨." },
-      { id: "samuel-born", start: -1105, cat: "prophet", approx: true, title: "사무엘 출생", ref: "삼상 1장", desc: "한나의 기도로 태어남. 마지막 사사이자 선지자로 사울과 다윗에게 기름 부음." },
-      { id: "samson", start: -1075, cat: "people", approx: true, title: "삼손", ref: "삿 13–16장", desc: "나실인 사사. 블레셋과 싸우다 들릴라에게 속아 힘을 잃었으나 마지막에 다곤 신전을 무너뜨림." },
+      { id: "othniel", start: -1373, lane: "people", approx: true, title: "옷니엘 (첫 사사)", ref: "삿 3:7–11", desc: "갈렙의 조카. 메소보다미아 왕 구산 리사다임에게서 이스라엘을 구원." },
+      { id: "deborah", start: -1209, lane: "people", approx: true, title: "드보라와 바락", ref: "삿 4–5장", desc: "여선지자 드보라가 바락과 함께 하솔 왕 야빈의 군대장관 시스라를 물리침." },
+      { id: "gideon", start: -1162, lane: "people", approx: true, title: "기드온", ref: "삿 6–8장", desc: "300명의 용사로 미디안 대군을 물리침." },
+      { id: "ruth", start: -1100, lane: "people", approx: true, title: "룻과 보아스", ref: "룻기", desc: "모압 여인 룻이 시어머니 나오미를 따라 베들레헴으로. 보아스와 결혼하여 다윗의 증조모가 됨." },
+      { id: "samuel-born", start: -1105, lane: "prophet", approx: true, title: "사무엘 출생", ref: "삼상 1장", desc: "한나의 기도로 태어남. 마지막 사사이자 선지자로 사울과 다윗에게 기름 부음." },
+      { id: "samson", start: -1075, lane: "people", approx: true, title: "삼손", ref: "삿 13–16장", desc: "나실인 사사. 블레셋과 싸우다 들릴라에게 속아 힘을 잃었으나 마지막에 다곤 신전을 무너뜨림." },
 
       // 통일 왕국
-      { id: "saul", start: -1050, cat: "king", title: "사울 즉위", ref: "삼상 10장", desc: "백성이 왕을 요구하자 베냐민 지파 사울이 이스라엘의 첫 왕이 됨." },
-      { id: "david-born", start: -1040, cat: "people", title: "다윗 출생", ref: "삼하 5:4", desc: "베들레헴 이새의 막내아들." },
-      { id: "goliath", start: -1025, cat: "event", approx: true, title: "다윗과 골리앗", ref: "삼상 17장", desc: "소년 다윗이 물매와 돌 하나로 블레셋 장수 골리앗을 쓰러뜨림." },
-      { id: "david-king", start: -1010, cat: "king", title: "다윗 즉위 (헤브론)", ref: "삼하 2:1–4", desc: "30세에 헤브론에서 유다의 왕이 됨." },
-      { id: "jerusalem", start: -1003, cat: "king", title: "예루살렘 수도·다윗 언약", ref: "삼하 5–7장", desc: "온 이스라엘의 왕이 되어 예루살렘을 수도로 삼음. 영원한 왕위의 약속(다윗 언약)." },
-      { id: "solomon", start: -970, cat: "king", title: "솔로몬 즉위", ref: "왕상 1–3장", desc: "다윗의 아들 솔로몬이 왕위에 올라 지혜를 구함." },
-      { id: "temple-start", start: -966, cat: "event", title: "성전 건축 시작", ref: "왕상 6:1", desc: "출애굽 후 480년, 솔로몬 4년에 모리아산에 성전 건축 시작." },
-      { id: "temple-done", start: -959, cat: "event", title: "솔로몬 성전 완공", ref: "왕상 6:38; 8장", desc: "7년 만에 완공. 봉헌 시 여호와의 영광이 성전에 가득함." },
+      { id: "saul", start: -1050, end: -1010, lane: "king", title: "사울 왕", ref: "삼상 10장", desc: "백성이 왕을 요구하자 베냐민 지파 사울이 이스라엘의 첫 왕이 됨." },
+      { id: "david-born", start: -1040, lane: "people", title: "다윗 출생", ref: "삼하 5:4", desc: "베들레헴 이새의 막내아들." },
+      { id: "goliath", start: -1025, lane: "event", approx: true, title: "다윗과 골리앗", ref: "삼상 17장", desc: "소년 다윗이 물매와 돌 하나로 블레셋 장수 골리앗을 쓰러뜨림." },
+      { id: "david-king", start: -1010, end: -970, lane: "king", title: "다윗 왕", ref: "삼하 2:1–4; 5:4–5", desc: "30세에 헤브론에서 유다의 왕이 되어 7년 반, 예루살렘에서 온 이스라엘의 왕으로 33년, 모두 40년을 다스림." },
+      { id: "jerusalem", start: -1003, lane: "king", title: "예루살렘 수도·다윗 언약", ref: "삼하 5–7장", desc: "온 이스라엘의 왕이 되어 예루살렘을 수도로 삼음. 영원한 왕위의 약속(다윗 언약)." },
+      { id: "solomon", start: -970, end: -930, lane: "king", title: "솔로몬 왕", ref: "왕상 1–11장", desc: "다윗의 아들 솔로몬이 왕위에 올라 지혜를 구함. 성전을 건축했으나 말년에 이방 아내들로 인해 우상 숭배에 빠짐." },
+      { id: "temple-start", start: -966, lane: "event", title: "성전 건축 시작", ref: "왕상 6:1", desc: "출애굽 후 480년, 솔로몬 4년에 모리아산에 성전 건축 시작." },
+      { id: "temple-done", start: -959, lane: "event", title: "솔로몬 성전 완공", ref: "왕상 6:38; 8장", desc: "7년 만에 완공. 봉헌 시 여호와의 영광이 성전에 가득함." },
 
       // 분열 왕국
-      { id: "division", start: -930, cat: "king", title: "왕국 분열", ref: "왕상 12장", desc: "르호보암의 강압 정치로 10지파가 여로보암을 따라 북이스라엘을 세움. 여로보암은 벧엘·단에 금송아지를 세움." },
-      { id: "ahab", start: -874, cat: "king", title: "아합 즉위 (북)", ref: "왕상 16:29–33", desc: "이세벨과 결혼하여 바알 숭배를 국가적으로 들여온 북이스라엘의 악한 왕." },
-      { id: "carmel", start: -860, cat: "prophet", approx: true, title: "엘리야, 갈멜산 대결", ref: "왕상 18장", desc: "바알 선지자 450명과 대결. 하늘에서 불이 내려 제물을 태움." },
-      { id: "elisha", start: -848, cat: "prophet", approx: true, title: "엘리야 승천, 엘리사 계승", ref: "왕하 2장", desc: "엘리야가 회오리바람으로 하늘에 올라가고 엘리사가 갑절의 영감을 받음." },
-      { id: "jehu", start: -841, cat: "king", title: "예후의 혁명", ref: "왕하 9–10장", desc: "아합 왕가를 멸하고 바알 숭배를 척결." },
-      { id: "jonah", start: -785, cat: "prophet", approx: true, title: "요나, 니느웨 선교", ref: "요나서; 왕하 14:25", desc: "앗시리아 수도 니느웨에 회개를 외치자 온 성이 회개함." },
-      { id: "amos-hosea", start: -760, cat: "prophet", approx: true, title: "아모스·호세아", ref: "아모스; 호세아", desc: "북이스라엘의 번영기에 사회 정의와 언약적 사랑을 외친 선지자들." },
-      { id: "isaiah", start: -740, cat: "prophet", title: "이사야 소명", ref: "사 6장", desc: "웃시야 왕이 죽던 해 성전에서 거룩하신 하나님을 봄. '내가 여기 있나이다 나를 보내소서.' 메시아 예언(사 7, 9, 53장)." },
-      { id: "samaria-fall", start: -722, cat: "event", title: "사마리아 함락 (북이스라엘 멸망)", ref: "왕하 17장", desc: "앗시리아(살만에셀·사르곤 2세)에 멸망. 백성이 흩어지고 이방인이 이주해 사마리아인이 형성됨." },
-      { id: "hezekiah", start: -715, cat: "king", title: "히스기야 즉위 (남)", ref: "왕하 18–20장", desc: "우상을 제거하고 유월절을 회복한 개혁 왕. 기도로 15년 생명 연장." },
-      { id: "sennacherib", start: -701, cat: "event", title: "산헤립의 예루살렘 포위", ref: "왕하 18–19장; 사 36–37장", desc: "앗시리아 대군이 포위했으나 여호와의 사자가 하룻밤에 18만 5천 명을 침." },
-      { id: "josiah", start: -640, cat: "king", title: "요시야 즉위", ref: "왕하 22:1", desc: "8세에 즉위한 남유다의 선한 왕." },
-      { id: "jeremiah", start: -627, cat: "prophet", title: "예레미야 소명", ref: "렘 1:1–10", desc: "요시야 13년에 부르심. 유다의 멸망과 70년 포로, 새 언약(렘 31장)을 예언한 '눈물의 선지자'." },
-      { id: "book-of-law", start: -622, cat: "event", title: "율법책 발견, 요시야 개혁", ref: "왕하 22–23장", desc: "성전 수리 중 율법책을 발견하고 대대적인 종교 개혁과 유월절 회복." },
-      { id: "nineveh-fall", start: -612, cat: "world", title: "니느웨 멸망 (앗시리아)", ref: "나훔서", desc: "바벨론·메대 연합군에 의해 앗시리아 수도 니느웨가 함락됨. 나훔의 예언 성취." },
-      { id: "exile1", start: -605, cat: "event", title: "1차 바벨론 포로 (다니엘)", ref: "단 1장; 왕하 24:1", desc: "느부갓네살이 갈그미스 전투 후 예루살렘을 침공. 다니엘과 세 친구가 포로로 끌려감." },
-      { id: "exile2", start: -597, cat: "event", title: "2차 포로 (에스겔)", ref: "왕하 24:10–17", desc: "여호야긴 왕과 귀족, 기술자 1만 명이 포로로. 에스겔도 이때 끌려감." },
-      { id: "ezekiel", start: -593, cat: "prophet", title: "에스겔 소명", ref: "겔 1장", desc: "그발 강가에서 하나님의 영광의 환상을 봄. 마른 뼈 환상(37장)." },
-      { id: "jerusalem-fall", start: -586, cat: "event", title: "예루살렘 함락·성전 파괴", ref: "왕하 25장; 렘 52장", desc: "시드기야 11년, 바벨론이 예루살렘과 솔로몬 성전을 불태움. 3차 포로." },
+      { id: "division", start: -930, lane: "king", title: "왕국 분열", ref: "왕상 12장", desc: "르호보암의 강압 정치로 10지파가 여로보암을 따라 북이스라엘을 세움. 여로보암은 벧엘·단에 금송아지를 세움." },
+      { id: "ahab", start: -874, end: -853, lane: "king", title: "아합 (북)", ref: "왕상 16:29–33", desc: "이세벨과 결혼하여 바알 숭배를 국가적으로 들여온 북이스라엘의 악한 왕." },
+      { id: "carmel", start: -860, lane: "prophet", approx: true, title: "엘리야, 갈멜산 대결", ref: "왕상 18장", desc: "바알 선지자 450명과 대결. 하늘에서 불이 내려 제물을 태움." },
+      { id: "elisha", start: -848, lane: "prophet", approx: true, title: "엘리야 승천, 엘리사 계승", ref: "왕하 2장", desc: "엘리야가 회오리바람으로 하늘에 올라가고 엘리사가 갑절의 영감을 받음." },
+      { id: "jehu", start: -841, lane: "king", title: "예후의 혁명", ref: "왕하 9–10장", desc: "아합 왕가를 멸하고 바알 숭배를 척결." },
+      { id: "jonah", start: -785, lane: "prophet", approx: true, title: "요나, 니느웨 선교", ref: "요나서; 왕하 14:25", desc: "앗시리아 수도 니느웨에 회개를 외치자 온 성이 회개함." },
+      { id: "amos-hosea", start: -760, lane: "prophet", approx: true, title: "아모스·호세아", ref: "아모스; 호세아", desc: "북이스라엘의 번영기에 사회 정의와 언약적 사랑을 외친 선지자들." },
+      { id: "isaiah", start: -740, lane: "prophet", title: "이사야 소명", ref: "사 6장", desc: "웃시야 왕이 죽던 해 성전에서 거룩하신 하나님을 봄. '내가 여기 있나이다 나를 보내소서.' 메시아 예언(사 7, 9, 53장)." },
+      { id: "samaria-fall", start: -722, lane: "event", title: "사마리아 함락 (북이스라엘 멸망)", ref: "왕하 17장", desc: "앗시리아(살만에셀·사르곤 2세)에 멸망. 백성이 흩어지고 이방인이 이주해 사마리아인이 형성됨." },
+      { id: "hezekiah", start: -715, end: -686, lane: "king", title: "히스기야 (남)", ref: "왕하 18–20장", desc: "우상을 제거하고 유월절을 회복한 개혁 왕. 기도로 15년 생명 연장." },
+      { id: "sennacherib", start: -701, lane: "event", title: "산헤립의 예루살렘 포위", ref: "왕하 18–19장; 사 36–37장", desc: "앗시리아 대군이 포위했으나 여호와의 사자가 하룻밤에 18만 5천 명을 침." },
+      { id: "josiah", start: -640, end: -609, lane: "king", title: "요시야 (남)", ref: "왕하 22–23장", desc: "8세에 즉위한 남유다의 선한 왕. 므깃도에서 이집트 왕 느고와 싸우다 전사." },
+      { id: "jeremiah", start: -627, lane: "prophet", title: "예레미야 소명", ref: "렘 1:1–10", desc: "요시야 13년에 부르심. 유다의 멸망과 70년 포로, 새 언약(렘 31장)을 예언한 '눈물의 선지자'." },
+      { id: "book-of-law", start: -622, lane: "event", title: "율법책 발견, 요시야 개혁", ref: "왕하 22–23장", desc: "성전 수리 중 율법책을 발견하고 대대적인 종교 개혁과 유월절 회복." },
+      { id: "eg-middle", start: -2050, end: -1710, lane: "world", approx: true, title: "이집트 중왕국", ref: "창 12:10", desc: "아브라함이 기근으로 내려가고, 요셉이 총리가 된 시기의 이집트." },
+      { id: "hyksos", start: -1650, end: -1550, lane: "world", approx: true, title: "힉소스 (이집트)", ref: "", desc: "셈족 계열 이방 왕조가 하이집트를 지배한 시기." },
+      { id: "eg-new", start: -1550, end: -1070, lane: "world", approx: true, title: "이집트 신왕국", ref: "출 1:8", desc: "'요셉을 알지 못하는 새 왕'. 출애굽 당시의 이집트 (18왕조)." },
+      { id: "assyria", start: -911, end: -609, lane: "world", approx: true, title: "앗시리아 제국", ref: "왕하 15–19장", desc: "북이스라엘을 멸망시키고 유다를 위협한 제국. 수도 니느웨." },
+      { id: "neo-babylon", start: -626, end: -539, lane: "world", title: "신바빌로니아 제국", ref: "단 1–5장", desc: "느부갓네살이 유다를 멸망시키고 백성을 포로로 잡아감." },
+      { id: "persia", start: -539, end: -331, lane: "world", title: "페르시아 제국", ref: "에스라; 느헤미야; 에스더", desc: "고레스·다리오·아하수에로·아닥사스다. 포로 귀환과 성전 재건을 허락." },
+      { id: "hellenistic", start: -331, end: -63, lane: "world", title: "헬라 왕국들", ref: "단 8장; 11장", desc: "알렉산더 사후 프톨레마이오스(이집트)·셀레우코스(시리아) 왕조가 유대를 번갈아 지배." },
+      { id: "rome-rep", start: -63, end: 0, lane: "world", title: "로마", ref: "눅 2:1", desc: "폼페이우스 이후 유대는 로마의 지배를 받음. BC 27년 아우구스투스가 황제가 됨." },
+      { id: "nineveh-fall", start: -612, lane: "world", title: "니느웨 멸망 (앗시리아)", ref: "나훔서", desc: "바벨론·메대 연합군에 의해 앗시리아 수도 니느웨가 함락됨. 나훔의 예언 성취." },
+      { id: "exile1", start: -605, lane: "event", title: "1차 바벨론 포로 (다니엘)", ref: "단 1장; 왕하 24:1", desc: "느부갓네살이 갈그미스 전투 후 예루살렘을 침공. 다니엘과 세 친구가 포로로 끌려감." },
+      { id: "exile2", start: -597, lane: "event", title: "2차 포로 (에스겔)", ref: "왕하 24:10–17", desc: "여호야긴 왕과 귀족, 기술자 1만 명이 포로로. 에스겔도 이때 끌려감." },
+      { id: "ezekiel", start: -593, lane: "prophet", title: "에스겔 소명", ref: "겔 1장", desc: "그발 강가에서 하나님의 영광의 환상을 봄. 마른 뼈 환상(37장)." },
+      { id: "jerusalem-fall", start: -586, lane: "event", title: "예루살렘 함락·성전 파괴", ref: "왕하 25장; 렘 52장", desc: "시드기야 11년, 바벨론이 예루살렘과 솔로몬 성전을 불태움. 3차 포로." },
 
       // 포로기와 귀환
-      { id: "babylon-fall", start: -539, cat: "world", title: "바벨론 멸망 (고레스)", ref: "단 5장; 사 45:1", desc: "벨사살의 잔치 중 벽에 쓰인 글씨 '메네 메네 데겔 우바르신'. 페르시아 고레스가 바벨론을 점령." },
-      { id: "cyrus-decree", start: -538, cat: "event", title: "고레스 칙령, 1차 귀환", ref: "스 1–2장; 대하 36:22–23", desc: "고레스가 성전 재건을 허락. 스룹바벨과 약 5만 명이 귀환." },
-      { id: "haggai", start: -520, cat: "prophet", title: "학개·스가랴", ref: "학개; 스가랴", desc: "중단된 성전 재건을 다시 시작하도록 격려한 선지자들." },
-      { id: "temple2", start: -516, cat: "event", title: "제2성전 완공", ref: "스 6:15", desc: "다리오 왕 6년에 스룹바벨 성전 완공." },
-      { id: "esther", start: -479, cat: "people", title: "에스더 왕후", ref: "에 2:16–17", desc: "페르시아 아하수에로(크세르크세스) 왕의 왕후가 되어 하만의 음모에서 유대 민족을 구함. 부림절의 기원." },
-      { id: "ezra", start: -458, cat: "event", title: "에스라 귀환", ref: "스 7장", desc: "아닥사스다 7년에 학사 에스라가 귀환하여 율법을 가르침." },
-      { id: "nehemiah", start: -445, cat: "event", title: "느헤미야 성벽 재건", ref: "느 2–6장", desc: "예루살렘 성벽을 52일 만에 재건." },
-      { id: "malachi", start: -430, cat: "prophet", approx: true, title: "말라기", ref: "말라기", desc: "구약의 마지막 선지자. 엘리야를 보내리라는 예언(말 4:5) 이후 약 400년간 예언이 끊김." },
+      { id: "babylon-fall", start: -539, lane: "world", title: "바벨론 멸망 (고레스)", ref: "단 5장; 사 45:1", desc: "벨사살의 잔치 중 벽에 쓰인 글씨 '메네 메네 데겔 우바르신'. 페르시아 고레스가 바벨론을 점령." },
+      { id: "cyrus-decree", start: -538, lane: "event", title: "고레스 칙령, 1차 귀환", ref: "스 1–2장; 대하 36:22–23", desc: "고레스가 성전 재건을 허락. 스룹바벨과 약 5만 명이 귀환." },
+      { id: "haggai", start: -520, lane: "prophet", title: "학개·스가랴", ref: "학개; 스가랴", desc: "중단된 성전 재건을 다시 시작하도록 격려한 선지자들." },
+      { id: "temple2", start: -516, lane: "event", title: "제2성전 완공", ref: "스 6:15", desc: "다리오 왕 6년에 스룹바벨 성전 완공." },
+      { id: "esther", start: -479, lane: "people", title: "에스더 왕후", ref: "에 2:16–17", desc: "페르시아 아하수에로(크세르크세스) 왕의 왕후가 되어 하만의 음모에서 유대 민족을 구함. 부림절의 기원." },
+      { id: "ezra", start: -458, lane: "event", title: "에스라 귀환", ref: "스 7장", desc: "아닥사스다 7년에 학사 에스라가 귀환하여 율법을 가르침." },
+      { id: "nehemiah", start: -445, lane: "event", title: "느헤미야 성벽 재건", ref: "느 2–6장", desc: "예루살렘 성벽을 52일 만에 재건." },
+      { id: "malachi", start: -430, lane: "prophet", approx: true, title: "말라기", ref: "말라기", desc: "구약의 마지막 선지자. 엘리야를 보내리라는 예언(말 4:5) 이후 약 400년간 예언이 끊김." },
 
       // 중간기
-      { id: "alexander", start: -332, cat: "world", title: "알렉산더 대왕의 정복", ref: "단 8:5–8, 21", desc: "헬라 제국이 페르시아를 무너뜨리고 유대를 지배. 다니엘서의 숫염소 환상." },
-      { id: "septuagint", start: -250, cat: "world", approx: true, title: "70인역(LXX) 번역", ref: "", desc: "알렉산드리아에서 히브리어 구약을 헬라어로 번역. 신약 저자들이 자주 인용함." },
-      { id: "maccabees", start: -167, cat: "world", title: "성전 모독·마카비 반란", ref: "단 11:31", desc: "셀레우코스의 안티오쿠스 4세가 성전에 제우스 제단을 세움(멸망의 가증한 것). 마카비 가문이 봉기." },
-      { id: "hanukkah", start: -164, cat: "world", title: "성전 재봉헌 (수전절)", ref: "요 10:22", desc: "마카비가 성전을 되찾아 정결하게 하고 재봉헌. 수전절(하누카)의 기원." },
-      { id: "pompey", start: -63, cat: "world", title: "폼페이우스, 예루살렘 점령", ref: "", desc: "로마 장군 폼페이우스가 예루살렘을 점령하며 유대가 로마의 지배 아래 들어감." },
-      { id: "herod", start: -37, cat: "king", title: "헤롯 대왕 즉위", ref: "마 2:1", desc: "로마 원로원이 임명한 유대의 왕. 이두매 출신." },
-      { id: "herod-temple", start: -20, cat: "world", title: "헤롯 성전 확장 시작", ref: "요 2:20", desc: "'이 성전은 사십육 년 동안에 지었거늘' — 헤롯이 제2성전을 대규모로 증축." },
-      { id: "jesus-born-ot", start: -5, cat: "event", approx: true, title: "예수 그리스도 탄생 → 신약", ref: "마 1–2장; 눅 2장", desc: "구약의 약속이 성취됨. 신약 타임라인에서 이어집니다.", link: "nt:jesus-born" }
+      { id: "alexander", start: -332, lane: "world", title: "알렉산더 대왕의 정복", ref: "단 8:5–8, 21", desc: "헬라 제국이 페르시아를 무너뜨리고 유대를 지배. 다니엘서의 숫염소 환상." },
+      { id: "septuagint", start: -250, lane: "world", approx: true, title: "70인역(LXX) 번역", ref: "", desc: "알렉산드리아에서 히브리어 구약을 헬라어로 번역. 신약 저자들이 자주 인용함." },
+      { id: "maccabees", start: -167, lane: "world", title: "성전 모독·마카비 반란", ref: "단 11:31", desc: "셀레우코스의 안티오쿠스 4세가 성전에 제우스 제단을 세움(멸망의 가증한 것). 마카비 가문이 봉기." },
+      { id: "hanukkah", start: -164, lane: "world", title: "성전 재봉헌 (수전절)", ref: "요 10:22", desc: "마카비가 성전을 되찾아 정결하게 하고 재봉헌. 수전절(하누카)의 기원." },
+      { id: "pompey", start: -63, lane: "world", title: "폼페이우스, 예루살렘 점령", ref: "", desc: "로마 장군 폼페이우스가 예루살렘을 점령하며 유대가 로마의 지배 아래 들어감." },
+      { id: "herod", start: -37, end: -4, lane: "king", title: "헤롯 대왕", ref: "마 2:1", desc: "로마 원로원이 임명한 유대의 왕. 이두매 출신." },
+      { id: "herod-temple", start: -20, lane: "world", title: "헤롯 성전 확장 시작", ref: "요 2:20", desc: "'이 성전은 사십육 년 동안에 지었거늘' — 헤롯이 제2성전을 대규모로 증축." },
+      { id: "jesus-born-ot", start: -5, lane: "event", approx: true, title: "예수 그리스도 탄생 → 신약", ref: "마 1–2장; 눅 2장", desc: "구약의 약속이 성취됨. 신약 타임라인에서 이어집니다.", link: "nt:jesus-born" }
     ]
   },
 

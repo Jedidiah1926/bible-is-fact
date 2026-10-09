@@ -255,29 +255,45 @@ h1 {
   pointer-events: none;
 }
 
+/* 마우스 위치 세로선: 항목 뒤에 깔림 */
 .cursor-line {
   position: absolute;
-  top: 0;
+  top: 34px;
   width: 0;
   border-left: 1px solid var(--line-strong);
   pointer-events: none;
-  z-index: 11;
+  z-index: 1;
   display: none;
 }
+/* 마우스 위치 연도: 연도 바 안에 표시 */
 .cursor-year {
-  position: sticky;
-  top: 0;
-  display: inline-block;
+  position: absolute;
+  top: 6px;
+  display: none;
   transform: translateX(-50%);
   background: var(--text);
   color: var(--bg);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-top: 36px;
+  line-height: 1;
+  padding: 5px 7px;
+  border-radius: 5px;
   white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+  font-variant-numeric: tabular-nums;
 }
+
+/* 원역사(연대 미상) 구간 */
+.undated-zone {
+  position: absolute;
+  top: 34px;
+  bottom: 0;
+  background: repeating-linear-gradient(135deg, transparent 0 9px, var(--lane-alt) 9px 18px);
+  border-right: 2px dashed var(--line-strong);
+  pointer-events: none;
+}
+.tick.unknown { color: var(--accent); font-weight: 800; white-space: pre; }
 
 .guide {
   position: absolute;
@@ -285,7 +301,7 @@ h1 {
   width: 0;
   border-left: 2px solid var(--guide);
   pointer-events: none;
-  z-index: 3;
+  z-index: 1;
 }
 .guide-band {
   position: absolute;
@@ -301,11 +317,11 @@ h1 {
   --cb: hsl(var(--h) var(--it-bg-s) var(--it-bg-l));
   --cbar: hsl(var(--h) var(--it-bg-s) var(--it-bar-l));
   position: absolute;
-  z-index: 2;
-  transition: opacity 0.15s;
 }
-.item.dim { opacity: 0.22; }
-.item.dim:hover { opacity: 0.7; }
+/* 래퍼에 z-index/opacity를 주지 않아야 세로선이 모든 항목 뒤로 깔림 */
+.item > * { transition: opacity 0.15s; }
+.item.dim > * { opacity: 0.22; }
+.item.dim:hover > * { opacity: 0.7; }
 
 /* 시점 항목: 점 + 라벨 */
 .dot {
@@ -329,31 +345,9 @@ h1 {
   color: var(--text);
   cursor: pointer;
   border-radius: 7px;
-}
-.label .yr {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--c);
-  font-variant-numeric: tabular-nums;
+  z-index: 3;
 }
 
-.connector {
-  position: absolute;
-  width: 0;
-  border-left: 1px solid var(--c);
-  opacity: 0.55;
-  z-index: 1;
-}
-
-/* 구약: 카드형 라벨 */
-.ot .label {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--c);
-  padding: 4px 9px 5px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
 .label:hover, .bar:hover { box-shadow: var(--shadow); z-index: 6; }
 
 .item.selected .label,
@@ -364,19 +358,6 @@ h1 {
 }
 .item.selected .dot { transform: scale(1.35); }
 .item.match .label, .item.match .bar { background: color-mix(in srgb, var(--accent) 22%, var(--surface)); }
-
-/* 구약 중심선 */
-.track {
-  position: absolute;
-  left: 0;
-  height: 3px;
-  margin-top: -1.5px;
-  background: var(--line-strong);
-  border-radius: 2px;
-}
-
-/* 시대 띠 */
-.period .bar { font-size: 12.5px; height: 26px; }
 
 /* 기간 막대 */
 .bar {
@@ -394,6 +375,7 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  z-index: 3;
 }
 .bar.approx { border-style: dashed; }
 .bar-label {
@@ -404,42 +386,10 @@ h1 {
   line-height: 24px;
   color: var(--text);
   cursor: pointer;
+  z-index: 3;
 }
 
-/* 원역사 (연대 미상) */
-.prologue {
-  position: absolute;
-  padding: 10px;
-  border: 1px dashed var(--line-strong);
-  border-radius: 12px;
-  background: var(--surface-2);
-  z-index: 2;
-}
-.prologue h2 {
-  margin: 0 0 2px;
-  font-size: 13px;
-  font-weight: 800;
-}
-.prologue p { margin: 0 0 8px; font-size: 11.5px; color: var(--muted); }
-.pro-card {
-  --h: 18;
-  --c: hsl(var(--h) var(--it-s) var(--it-l));
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--c);
-  border-radius: 7px;
-  padding: 6px 9px;
-  margin-top: 6px;
-  font-size: 13px;
-  font-weight: 600;
-}
-.pro-card small { display: block; font-size: 11px; color: var(--muted); font-weight: 500; }
-.pro-card.selected { outline: 2px solid var(--guide); }
-
-/* 신약: 레인 */
+/* 레인 */
 .lane {
   position: absolute;
   left: 0;
@@ -464,12 +414,11 @@ h1 {
   z-index: 9;
   line-height: 1.25;
 }
-.nt .label {
+.canvas .label {
   padding: 0 4px;
   line-height: 24px;
   height: 24px;
 }
-.nt .label .yr { display: inline; margin-right: 5px; }
 
 /* ───────── 상세 패널 ───────── */
 .detail {

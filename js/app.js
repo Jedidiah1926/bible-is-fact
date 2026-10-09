@@ -35,7 +35,14 @@
     return `AD ${r}`;
   }
 
+  // 연대 미상 구간(원역사)은 '?'로 표기
+  function yearText(y) {
+    const u = cfg().undatedBefore;
+    return u != null && y < u ? "?" : fmtYear(y);
+  }
+
   function fmtRange(it) {
+    if (it.undated) return "?";
     const pre = it.approx ? "약 " : "";
     if (it.end == null) return pre + fmtYear(it.start);
     const len = Math.round(it.end - it.start);
@@ -56,42 +63,41 @@
   const groupOf = {}; // view -> id -> {name, hue}
 
   (function buildIndex() {
+    ["ot", "nt"].forEach((v) => {
+      groupOf[v] = {};
+      DATA[v].lanes.forEach((l) => (groupOf[v][l.id] = l));
+    });
     const ot = DATA.ot;
-    groupOf.ot = {};
-    ot.categories.forEach((c) => (groupOf.ot[c.id] = c));
-    groupOf.ot.period = { id: "period", name: "시대", hue: 35 };
-    groupOf.ot.prologue = { id: "prologue", name: "원역사 (연대 미상)", hue: 18 };
-    ot.periods.forEach((p) => index.ot.set(p.id, { ...p, kind: "period", group: "period" }));
-    ot.items.forEach((i) => index.ot.set(i.id, { ...i, kind: "item", group: i.cat }));
-    ot.prologue.forEach((p) => index.ot.set(p.id, { ...p, kind: "prologue", group: "prologue" }));
-
-    const nt = DATA.nt;
-    groupOf.nt = {};
-    nt.lanes.forEach((l) => (groupOf.nt[l.id] = l));
-    nt.items.forEach((i) => index.nt.set(i.id, { ...i, kind: "item", group: i.lane }));
+    ot.periods.forEach((p) => index.ot.set(p.id, { ...p, lane: "period", group: "period" }));
+    // 원역사: 연대 미상('?') 구간에 성경 순서대로 고르게 배치 (위치는 순서만 의미)
+    const [a, b] = [ot.range[0], ot.undatedBefore];
+    ot.prologue.forEach((p, i) =>
+      index.ot.set(p.id, {
+        ...p,
+        lane: "event",
+        group: "event",
+        undated: true,
+        start: a + ((b - a) * (i + 0.5)) / ot.prologue.length
+      })
+    );
+    ot.items.forEach((i) => index.ot.set(i.id, { ...i, group: i.lane }));
+    DATA.nt.items.forEach((i) => index.nt.set(i.id, { ...i, group: i.lane }));
   })();
 
   const cfg = () => DATA[state.view];
   const ppy = () => state.ppy[state.view];
 
-  function originX() {
-    if (state.view === "ot") return 24 + PROLOGUE_W + 40;
-    return laneHeadW() + 40;
-  }
-  const PROLOGUE_W = 210;
+  const originX = () => laneHeadW() + 40;
   const laneHeadW = () => (isMobile() ? 92 : 128);
 
   const xOf = (y) => originX() + (y - cfg().range[0]) * ppy();
   const yearAt = (px) => cfg().range[0] + (px - originX()) / ppy();
 
-  function isVisible(it) {
-    if (it.kind === "prologue") return true;
-    return !state.hidden[state.view].has(it.group);
-  }
+  const isVisible = (it) => !state.hidden[state.view].has(it.group);
 
   function visibleTimed() {
     return [...index[state.view].values()]
-      .filter((it) => it.kind !== "prologue" && isVisible(it))
+      .filter(isVisible)
       .sort((a, b) => a.start - b.start || (a.end ?? a.start) - (b.end ?? b.start));
   }
 
@@ -102,11 +108,13 @@
   }
 
   function concurrentWith(sel) {
+    // 연대 미상 항목은 서로끼리만 같은 시기로 봄
+    if (sel.undated) return visibleTimed().filter((it) => it.id !== sel.id && it.undated);
     const pad = cfg().concurrentPad;
     const s = sel.start - pad;
     const e = (sel.end ?? sel.start) + pad;
     return visibleTimed().filter(
-      (it) => it.id !== sel.id && it.start <= e && (it.end ?? it.start) >= s
+      (it) => it.id !== sel.id && !it.undated && it.start <= e && (it.end ?? it.start) >= s
     );
   }
 
@@ -126,7 +134,7 @@
   }
 
   // ───────── 렌더링 ─────────
-  let cursorLine, cursorYear;
+  let cursorLine, cursorYear, axisEl;
   const nodes = new Map(); // id -> element
 
   function render() {
@@ -138,14 +146,15 @@
     canvas.style.width = totalW + "px";
 
     renderAxis(totalW);
-    const height = state.view === "ot" ? renderOT() : renderNT(totalW);
+    const height = renderLanes(totalW);
     canvas.style.height = Math.max(height, viewport.clientHeight) + "px";
 
+    // 마우스 위치 세로선 (항목 뒤) + 연도 표시 (연도 바 안)
     cursorLine = el("div", "cursor-line");
-    cursorLine.style.height = canvas.style.height;
-    cursorYear = el("span", "cursor-year");
-    cursorLine.appendChild(cursorYear);
+    cursorLine.style.height = parseFloat(canvas.style.height) - AXIS_H + "px";
     canvas.appendChild(cursorLine);
+    cursorYear = el("span", "cursor-year");
+    axisEl.appendChild(cursorYear);
 
     renderGuide();
     applyHighlights();
@@ -162,7 +171,20 @@
     axis.style.width = totalW + "px";
     const step = tickStep();
     const major = step * 5;
-    const first = Math.ceil(c.range[0] / step) * step;
+    const u = c.undatedBefore;
+    const first = Math.ceil((u ?? c.range[0]) / step) * step;
+
+    if (u != null) {
+      // 원역사(연대 미상) 구간 표시
+      const zone = el("div", "undated-zone");
+      zone.style.left = xOf(c.range[0]) + "px";
+      zone.style.width = xOf(u) - xOf(c.range[0]) + "px";
+      canvas.appendChild(zone);
+      const t = el("div", "tick unknown", { textContent: "?  연대 미상" });
+      t.style.left = xOf(c.range[0]) + "px";
+      axis.appendChild(t);
+    }
+
     for (let y = first; y <= c.range[1]; y += step) {
       const x = xOf(y);
       const isEra = y === 0;
@@ -176,114 +198,19 @@
       canvas.appendChild(g);
     }
     canvas.appendChild(axis);
+    axisEl = axis;
   }
 
-  // ── 구약: 한 줄 타임라인 ──
-  function renderOT() {
-    const c = DATA.ot;
-    const top = AXIS_H + 14;
-
-    // 원역사
-    const pro = el("div", "prologue");
-    pro.style.left = "24px";
-    pro.style.top = top + "px";
-    pro.style.width = PROLOGUE_W + "px";
-    pro.appendChild(el("h2", "", { textContent: "원역사" }));
-    pro.appendChild(el("p", "", { textContent: "창세기 1–11장 · 연대 미상" }));
-    c.prologue.forEach((p) => {
-      const b = el("button", "pro-card");
-      b.dataset.id = p.id;
-      b.innerHTML = `${p.title}<small>${p.ref}</small>`;
-      pro.appendChild(b);
-      nodes.set(p.id, b);
-    });
-    canvas.appendChild(pro);
-
-    // 시대 띠
-    const periods = [...index.ot.values()].filter((i) => i.kind === "period" && isVisible(i));
-    const pRows = packRows(periods.map((p) => ({ left: xOf(p.start), right: xOf(p.end) })), 0);
-    const pRowCount = periods.length ? Math.max(...pRows) + 1 : 0;
-    periods.forEach((p, i) => {
-      const wrap = el("div", "item period");
-      wrap.dataset.id = p.id;
-      wrap.style.setProperty("--h", p.hue);
-      const bar = el("div", "bar");
-      bar.style.left = xOf(p.start) + "px";
-      bar.style.top = top + pRows[i] * 30 + "px";
-      bar.style.width = Math.max(4, xOf(p.end) - xOf(p.start) - 2) + "px";
-      bar.textContent = p.title;
-      bar.title = `${p.title} (${fmtRange(p)})`;
-      wrap.appendChild(bar);
-      canvas.appendChild(wrap);
-      nodes.set(p.id, wrap);
-    });
-
-    const lineY = top + pRowCount * 30 + 34;
-    const track = el("div", "track");
-    track.style.top = lineY + "px";
-    track.style.left = xOf(c.range[0]) + "px";
-    track.style.width = xOf(c.range[1]) - xOf(c.range[0]) + "px";
-    canvas.appendChild(track);
-
-    // 사건: 점은 선 위에, 라벨은 아래에 겹치지 않게 쌓음
-    const items = [...index.ot.values()]
-      .filter((i) => i.kind === "item" && isVisible(i))
-      .sort((a, b) => a.start - b.start);
-    const ROW = 48;
-    const labelTop0 = lineY + 22;
-    const ext = items.map((it) => {
-      const w = Math.max(textWidth(it.title, 13, 600), textWidth(fmtRange(it), 11, 600)) + 22;
-      const left = xOf(it.start) - 10;
-      return { left, right: left + w };
-    });
-    const rows = packRows(ext);
-    const rowCount = items.length ? Math.max(...rows) + 1 : 0;
-
-    items.forEach((it, i) => {
-      const g = groupOf.ot[it.group];
-      const x = xOf(it.start);
-      const wrap = el("div", "item");
-      wrap.dataset.id = it.id;
-      wrap.style.setProperty("--h", g.hue);
-      wrap.style.left = "0";
-      wrap.style.top = "0";
-
-      const dot = el("div", "dot" + (it.approx ? " approx" : ""));
-      dot.style.left = x + "px";
-      dot.style.top = lineY + "px";
-
-      const ly = labelTop0 + rows[i] * ROW;
-      const conn = el("div", "connector");
-      conn.style.left = x + "px";
-      conn.style.top = lineY + "px";
-      conn.style.height = ly - lineY + "px";
-
-      const label = el("div", "label");
-      label.style.left = ext[i].left + "px";
-      label.style.top = ly + "px";
-      label.innerHTML = `<span class="yr"></span><span class="t"></span>`;
-      label.querySelector(".yr").textContent = fmtRange(it);
-      label.querySelector(".t").textContent = it.title;
-
-      wrap.append(conn, dot, label);
-      canvas.appendChild(wrap);
-      nodes.set(it.id, wrap);
-    });
-
-    const proBottom = top + 60 + c.prologue.length * 52;
-    return Math.max(labelTop0 + rowCount * ROW + 30, proBottom);
-  }
-
-  // ── 신약: 여러 줄(레인) 타임라인 ──
-  function renderNT(totalW) {
-    const c = DATA.nt;
+  // ── 여러 줄(레인) 타임라인 ──
+  function renderLanes(totalW) {
+    const c = cfg();
     const ROW = 30;
     let y = AXIS_H;
     let alt = false;
 
     c.lanes.forEach((lane) => {
-      if (state.hidden.nt.has(lane.id)) return;
-      const items = [...index.nt.values()]
+      if (state.hidden[state.view].has(lane.id)) return;
+      const items = [...index[state.view].values()]
         .filter((i) => i.lane === lane.id)
         .sort((a, b) => a.start - b.start || (b.end ?? b.start) - (a.end ?? a.start));
 
@@ -318,7 +245,7 @@
         const rowTop = y + 7 + rows[i] * ROW + 3;
         const wrap = el("div", "item");
         wrap.dataset.id = it.id;
-        wrap.style.setProperty("--h", lane.hue);
+        wrap.style.setProperty("--h", it.hue ?? lane.hue);
         wrap.style.left = "0";
         wrap.style.top = "0";
 
@@ -358,9 +285,9 @@
 
   function renderGuide() {
     const sel = state.selected && index[state.view].get(state.selected);
-    if (!sel || sel.kind === "prologue") return;
+    if (!sel) return;
     const h = parseFloat(canvas.style.height) - AXIS_H;
-    if (sel.end != null || cfg().concurrentPad) {
+    if (!sel.undated) {
       const pad = cfg().concurrentPad;
       const band = el("div", "guide-band");
       const l = xOf(sel.start - pad);
@@ -381,7 +308,7 @@
   function applyHighlights() {
     const q = state.query;
     const sel = state.selected && index[state.view].get(state.selected);
-    const concurrent = sel && sel.kind !== "prologue" ? new Set(concurrentWith(sel).map((i) => i.id)) : null;
+    const concurrent = sel ? new Set(concurrentWith(sel).map((i) => i.id)) : null;
 
     nodes.forEach((node, id) => {
       const it = index[state.view].get(id);
@@ -404,11 +331,7 @@
   function renderLegend() {
     const legend = $("#legend");
     legend.innerHTML = "";
-    const groups =
-      state.view === "ot"
-        ? [{ id: "period", name: "시대", hue: 35 }, ...DATA.ot.categories]
-        : DATA.nt.lanes;
-    groups.forEach((g) => {
+    cfg().lanes.forEach((g) => {
       const b = el("button", "chip", { textContent: g.name });
       b.style.setProperty("--h", g.hue);
       b.setAttribute("aria-pressed", String(!state.hidden[state.view].has(g.id)));
@@ -436,9 +359,7 @@
     const chip = el("span", "d-chip", { textContent: g.name });
     chip.style.setProperty("--h", hue);
     detailBody.appendChild(chip);
-    if (it.kind !== "prologue") {
-      detailBody.appendChild(el("div", "d-year", { textContent: fmtRange(it) }));
-    }
+    detailBody.appendChild(el("div", "d-year", { textContent: it.undated ? "? (연대 미상)" : fmtRange(it) }));
     detailBody.appendChild(el("h2", "d-title", { textContent: it.title }));
     if (it.ref) detailBody.appendChild(el("div", "d-ref", { textContent: "📖 " + it.ref }));
     if (it.desc) detailBody.appendChild(el("p", "d-desc", { textContent: it.desc }));
@@ -453,7 +374,7 @@
     }
 
     // 이전/다음
-    if (it.kind !== "prologue") {
+    {
       const list = visibleTimed();
       const idx = list.findIndex((x) => x.id === it.id);
       const nav = el("div", "d-nav");
@@ -469,13 +390,13 @@
       // 같은 시기
       const pad = cfg().concurrentPad;
       const sec = el("div", "d-section");
-      sec.innerHTML = `같은 시기 <small>(앞뒤 ${pad}년 포함)</small>`;
+      sec.innerHTML = it.undated ? `같은 시기 <small>(원역사 · 연대 미상)</small>` : `같은 시기 <small>(앞뒤 ${pad}년 포함)</small>`;
       detailBody.appendChild(sec);
       const conc = concurrentWith(it);
       if (!conc.length) {
         detailBody.appendChild(el("div", "d-empty", { textContent: "같은 시기의 다른 항목이 없습니다." }));
       }
-      const order = state.view === "nt" ? DATA.nt.lanes.map((l) => l.id) : ["period", ...DATA.ot.categories.map((c) => c.id)];
+      const order = cfg().lanes.map((l) => l.id);
       order.forEach((gid) => {
         const its = conc.filter((x) => x.group === gid);
         if (!its.length) return;
@@ -488,7 +409,11 @@
           const li = el("li");
           const b = el("button");
           b.innerHTML = `<span class="y"></span><span></span>`;
-          b.children[0].textContent = x.end != null ? `${fmtYear(x.start)}–${fmtYear(x.end).replace(/^(AD|BC) /, "")}` : fmtYear(x.start);
+          b.children[0].textContent = x.undated
+            ? "?"
+            : x.end != null
+              ? `${fmtYear(x.start)}–${fmtYear(x.end).replace(/^(AD|BC) /, "")}`
+              : fmtYear(x.start);
           b.children[1].textContent = x.title;
           b.addEventListener("click", () => select(x.id, { scroll: true }));
           li.appendChild(b);
@@ -523,12 +448,8 @@
   function scrollToItem(it, smooth = true) {
     const node = nodes.get(it.id);
     const vw = viewport.clientWidth;
-    let left;
-    if (it.kind === "prologue") left = 0;
-    else {
-      const mid = it.end != null ? (it.start + it.end) / 2 : it.start;
-      left = xOf(mid) - (vw + (state.view === "nt" ? laneHeadW() : 0)) / 2;
-    }
+    const mid = it.end != null ? (it.start + it.end) / 2 : it.start;
+    const left = xOf(mid) - (vw + laneHeadW()) / 2;
     let top = viewport.scrollTop;
     if (node) {
       const target = node.querySelector(".label, .bar") || node;
@@ -633,7 +554,7 @@
       // 현재 탭에서 먼저 찾고, 없으면 다른 탭에서
       const find = (view) =>
         [...index[view].values()]
-          .filter((it) => matchesQuery(it, q) && (it.kind === "prologue" || !state.hidden[view].has(it.group)))
+          .filter((it) => matchesQuery(it, q) && !state.hidden[view].has(it.group))
           .sort((a, b) => (a.start ?? -1e9) - (b.start ?? -1e9));
       let view = state.view;
       let hits = find(view);
@@ -660,25 +581,33 @@
     if (dragMoved) return;
     const node = e.target.closest("[data-id]");
     if (node) select(node.dataset.id);
-    else if (!e.target.closest(".prologue")) select(null);
+    else select(null);
   });
 
   // 마우스 위치 연도 표시
+  function hideCursor() {
+    if (!cursorLine) return;
+    cursorLine.style.display = "none";
+    cursorYear.style.display = "none";
+  }
   viewport.addEventListener("mousemove", (e) => {
     if (!cursorLine) return;
     const vr = viewport.getBoundingClientRect();
-    const px = e.clientX - vr.left + viewport.scrollLeft;
+    const lx = e.clientX - vr.left;
+    const ly = e.clientY - vr.top;
+    // 줄 이름 칸이나 스크롤바 위에서는 숨김 (clientWidth/Height는 스크롤바 제외 크기)
+    if (lx < laneHeadW() || lx >= viewport.clientWidth || ly >= viewport.clientHeight) return hideCursor();
+    const px = lx + viewport.scrollLeft;
     const yv = yearAt(px);
     const c = cfg();
-    if (px < originX() - 10 || yv < c.range[0] || yv > c.range[1]) {
-      cursorLine.style.display = "none";
-      return;
-    }
+    if (yv < c.range[0] || yv > c.range[1]) return hideCursor();
     cursorLine.style.display = "block";
     cursorLine.style.left = px + "px";
-    cursorYear.textContent = fmtYear(yv);
+    cursorYear.style.display = "block";
+    cursorYear.style.left = px + "px";
+    cursorYear.textContent = yearText(yv);
   });
-  viewport.addEventListener("mouseleave", () => cursorLine && (cursorLine.style.display = "none"));
+  viewport.addEventListener("mouseleave", hideCursor);
 
   // Ctrl/⌘ + 휠 (트랙패드 핀치 포함) 확대
   viewport.addEventListener(

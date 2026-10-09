@@ -18,7 +18,8 @@
     selected: null,
     query: "",
     hidden: { ot: new Set(), nt: new Set() },
-    scrolled: { ot: false, nt: false }
+    scrolled: { ot: false, nt: false },
+    mode: "h" // "h" 가로 타임라인, "v" 세로 목록 (모바일 기본)
   };
 
   // ───────── 유틸 ─────────
@@ -235,6 +236,8 @@
   const nodes = new Map(); // id -> element
 
   function render() {
+    document.body.classList.toggle("mode-v", state.mode === "v");
+    if (state.mode === "v") return renderVertical();
     const c = cfg();
     const totalW = Math.ceil(xOf(c.range[1]) + 80);
     canvas.innerHTML = "";
@@ -381,9 +384,125 @@
     return y + 24;
   }
 
+  // ── 세로 보기 (모바일 기본) ──
+  // 구약은 시대별, 신약은 10년 단위로 묶어 위에서 아래로 시간순 나열
+  function verticalSections(items) {
+    const c = cfg();
+    if (state.view === "ot" && !state.hidden.ot.has("period")) {
+      // 같은 해에 시작하는 시대(북이스라엘·남유다)는 한 구간으로 합침
+      const heads = [];
+      [...index.ot.values()]
+        .filter((p) => p.lane === "period")
+        .sort((a, b) => a.start - b.start)
+        .forEach((p) => {
+          const prev = heads[heads.length - 1];
+          if (prev && prev.start === p.start) {
+            prev.title += " · " + p.title;
+            prev.end = Math.max(prev.end, p.end);
+          } else heads.push({ id: p.id, start: p.start, end: p.end, title: p.title, undated: p.undated, items: [] });
+        });
+      items.forEach((it) => {
+        const h = [...heads].reverse().find((h) => h.start <= it.start) || heads[0];
+        h.items.push(it);
+      });
+      return heads.map((h) => ({
+        ...h,
+        sub: h.undated ? "연대 미상" : `${fmtYear(h.start)} – ${fmtYear(h.end)}`
+      }));
+    }
+    // 10년(구약에서 시대 줄을 숨긴 경우 100년) 단위
+    const step = state.view === "nt" ? 10 : 100;
+    const map = new Map();
+    items.forEach((it) => {
+      const key = it.undated ? "?" : Math.floor(it.start / step) * step;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(it);
+    });
+    return [...map.entries()].map(([k, list]) => {
+      if (k === "?") return { title: "원역사", sub: "연대 미상", items: list, start: c.range[0] };
+      const a = k, b = k + step - 1;
+      const title =
+        a < 0 ? `BC ${-a}–${Math.max(1, -b)}년` : a === 0 ? `AD 1–${b}년` : `AD ${a}–${b}년`;
+      // 이 구간에 걸쳐 있는 통치자(신약)
+      const ruling =
+        state.view === "nt"
+          ? [...index.nt.values()]
+              .filter((r) => (r.lane === "rome" || r.lane === "judea") && isVisible(r) && r.end != null && r.start < a + step && r.end > a)
+              .filter((r) => !["prefects", "procurators"].includes(r.id))
+              .map((r) => r.title)
+          : [];
+      return { title, sub: ruling.length ? ruling.join(" · ") : "", items: list, start: a };
+    });
+  }
+
+  function vYear(it) {
+    if (it.undated) return "?";
+    const pre = it.approx ? "약 " : "";
+    if (it.end == null) return pre + fmtYear(it.start);
+    const a = fmtYear(it.start);
+    const b = fmtYear(it.end);
+    return pre + (a.slice(0, 2) === b.slice(0, 2) ? `${a}–${b.slice(3)}` : `${a}–${b}`);
+  }
+
+  function renderVertical() {
+    canvas.innerHTML = "";
+    nodes.clear();
+    cursorLine = null;
+    canvas.className = `canvas vlist ${state.view}`;
+    canvas.style.width = "";
+    canvas.style.height = "";
+
+    const showPeriodsAsHeads = state.view === "ot" && !state.hidden.ot.has("period");
+    const items = visibleTimed().filter((it) => !(showPeriodsAsHeads && it.lane === "period"));
+    const sections = verticalSections(items).filter((s) => s.items.length || s.id);
+
+    sections.forEach((s) => {
+      const sec = el("section", "v-sec");
+      const head = el("header", "v-head");
+      const h = el("div", "v-head-title", { textContent: s.title });
+      head.appendChild(h);
+      if (s.sub) head.appendChild(el("div", "v-head-sub", { textContent: s.sub, title: s.sub }));
+      if (s.id) {
+        // 시대 제목을 누르면 그 시대 설명
+        head.classList.add("item", "v-period");
+        head.dataset.id = s.id;
+        head.style.setProperty("--h", index.ot.get(s.id).hue);
+        nodes.set(s.id, head);
+      }
+      sec.appendChild(head);
+
+      const ul = el("ol", "v-list");
+      s.items
+        .sort((a, b) => a.start - b.start)
+        .forEach((it) => {
+          const lane = groupOf[state.view][it.group];
+          const li = el("li", "item v-row");
+          li.dataset.id = it.id;
+          li.style.setProperty("--h", it.hue ?? lane.hue);
+          li.appendChild(el("div", "v-year", { textContent: vYear(it) }));
+          const rail = el("div", "v-rail");
+          rail.appendChild(el("span", "v-dot" + (it.approx ? " approx" : "") + (it.end != null ? " span" : "")));
+          li.appendChild(rail);
+          const card = el("div", "v-card");
+          const t = el("div", "v-title");
+          t.appendChild(titleNodes(it));
+          card.appendChild(t);
+          card.appendChild(el("div", "v-lane", { textContent: lane.name }));
+          li.appendChild(card);
+          ul.appendChild(li);
+          nodes.set(it.id, li);
+        });
+      sec.appendChild(ul);
+      canvas.appendChild(sec);
+    });
+
+    if (!sections.length) canvas.appendChild(el("p", "v-empty", { textContent: "표시할 항목이 없습니다. 범례에서 줄을 켜 주세요." }));
+    applyHighlights();
+  }
+
   function renderGuide() {
     const sel = state.selected && index[state.view].get(state.selected);
-    if (!sel) return;
+    if (!sel || state.mode === "v") return;
     const h = parseFloat(canvas.style.height) - AXIS_H;
     if (!sel.undated) {
       const pad = cfg().concurrentPad;
@@ -632,6 +751,14 @@
 
   function scrollToItem(it, smooth = true) {
     const node = nodes.get(it.id);
+    if (state.mode === "v") {
+      // 세로 보기: 고정된 구간 제목 아래, 화면 위쪽에 오도록
+      if (!node) return;
+      const head = node.closest(".v-sec")?.querySelector(".v-head");
+      const offset = (head && !node.classList.contains("v-head") ? head.offsetHeight : 0) + 10;
+      viewport.scrollTo({ top: Math.max(0, node.offsetTop - offset), behavior: smooth ? "smooth" : "auto" });
+      return;
+    }
     const vw = viewport.clientWidth;
     const midX = it.end != null ? xOf((it.start + it.end) / 2) : posX(it);
     const left = midX - (vw + laneHeadW()) / 2;
@@ -666,12 +793,14 @@
   }
 
   function initialScroll() {
+    if (state.mode === "v") return viewport.scrollTo({ top: 0, left: 0 });
     if (state.view === "nt") viewport.scrollTo({ left: Math.max(0, xOf(-10) - laneHeadW() - 20), top: 0 });
     else viewport.scrollTo({ left: 0, top: 0 });
   }
 
   // ───────── 확대/축소 ─────────
   function setZoom(newPpy, anchorClientX) {
+    if (state.mode === "v") return;
     const z = cfg().zoom;
     newPpy = Math.min(z.max, Math.max(z.min, newPpy));
     if (Math.abs(newPpy - ppy()) < 1e-6) return;
@@ -686,6 +815,7 @@
   }
 
   function fitAll() {
+    if (state.mode === "v") return;
     const c = cfg();
     const avail = viewport.clientWidth - originX() - 60;
     setZoom(avail / (c.range[1] - c.range[0]));
@@ -693,6 +823,13 @@
   }
 
   function rerenderKeepingCenter() {
+    if (state.mode === "v") {
+      const top = viewport.scrollTop;
+      render();
+      viewport.scrollTop = top;
+      if (state.selected) showDetail();
+      return;
+    }
     const year = yearAt(viewport.scrollLeft + viewport.clientWidth / 2);
     const top = viewport.scrollTop;
     render();
@@ -765,7 +902,8 @@
   canvas.addEventListener("click", (e) => {
     if (dragMoved) return;
     const node = e.target.closest("[data-id]");
-    if (node) select(node.dataset.id);
+    // 모바일 세로 보기에서는 아래에서 올라오는 패널에 가리지 않도록 누른 항목을 위로 올림
+    if (node) select(node.dataset.id, { scroll: state.mode === "v" && isMobile() });
     else select(null);
   });
 
@@ -810,7 +948,7 @@
   let drag = null;
   let dragMoved = false;
   viewport.addEventListener("pointerdown", (e) => {
-    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    if (state.mode === "v" || e.pointerType !== "mouse" || e.button !== 0) return;
     drag = { x: e.clientX, y: e.clientY, l: viewport.scrollLeft, t: viewport.scrollTop };
     dragMoved = false;
   });
@@ -835,7 +973,7 @@
   viewport.addEventListener(
     "touchstart",
     (e) => {
-      if (e.touches.length === 2) {
+      if (e.touches.length === 2 && state.mode === "h") {
         const [a, b] = e.touches;
         pinch = { d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), p: ppy() };
       }
@@ -863,7 +1001,9 @@
       if (!list.length) return;
       e.preventDefault();
       let idx = list.findIndex((x) => x.id === state.selected);
-      if (idx === -1) {
+      if (idx === -1 && state.mode === "v") {
+        idx = 0;
+      } else if (idx === -1) {
         const centerYear = yearAt(viewport.scrollLeft + viewport.clientWidth / 2);
         idx = list.findIndex((x) => x.start >= centerYear);
         if (idx === -1) idx = list.length - 1;
@@ -890,6 +1030,28 @@
   });
 
   // ───────── 시작 ─────────
+  // 세로/가로 보기 전환 (선택은 이 브라우저에만 기억)
+  const modeBtn = $("#mode");
+  function updateModeBtn() {
+    modeBtn.textContent = state.mode === "v" ? "가로 보기" : "세로 보기";
+    modeBtn.setAttribute("aria-label", state.mode === "v" ? "가로 타임라인으로 보기" : "세로 목록으로 보기");
+  }
+  modeBtn.addEventListener("click", () => {
+    state.mode = state.mode === "v" ? "h" : "v";
+    try { localStorage.setItem("bible-timeline-mode", state.mode); } catch (e) { /* 무시 */ }
+    updateModeBtn();
+    state.scrolled = { ot: false, nt: false };
+    render();
+    if (state.selected) scrollToItem(index[state.view].get(state.selected), false);
+    else initialScroll();
+  });
+  {
+    let saved = null;
+    try { saved = localStorage.getItem("bible-timeline-mode"); } catch (e) { /* 무시 */ }
+    state.mode = saved === "h" || saved === "v" ? saved : isMobile() ? "v" : "h";
+    updateModeBtn();
+  }
+
   function boot() {
     const [view, id] = location.hash.replace(/^#/, "").split("/");
     const v = view === "nt" ? "nt" : "ot";

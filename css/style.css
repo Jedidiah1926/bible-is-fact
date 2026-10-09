@@ -444,6 +444,111 @@ h1 {
   height: 24px;
 }
 
+/* ───────── 세로 보기 (모바일 기본) ───────── */
+.mode-btn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 8px;
+  height: 34px;
+  padding: 0 11px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex: none;
+}
+.mode-btn:hover { background: var(--surface-2); }
+body.mode-v .zoom { display: none; }
+body.mode-v .viewport { cursor: auto; }
+body.mode-v .hint > span:first-child { display: none; }
+
+.vlist { padding: 0 0 45vh; max-width: 760px; margin: 0 auto; }
+
+.v-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 16px 9px;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.v-head-title { flex: none; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
+.v-head-sub {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v-head.v-period { cursor: pointer; border-left: 4px solid hsl(var(--h) var(--it-s) var(--it-l)); }
+.v-head.v-period .v-head-title::after { content: " ›"; color: var(--muted); font-weight: 600; }
+.v-head.v-period.selected { background: color-mix(in srgb, var(--guide) 14%, var(--bg)); }
+
+.v-list { list-style: none; margin: 0; padding: 4px 0 10px; }
+.vlist .item { position: relative; }
+.v-row {
+  display: grid;
+  grid-template-columns: 84px 22px 1fr;
+  align-items: stretch;
+  padding: 0 16px 0 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.v-year {
+  padding: 11px 6px 0 0;
+  text-align: right;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+}
+.v-rail { position: relative; }
+.v-rail::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid var(--line);
+  transform: translateX(-1px);
+}
+.v-dot {
+  position: absolute;
+  left: 50%;
+  top: 13px;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-radius: 50%;
+  background: hsl(var(--h) var(--it-s) var(--it-l));
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px hsl(var(--h) var(--it-s) var(--it-l));
+}
+.v-dot.approx { background: var(--bg); box-shadow: 0 0 0 2px hsl(var(--h) var(--it-s) var(--it-l)); }
+.v-dot.span { border-radius: 3px; height: 16px; top: 11px; }
+.v-card {
+  margin: 4px 0;
+  padding: 7px 11px 8px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid hsl(var(--h) var(--it-s) var(--it-l));
+  min-width: 0;
+}
+.v-title { font-size: 14.5px; font-weight: 700; line-height: 1.35; }
+.v-lane { margin-top: 2px; font-size: 11.5px; color: hsl(var(--h) var(--it-s) var(--it-l)); font-weight: 600; }
+.v-row:active .v-card { background: var(--surface-2); }
+.v-row.selected .v-card { outline: 2px solid var(--guide); outline-offset: 1px; }
+.v-row.match .v-card { background: color-mix(in srgb, var(--accent) 18%, var(--surface)); }
+.v-empty { padding: 40px 16px; color: var(--muted); text-align: center; }
+
 /* ───────── 상세 패널 ───────── */
 .detail {
   width: 360px;
@@ -703,7 +808,7 @@ h1 {
     position: absolute;
     left: 0; right: 0; bottom: 0;
     width: auto;
-    max-height: 58%;
+    max-height: 62%;
     border-left: 0;
     border-top: 1px solid var(--line);
     border-radius: 16px 16px 0 0;
@@ -711,6 +816,22 @@ h1 {
     padding: 16px 16px 24px;
   }
   .d-title { font-size: 19px; }
+  .detail::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    margin: -6px auto 10px;
+    border-radius: 2px;
+    background: var(--line-strong);
+  }
+  .v-row { grid-template-columns: 74px 20px 1fr; padding: 0 12px 0 6px; }
+  .v-head { padding: 9px 16px 8px; }
+  .mode-btn { padding: 0 9px; font-size: 12.5px; }
+  .tools { gap: 6px; }
+  h1 { font-size: 17px; }
   .hint > span:first-child { display: none; }
+  .hint { padding: 6px 16px; font-size: 11.5px; }
+  .hint .note { display: none; }
   .lane-head { width: 92px; font-size: 12px; padding: 0 6px 0 8px; }
 }

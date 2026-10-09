@@ -82,7 +82,25 @@
     );
     ot.items.forEach((i) => index.ot.set(i.id, { ...i, group: i.lane }));
     DATA.nt.items.forEach((i) => index.nt.set(i.id, { ...i, group: i.lane }));
+
+    // 성경 밖 자료로 확인된 내용 (js/evidence.js)
+    Object.entries(window.TIMELINE_EVIDENCE || {}).forEach(([id, ev]) => {
+      ["ot", "nt"].forEach((v) => {
+        const it = index[v].get(id);
+        if (it) it.evidence = ev;
+      });
+    });
   })();
+
+  const EV_W = 18; // 확인 표시(✓) 폭
+
+  // 제목 + (증거가 있으면) 확인 표시
+  function titleNodes(it) {
+    const frag = document.createDocumentFragment();
+    frag.append(it.title);
+    if (it.evidence) frag.append(el("span", "ev-mark", { textContent: "✓", title: "성경 밖 자료로 확인됨" }));
+    return frag;
+  }
 
   const cfg = () => DATA[state.view];
   const ppy = () => state.ppy[state.view];
@@ -217,13 +235,14 @@
       // 각 항목의 차지 영역 계산
       const layout = items.map((it) => {
         const x = xOf(it.start);
-        const tw = textWidth(it.title, 12.5, 700) + 18;
+        const ew = it.evidence ? EV_W : 0;
+        const tw = textWidth(it.title, 12.5, 700) + 18 + ew;
         if (it.end != null) {
           const w = Math.max(6, xOf(it.end) - x);
           const inside = tw <= w;
           return { it, x, w, inside, left: x, right: inside ? x + w : x + w + 6 + tw };
         }
-        const lw = textWidth(it.title, 12.5, 600) + 12;
+        const lw = textWidth(it.title, 12.5, 600) + 12 + ew;
         return { it, x, left: x - 7, right: x + 8 + lw };
       });
       const rows = packRows(layout);
@@ -255,10 +274,11 @@
           bar.style.top = rowTop + "px";
           bar.style.width = L.w + "px";
           bar.title = `${it.title} (${fmtRange(it)})`;
-          if (L.inside) bar.textContent = it.title;
+          if (L.inside) bar.appendChild(titleNodes(it));
           wrap.appendChild(bar);
           if (!L.inside) {
-            const bl = el("div", "bar-label", { textContent: it.title });
+            const bl = el("div", "bar-label");
+            bl.appendChild(titleNodes(it));
             bl.style.left = L.x + L.w + 6 + "px";
             bl.style.top = rowTop + "px";
             wrap.appendChild(bl);
@@ -270,7 +290,7 @@
           const label = el("div", "label");
           label.style.left = L.x + 8 + "px";
           label.style.top = rowTop + "px";
-          label.textContent = it.title;
+          label.appendChild(titleNodes(it));
           label.title = fmtRange(it);
           wrap.append(dot, label);
         }
@@ -363,6 +383,27 @@
     detailBody.appendChild(el("h2", "d-title", { textContent: it.title }));
     if (it.ref) detailBody.appendChild(el("div", "d-ref", { textContent: "📖 " + it.ref }));
     if (it.desc) detailBody.appendChild(el("p", "d-desc", { textContent: it.desc }));
+
+    if (it.evidence) {
+      const box = el("section", "d-evidence");
+      box.appendChild(el("h3", "", { textContent: "✓ 성경 밖 자료로 확인된 내용" }));
+      it.evidence.forEach((ev) => {
+        const card = el("div", "ev-card");
+        card.appendChild(el("div", "ev-title", { textContent: ev.title }));
+        if (ev.year) card.appendChild(el("div", "ev-year", { textContent: ev.year }));
+        if (ev.doubt) {
+          const d = el("p", "ev-doubt");
+          d.append(el("b", "", { textContent: "이전 견해 " }), ev.doubt);
+          card.appendChild(d);
+        }
+        const t = el("p", "ev-text");
+        if (ev.doubt) t.append(el("b", "", { textContent: "확인 " }));
+        t.append(ev.text);
+        card.appendChild(t);
+        box.appendChild(card);
+      });
+      detailBody.appendChild(box);
+    }
 
     if (it.link) {
       const [view, id] = it.link.split(":");

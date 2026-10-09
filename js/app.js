@@ -116,6 +116,9 @@
   const markW = (it) =>
     (it.history ? 18 : 0) + (it.evidence ? 18 : 0) + (it.research ? 14 : 0) + (it.disputed ? 16 : 0);
 
+  // 점 항목 이름표 폭 (점 오른쪽 8px부터 시작)
+  const pointLabelW = (it) => textWidth(it.title, 12.5, 600) + 12 + markW(it);
+
   // 제목 + 표시
   function titleNodes(it) {
     const frag = document.createDocumentFragment();
@@ -133,8 +136,38 @@
   const originX = () => laneHeadW() + 40;
   const laneHeadW = () => (isMobile() ? 92 : 128);
 
-  const xOf = (y) => originX() + (y - cfg().range[0]) * ppy();
-  const yearAt = (px) => cfg().range[0] + (px - originX()) / ppy();
+  // 연대 미상(?) 구간의 화면 폭: 연도 비율대로 그리되, 많이 축소해도 이름표가 들어갈 최소 폭은 유지
+  function undatedW() {
+    const c = cfg();
+    const u = c.undatedBefore;
+    if (u == null) return 0;
+    const widest = Math.max(
+      0,
+      ...[...index[state.view].values()].filter((it) => it.undated && it.end == null).map(pointLabelW)
+    );
+    return Math.max((u - c.range[0]) * ppy(), widest + 60);
+  }
+
+  // 연도 → 화면 x (연대 미상 구간은 따로 늘이거나 줄여서 붙임)
+  function xOf(y) {
+    const c = cfg();
+    const u = c.undatedBefore;
+    if (u == null) return originX() + (y - c.range[0]) * ppy();
+    const zw = undatedW();
+    if (y < u) return originX() + ((y - c.range[0]) / (u - c.range[0])) * zw;
+    return originX() + zw + (y - u) * ppy();
+  }
+
+  // 화면 x → 연도 (xOf의 역함수)
+  function yearAt(px) {
+    const c = cfg();
+    const u = c.undatedBefore;
+    if (u == null) return c.range[0] + (px - originX()) / ppy();
+    const zw = undatedW();
+    const d = px - originX();
+    if (d < zw) return c.range[0] + (d / zw) * (u - c.range[0]);
+    return u + (d - zw) / ppy();
+  }
 
   const isVisible = (it) => !state.hidden[state.view].has(it.group);
 
@@ -174,6 +207,27 @@
       }
       return r;
     });
+  }
+
+  // 항목의 화면 x 위치. 연대 미상(?) 점 항목은 연도가 아니라 순서만 의미가 있으므로
+  // '?' 구간 폭에 맞춰 고르게 놓고, 이름표가 구간 경계를 넘지 않게 한다.
+  function posX(it) {
+    if (!it.undated || it.end != null) return xOf(it.start);
+    const c = cfg();
+    const list = [...index[state.view].values()].filter((u) => u.undated && u.end == null);
+    const left = xOf(c.range[0]) + 16;
+    const right = xOf(c.undatedBefore) - 10;
+    // 각 항목이 차지하는 폭(점 + 이름표)을 빼고 남는 공간을 사이 간격으로 고르게 나눔
+    const widths = list.map((u) => 15 + pointLabelW(u));
+    const free = right - left - widths.reduce((a, w) => a + w, 0);
+    const i = list.indexOf(it);
+    if (list.length > 1 && free >= 6 * (list.length - 1)) {
+      const gap = free / (list.length - 1);
+      return left + widths.slice(0, i).reduce((a, w) => a + w + gap, 0);
+    }
+    // 공간이 모자라면(많이 축소한 경우) 고르게 놓고 겹치는 것은 다음 줄로
+    const slot = list.length > 1 ? Math.max(0, right - left - widths[list.length - 1]) / (list.length - 1) : 0;
+    return Math.max(left, Math.min(left + slot * i, right - 8 - pointLabelW(it)));
   }
 
   // ───────── 렌더링 ─────────
@@ -259,7 +313,7 @@
 
       // 각 항목의 차지 영역 계산
       const layout = items.map((it) => {
-        const x = xOf(it.start);
+        const x = posX(it);
         const ew = markW(it);
         const tw = textWidth(it.title, 12.5, 700) + 18 + ew;
         if (it.end != null) {
@@ -267,8 +321,7 @@
           const inside = tw <= w;
           return { it, x, w, inside, left: x, right: inside ? x + w : x + w + 6 + tw };
         }
-        const lw = textWidth(it.title, 12.5, 600) + 12 + ew;
-        return { it, x, left: x - 7, right: x + 8 + lw };
+        return { it, x, left: x - 7, right: x + 8 + pointLabelW(it) };
       });
       const rows = packRows(layout);
       const rowCount = Math.max(1, items.length ? Math.max(...rows) + 1 : 1);
@@ -341,10 +394,10 @@
       band.style.height = h + "px";
       canvas.appendChild(band);
     }
-    [sel.start, sel.end].forEach((yv) => {
-      if (yv == null) return;
+    const xs = sel.end != null ? [xOf(sel.start), xOf(sel.end)] : [posX(sel)];
+    xs.forEach((x) => {
       const g = el("div", "guide");
-      g.style.left = xOf(yv) + "px";
+      g.style.left = x + "px";
       g.style.height = h + "px";
       canvas.appendChild(g);
     });
@@ -580,8 +633,8 @@
   function scrollToItem(it, smooth = true) {
     const node = nodes.get(it.id);
     const vw = viewport.clientWidth;
-    const mid = it.end != null ? (it.start + it.end) / 2 : it.start;
-    const left = xOf(mid) - (vw + laneHeadW()) / 2;
+    const midX = it.end != null ? xOf((it.start + it.end) / 2) : posX(it);
+    const left = midX - (vw + laneHeadW()) / 2;
     let top = viewport.scrollTop;
     if (node) {
       const target = node.querySelector(".label, .bar") || node;

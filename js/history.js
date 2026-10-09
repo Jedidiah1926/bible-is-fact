@@ -61,10 +61,6 @@ window.TIMELINE_HISTORY = {
     text: "하스몬 왕가의 형제 히르카누스 2세와 아리스토불루스 2세의 다툼에 개입한 로마 장군 폼페이우스가 3개월 포위 끝에 성전 산을 함락하고 지성소에 들어감. 유대는 왕국 칭호를 잃고 로마의 속국이 됨.",
     sources: [W("Siege_of_Jerusalem_(63_BC)"), W("Hasmonean_dynasty")]
   },
-  "herod": {
-    text: "로마 원로원이 '유대인의 왕'으로 임명한 헤롯(재위 BC 37–4). 예루살렘 성전 증축, 가이사랴 항구, 마사다·헤로디움 요새 등 그의 건축물이 지금도 남아 있음.",
-    sources: [W("Herod_the_Great")]
-  },
   "p-greek": {
     text: "알렉산더의 정복(BC 332) 이후 유대가 헬라 왕조들의 지배를 받은 시기.",
     sources: [W("Hellenistic_Palestine")]

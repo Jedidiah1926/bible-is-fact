@@ -12,7 +12,7 @@
 window.TIMELINE_DATA = {
   ot: {
     name: "구약",
-    range: [-2450, 0],
+    range: [-2450, 0], // 구약 부분 (화면에서는 신약과 하나로 합쳐 보여 줌)
     undatedBefore: -2200, // 이 연도 이전은 연대 미상(?) 구간
     zoom: { min: 0.35, max: 24, initial: 2.4 },
     concurrentPad: 12,
@@ -50,7 +50,10 @@ window.TIMELINE_DATA = {
       { id: "p-persia", start: -538, end: -332, title: "귀환·페르시아 시대", hue: 190, desc: "고레스 칙령으로 귀환, 성전·성벽 재건. 말라기 이후 약 400년간 선지자의 말씀이 끊긴 '중간기'가 시작됨.", ref: "에스라; 느헤미야; 에스더" },
       { id: "p-greek", start: -332, end: -167, title: "헬라 시대", hue: 210, desc: "알렉산더 대왕의 정복 이후 프톨레마이오스·셀레우코스 왕조의 지배. 헬라어 70인역 성경 번역.", ref: "단 8장; 11장" },
       { id: "p-hasmonean", start: -167, end: -63, title: "하스몬 왕조", hue: 165, desc: "마카비 반란으로 독립한 유대인 왕조. 바리새파·사두개파가 형성됨.", ref: "(마카비서)" },
-      { id: "p-rome", start: -63, end: -4, title: "로마 지배", hue: 350, desc: "폼페이우스의 예루살렘 점령 이후 로마의 지배. 헤롯 대왕이 로마의 분봉왕으로 다스림.", ref: "" }
+      { id: "p-rome", start: -63, end: -5, title: "로마 지배", hue: 350, desc: "폼페이우스의 예루살렘 점령 이후 로마의 지배. 헤롯 대왕이 로마의 분봉왕으로 다스림.", ref: "" },
+      // 신약 시대 (세로 보기에서는 10년 단위로 나눠 보여 줌: split)
+      { id: "p-jesus", start: -5, end: 30, split: 10, title: "예수 그리스도 시대", hue: 45, desc: "예수의 탄생부터 공생애, 십자가와 부활, 승천까지. 로마 황제 아우구스투스·티베리우스, 헤롯 왕가와 총독 빌라도의 시대.", ref: "4복음서" },
+      { id: "p-apostolic", start: 30, end: 100, split: 10, title: "사도 시대", hue: 205, desc: "오순절 성령 강림으로 시작된 교회가 예루살렘에서 땅끝까지 퍼져 나간 시대. 바울의 전도여행, 신약 성경 기록, 예루살렘 멸망, 사도 요한의 별세까지.", ref: "사도행전; 서신서; 요한계시록" }
     ],
 
     items: [
@@ -145,9 +148,6 @@ window.TIMELINE_DATA = {
       { id: "maccabees", start: -167, lane: "world", title: "성전 모독·마카비 반란", ref: "단 11:31", desc: "셀레우코스의 안티오쿠스 4세가 성전에 제우스 제단을 세움(멸망의 가증한 것). 마카비 가문이 봉기." },
       { id: "hanukkah", start: -164, lane: "world", title: "성전 재봉헌 (수전절)", ref: "요 10:22", desc: "마카비가 성전을 되찾아 정결하게 하고 재봉헌. 수전절(하누카)의 기원." },
       { id: "pompey", start: -63, lane: "world", title: "폼페이우스, 예루살렘 점령", ref: "", desc: "로마 장군 폼페이우스가 예루살렘을 점령하며 유대가 로마의 지배 아래 들어감." },
-      { id: "herod", start: -37, end: -4, lane: "king", title: "헤롯 대왕", ref: "마 2:1", desc: "로마 원로원이 임명한 유대의 왕. 이두매 출신." },
-      { id: "herod-temple", start: -20, lane: "world", title: "헤롯 성전 확장 시작", ref: "요 2:20", desc: "'이 성전은 사십육 년 동안에 지었거늘' — 헤롯이 제2성전을 대규모로 증축." },
-      { id: "jesus-born-ot", start: -5, lane: "event", approx: true, title: "예수 그리스도 탄생 → 신약", ref: "마 1–2장; 눅 2장", desc: "구약의 약속이 성취됨. 신약 타임라인에서 이어집니다.", link: "nt:jesus-born" }
     ]
   },
 
@@ -197,7 +197,7 @@ window.TIMELINE_DATA = {
 
       // 예수 그리스도
       { id: "john-born", lane: "jesus", start: -6, approx: true, title: "세례 요한 출생", ref: "눅 1장", desc: "제사장 사가랴와 엘리사벳의 아들. 엘리야의 심령과 능력으로 주의 길을 예비할 자." },
-      { id: "jesus-born", lane: "jesus", start: -5, approx: true, title: "예수 탄생 (베들레헴)", ref: "마 1–2장; 눅 2장", desc: "헤롯 대왕 사망(BC 4) 이전, 다윗의 동네 베들레헴에서 탄생. 목자들과 동방박사의 경배.", link: "ot:jesus-born-ot" },
+      { id: "jesus-born", lane: "jesus", start: -5, approx: true, title: "예수 탄생 (베들레헴)", ref: "마 1–2장; 눅 2장", desc: "헤롯 대왕 사망(BC 4) 이전, 다윗의 동네 베들레헴에서 탄생. 목자들과 동방박사의 경배." },
       { id: "flight-egypt", lane: "jesus", start: -4, approx: true, title: "이집트 피신·나사렛 정착", ref: "마 2:13–23", desc: "헤롯의 학살을 피해 이집트로 피신했다가 헤롯 사후 나사렛에 정착." },
       { id: "temple-12", lane: "jesus", start: 8, approx: true, title: "12세, 성전 방문", ref: "눅 2:41–52", desc: "'내가 내 아버지 집에 있어야 될 줄을 알지 못하셨나이까.'" },
       { id: "john-ministry", lane: "jesus", start: 26, end: 29, approx: true, title: "세례 요한의 사역", ref: "눅 3:1–20", desc: "디베료(티베리우스) 황제 15년경 요단강에서 회개의 세례를 전파." },

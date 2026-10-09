@@ -179,14 +179,6 @@ window.TIMELINE_EVIDENCE = {
       sources: [W("Elephantine_papyri_and_ostraca"), W("Sanballat_the_Horonite")]
     }
   ],
-  "herod-temple": [
-    {
-      title: "성전 경고 비문 (소렉 비문)",
-      year: "1871년 발견 (예루살렘, 샤를 클레르몽가노)",
-      text: "헤롯 성전 이방인의 뜰과 안뜰 사이 난간에 세운 헬라어 경고문: '이방인은 누구든지 성소 주위의 난간과 담 안으로 들어오지 말라. 붙잡히는 자는 죽게 되리니 스스로 책임지라.' 요세푸스의 기록, 그리고 바울이 이방인을 성전에 데려왔다는 모함으로 붙잡힌 사건(행 21:28–29)의 배경과 일치함.",
-      sources: [W("Temple_Warning_inscription")]
-    }
-  ],
 
   // ───────── 신약 ─────────
   "h-herod-temple": [

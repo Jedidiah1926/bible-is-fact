@@ -11,9 +11,10 @@
   <header class="topbar">
     <div class="brand">
       <h1>성경 타임라인</h1>
-      <nav class="tabs" role="tablist" aria-label="구약/신약 선택">
-        <button role="tab" data-view="ot" aria-selected="true">구약</button>
-        <button role="tab" data-view="nt" aria-selected="false">신약</button>
+      <nav class="tabs" aria-label="시대로 이동">
+        <button data-jump="all" aria-selected="false" title="전체 기간 보기">전체</button>
+        <button data-jump="ot" aria-selected="false" title="구약 시대로 이동">구약</button>
+        <button data-jump="nt" aria-selected="false" title="신약 시대로 이동">신약</button>
       </nav>
     </div>
 
@@ -25,7 +26,6 @@
       <button id="mode" class="mode-btn" title="세로/가로 보기 전환"></button>
       <div class="zoom" role="group" aria-label="확대/축소">
         <button id="zoom-out" title="축소 (-)" aria-label="축소">−</button>
-        <button id="zoom-fit" title="전체 보기">전체</button>
         <button id="zoom-in" title="확대 (+)" aria-label="확대">+</button>
       </div>
       <button id="theme" class="icon-btn" title="밝게/어둡게" aria-label="테마 전환"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>

@@ -188,7 +188,6 @@ h1 {
 }
 .zoom button + button { border-left: 1px solid var(--line); }
 .zoom button:hover, .icon-btn:hover { background: var(--surface-2); }
-#zoom-fit { font-size: 13px; padding: 0 10px; }
 
 .icon-btn {
   border: 1px solid var(--line);

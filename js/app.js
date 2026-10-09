@@ -2,6 +2,44 @@
   "use strict";
 
   const DATA = window.TIMELINE_DATA;
+
+  // ───────── 구약·신약을 하나의 타임라인으로 합침 ─────────
+  // 신약의 로마 황제·유대 통치자·사건 줄은 공통 줄로 옮기고, 색은 원래 줄 색을 유지함
+  const NT_LANE_MAP = { rome: "world", judea: "king", history: "world" };
+  const RULER_LANES = new Set(["rome", "judea"]); // 세로 보기 구간 제목에 '그 시기 통치자'로 표시
+  DATA.all = (() => {
+    const { ot, nt } = DATA;
+    const otLane = (id) => ot.lanes.find((l) => l.id === id);
+    const ntLane = (id) => nt.lanes.find((l) => l.id === id);
+    return {
+      range: [ot.range[0], nt.range[1]],
+      undatedBefore: ot.undatedBefore,
+      zoom: { min: ot.zoom.min, max: nt.zoom.max, initial: ot.zoom.initial },
+      eras: { ot: [ot.range[0], -4], nt: [-40, nt.range[1]] },
+      lanes: [
+        otLane("period"),
+        otLane("event"),
+        otLane("people"),
+        { ...otLane("king"), name: "왕·통치자" },
+        otLane("prophet"),
+        ntLane("jesus"),
+        ntLane("church"),
+        ntLane("paul"),
+        ntLane("writings"),
+        { ...otLane("world"), name: "주변 세계·역사" }
+      ],
+      periods: ot.periods,
+      prologue: ot.prologue,
+      items: [
+        ...ot.items,
+        ...nt.items.map((i) =>
+          NT_LANE_MAP[i.lane]
+            ? { ...i, origLane: i.lane, lane: NT_LANE_MAP[i.lane], hue: i.hue ?? ntLane(i.lane).hue }
+            : i
+        )
+      ]
+    };
+  })();
   const $ = (s) => document.querySelector(s);
   const viewport = $("#viewport");
   const canvas = $("#canvas");
@@ -13,12 +51,11 @@
   const FONT = getComputedStyle(document.documentElement).getPropertyValue("--font").trim();
 
   const state = {
-    view: "ot",
-    ppy: { ot: DATA.ot.zoom.initial, nt: DATA.nt.zoom.initial }, // pixels per year
+    view: "all", // 구약·신약 통합 타임라인
+    ppy: { all: DATA.all.zoom.initial }, // pixels per year
     selected: null,
     query: "",
-    hidden: { ot: new Set(), nt: new Set() },
-    scrolled: { ot: false, nt: false },
+    hidden: { all: new Set() },
     mode: "h" // "h" 가로 타임라인, "v" 세로 목록 (모바일 기본)
   };
 
@@ -63,29 +100,25 @@
   const isMobile = () => window.matchMedia("(max-width: 760px)").matches;
 
   // ───────── 데이터 색인 ─────────
-  const index = { ot: new Map(), nt: new Map() };
-  const groupOf = {}; // view -> id -> {name, hue}
+  const index = { all: new Map() };
+  const groupOf = { all: {} }; // view -> id -> {name, hue}
 
   (function buildIndex() {
-    ["ot", "nt"].forEach((v) => {
-      groupOf[v] = {};
-      DATA[v].lanes.forEach((l) => (groupOf[v][l.id] = l));
-    });
-    const ot = DATA.ot;
-    ot.periods.forEach((p) => index.ot.set(p.id, { ...p, lane: "period", group: "period" }));
-    // 원역사: 연대 미상('?') 구간에 성경 순서대로 고르게 배치 (위치는 순서만 의미)
-    const [a, b] = [ot.range[0], ot.undatedBefore];
-    ot.prologue.forEach((p, i) =>
-      index.ot.set(p.id, {
+    const all = DATA.all;
+    all.lanes.forEach((l) => (groupOf.all[l.id] = l));
+    all.periods.forEach((p) => index.all.set(p.id, { ...p, lane: "period", group: "period" }));
+    // 원역사: 연대 미상('?') 구간에 성경 순서대로 놓음 (위치는 순서만 의미)
+    const [a, b] = [all.range[0], all.undatedBefore];
+    all.prologue.forEach((p, i) =>
+      index.all.set(p.id, {
         ...p,
         lane: "event",
         group: "event",
         undated: true,
-        start: a + ((b - a) * (i + 0.5)) / ot.prologue.length
+        start: a + ((b - a) * (i + 0.5)) / all.prologue.length
       })
     );
-    ot.items.forEach((i) => index.ot.set(i.id, { ...i, group: i.lane }));
-    DATA.nt.items.forEach((i) => index.nt.set(i.id, { ...i, group: i.lane }));
+    all.items.forEach((i) => index.all.set(i.id, { ...i, group: i.lane }));
 
     // 역사 기록(js/history.js), 성경 밖 증거(js/evidence.js), 진행 중인 연구·논쟁(js/research.js, 미확인)
     [
@@ -94,23 +127,19 @@
       ["research", window.TIMELINE_RESEARCH]
     ].forEach(([key, map]) => {
       Object.entries(map || {}).forEach(([id, list]) => {
-        ["ot", "nt"].forEach((v) => {
-          const it = index[v].get(id);
-          if (it) it[key] = list;
-        });
+        const it = index.all.get(id);
+        if (it) it[key] = list;
       });
     });
 
     // 논란 많은 주장(논란 많음·논문 철회)은 일반 연구와 따로 모음
-    ["ot", "nt"].forEach((v) =>
-      index[v].forEach((it) => {
-        if (!it.research) return;
-        const disputed = it.research.filter((r) => isDisputed(r.status));
-        const rest = it.research.filter((r) => !isDisputed(r.status));
-        it.disputed = disputed.length ? disputed : undefined;
-        it.research = rest.length ? rest : undefined;
-      })
-    );
+    index.all.forEach((it) => {
+      if (!it.research) return;
+      const disputed = it.research.filter((r) => isDisputed(r.status));
+      const rest = it.research.filter((r) => !isDisputed(r.status));
+      it.disputed = disputed.length ? disputed : undefined;
+      it.research = rest.length ? rest : undefined;
+    });
   })();
 
   // 제목 옆 표시(史 역사 기록, ✓ 확인됨, ○ 연구 중, ▲ 논란 많음)의 폭
@@ -184,10 +213,13 @@
     return hay.includes(q);
   }
 
+  // '같은 시기'로 보는 앞뒤 여유: 신약 시대(촘촘함)는 1년, 구약 시대는 12년
+  const padFor = (it) => (it.start >= DATA.all.eras.nt[0] ? DATA.nt.concurrentPad : DATA.ot.concurrentPad);
+
   function concurrentWith(sel) {
     // 연대 미상 항목은 서로끼리만 같은 시기로 봄
     if (sel.undated) return visibleTimed().filter((it) => it.id !== sel.id && it.undated);
-    const pad = cfg().concurrentPad;
+    const pad = padFor(sel);
     const s = sel.start - pad;
     const e = (sel.end ?? sel.start) + pad;
     return visibleTimed().filter(
@@ -385,13 +417,31 @@
   }
 
   // ── 세로 보기 (모바일 기본) ──
-  // 구약은 시대별, 신약은 10년 단위로 묶어 위에서 아래로 시간순 나열
+  // 시대별로 묶어 위에서 아래로 시간순 나열. 신약 시대(split)는 10년 단위로 다시 나눔
+
+  // a년부터 step년 동안의 구간 제목과 그 시기 통치자(로마 황제·유대 통치자)
+  function decadeSection(a, step, list, period) {
+    const b = a + step - 1;
+    const range = a < 0 ? `BC ${-a}–${Math.max(1, -b)}년` : a === 0 ? `AD 1–${b}년` : `AD ${a}–${b}년`;
+    const ruling = [...index.all.values()]
+      .filter((r) => RULER_LANES.has(r.origLane) && isVisible(r) && r.end != null && r.start < a + step && r.end > a)
+      .filter((r) => !["prefects", "procurators"].includes(r.id))
+      .map((r) => r.title);
+    return {
+      id: period?.id,
+      title: period ? `${period.title} · ${range}` : range,
+      sub: ruling.join(" · "),
+      items: list,
+      start: a
+    };
+  }
+
   function verticalSections(items) {
     const c = cfg();
-    if (state.view === "ot" && !state.hidden.ot.has("period")) {
+    if (!state.hidden.all.has("period")) {
       // 같은 해에 시작하는 시대(북이스라엘·남유다)는 한 구간으로 합침
       const heads = [];
-      [...index.ot.values()]
+      [...index.all.values()]
         .filter((p) => p.lane === "period")
         .sort((a, b) => a.start - b.start)
         .forEach((p) => {
@@ -399,39 +449,38 @@
           if (prev && prev.start === p.start) {
             prev.title += " · " + p.title;
             prev.end = Math.max(prev.end, p.end);
-          } else heads.push({ id: p.id, start: p.start, end: p.end, title: p.title, undated: p.undated, items: [] });
+          } else heads.push({ id: p.id, start: p.start, end: p.end, title: p.title, undated: p.undated, split: p.split, items: [] });
         });
       items.forEach((it) => {
         const h = [...heads].reverse().find((h) => h.start <= it.start) || heads[0];
         h.items.push(it);
       });
-      return heads.map((h) => ({
-        ...h,
-        sub: h.undated ? "연대 미상" : `${fmtYear(h.start)} – ${fmtYear(h.end)}`
-      }));
+      return heads.flatMap((h) => {
+        if (!h.split) return [{ ...h, sub: h.undated ? "연대 미상" : `${fmtYear(h.start)} – ${fmtYear(h.end)}` }];
+        // 신약 시대: 10년 단위로 나누고, 첫 구간 제목만 시대를 누를 수 있게 함
+        const byDecade = new Map();
+        h.items.forEach((it) => {
+          const k = Math.floor(it.start / h.split) * h.split;
+          if (!byDecade.has(k)) byDecade.set(k, []);
+          byDecade.get(k).push(it);
+        });
+        return [...byDecade.keys()]
+          .sort((a, b) => a - b)
+          .map((k, i) => decadeSection(k, h.split, byDecade.get(k), i === 0 ? h : { title: h.title }));
+      });
     }
-    // 10년(구약에서 시대 줄을 숨긴 경우 100년) 단위
-    const step = state.view === "nt" ? 10 : 100;
+    // 시대 줄을 숨긴 경우: 구약 시대는 100년, 신약 시대는 10년 단위
     const map = new Map();
     items.forEach((it) => {
-      const key = it.undated ? "?" : Math.floor(it.start / step) * step;
+      const step = it.start >= DATA.all.eras.nt[0] ? 10 : 100;
+      const key = it.undated ? "?" : `${Math.floor(it.start / step) * step}/${step}`;
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(it);
     });
     return [...map.entries()].map(([k, list]) => {
       if (k === "?") return { title: "원역사", sub: "연대 미상", items: list, start: c.range[0] };
-      const a = k, b = k + step - 1;
-      const title =
-        a < 0 ? `BC ${-a}–${Math.max(1, -b)}년` : a === 0 ? `AD 1–${b}년` : `AD ${a}–${b}년`;
-      // 이 구간에 걸쳐 있는 통치자(신약)
-      const ruling =
-        state.view === "nt"
-          ? [...index.nt.values()]
-              .filter((r) => (r.lane === "rome" || r.lane === "judea") && isVisible(r) && r.end != null && r.start < a + step && r.end > a)
-              .filter((r) => !["prefects", "procurators"].includes(r.id))
-              .map((r) => r.title)
-          : [];
-      return { title, sub: ruling.length ? ruling.join(" · ") : "", items: list, start: a };
+      const [a, step] = k.split("/").map(Number);
+      return decadeSection(a, step, list);
     });
   }
 
@@ -452,7 +501,7 @@
     canvas.style.width = "";
     canvas.style.height = "";
 
-    const showPeriodsAsHeads = state.view === "ot" && !state.hidden.ot.has("period");
+    const showPeriodsAsHeads = !state.hidden.all.has("period");
     const items = visibleTimed().filter((it) => !(showPeriodsAsHeads && it.lane === "period"));
     const sections = verticalSections(items).filter((s) => s.items.length || s.id);
 
@@ -466,7 +515,7 @@
         // 시대 제목을 누르면 그 시대 설명
         head.classList.add("item", "v-period");
         head.dataset.id = s.id;
-        head.style.setProperty("--h", index.ot.get(s.id).hue);
+        head.style.setProperty("--h", index.all.get(s.id).hue);
         nodes.set(s.id, head);
       }
       sec.appendChild(head);
@@ -505,7 +554,7 @@
     if (!sel || state.mode === "v") return;
     const h = parseFloat(canvas.style.height) - AXIS_H;
     if (!sel.undated) {
-      const pad = cfg().concurrentPad;
+      const pad = padFor(sel);
       const band = el("div", "guide-band");
       const l = xOf(sel.start - pad);
       band.style.left = l + "px";
@@ -668,15 +717,6 @@
       );
     }
 
-    if (it.link) {
-      const [view, id] = it.link.split(":");
-      const b = el("button", "d-link", {
-        textContent: view === "nt" ? "신약 타임라인에서 보기 →" : "← 구약 타임라인에서 보기"
-      });
-      b.addEventListener("click", () => switchView(view, id));
-      detailBody.appendChild(b);
-    }
-
     // 이전/다음
     {
       const list = visibleTimed();
@@ -692,7 +732,7 @@
       detailBody.appendChild(nav);
 
       // 같은 시기
-      const pad = cfg().concurrentPad;
+      const pad = padFor(it);
       const sec = el("div", "d-section");
       sec.innerHTML = it.undated ? `같은 시기 <small>(원역사 · 연대 미상)</small>` : `같은 시기 <small>(앞뒤 ${pad}년 포함)</small>`;
       detailBody.appendChild(sec);
@@ -736,11 +776,7 @@
   function select(id, { scroll = false } = {}) {
     state.selected = id;
     const it = id && index[state.view].get(id);
-    if (it) {
-      history.replaceState(null, "", `#${state.view}/${id}`);
-    } else {
-      history.replaceState(null, "", `#${state.view}`);
-    }
+    history.replaceState(null, "", it ? `#${id}` : location.pathname + location.search);
     // 가이드 선을 다시 그리기 위해 기존 가이드만 교체
     canvas.querySelectorAll(".guide, .guide-band").forEach((n) => n.remove());
     renderGuide();
@@ -775,27 +811,27 @@
     viewport.scrollTo({ left: Math.max(0, left), top: Math.max(0, top), behavior: smooth ? "smooth" : "auto" });
   }
 
-  function switchView(view, selectId) {
-    if (view !== state.view) {
-      state.view = view;
-      state.selected = null;
-      document.querySelectorAll(".tabs button").forEach((b) =>
-        b.setAttribute("aria-selected", String(b.dataset.view === view))
-      );
-      renderLegend();
-      render();
-      if (!state.scrolled[view]) {
-        initialScroll();
-        state.scrolled[view] = true;
-      }
+  // 구약 시대 / 신약 시대 / 전체로 바로 이동
+  function jumpTo(era) {
+    document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.jump === era)));
+    const all = DATA.all;
+    if (state.mode === "v") {
+      const target = era === "nt" ? nodes.get("p-jesus") : null;
+      viewport.scrollTo({ top: target ? target.offsetTop : 0, behavior: "smooth" });
+      return;
     }
-    select(selectId || null, { scroll: !!selectId });
+    const [a, b] = era === "all" ? all.range : all.eras[era];
+    const avail = viewport.clientWidth - originX() - 40;
+    const clamp = (v) => Math.min(all.zoom.max, Math.max(all.zoom.min, v));
+    state.ppy.all = clamp(avail / (b - a));
+    // 원역사(?) 구간은 최소 폭이 있어 비율이 달라지므로, 실제 폭을 재서 두 번 보정
+    for (let i = 0; i < 2; i++) state.ppy.all = clamp(state.ppy.all * (avail / (xOf(b) - xOf(a))));
+    render();
+    viewport.scrollLeft = Math.max(0, xOf(a) - originX());
   }
 
   function initialScroll() {
-    if (state.mode === "v") return viewport.scrollTo({ top: 0, left: 0 });
-    if (state.view === "nt") viewport.scrollTo({ left: Math.max(0, xOf(-10) - laneHeadW() - 20), top: 0 });
-    else viewport.scrollTo({ left: 0, top: 0 });
+    viewport.scrollTo({ left: 0, top: 0 });
   }
 
   // ───────── 확대/축소 ─────────
@@ -812,14 +848,6 @@
     render();
     viewport.scrollLeft = xOf(year) - ax;
     viewport.scrollTop = scrollTop;
-  }
-
-  function fitAll() {
-    if (state.mode === "v") return;
-    const c = cfg();
-    const avail = viewport.clientWidth - originX() - 60;
-    setZoom(avail / (c.range[1] - c.range[0]));
-    viewport.scrollLeft = 0;
   }
 
   function rerenderKeepingCenter() {
@@ -840,12 +868,11 @@
 
   // ───────── 이벤트 ─────────
   document.querySelectorAll(".tabs button").forEach((b) =>
-    b.addEventListener("click", () => switchView(b.dataset.view))
+    b.addEventListener("click", () => jumpTo(b.dataset.jump))
   );
 
   $("#zoom-in").addEventListener("click", () => setZoom(ppy() * 1.5));
   $("#zoom-out").addEventListener("click", () => setZoom(ppy() / 1.5));
-  $("#zoom-fit").addEventListener("click", fitAll);
   $("#detail-close").addEventListener("click", () => select(null));
 
   $("#theme").addEventListener("click", () => {
@@ -873,23 +900,12 @@
     if (e.key === "Enter") {
       const q = searchInput.value.trim().toLowerCase();
       if (!q) return;
-      // 현재 탭에서 먼저 찾고, 없으면 다른 탭에서
-      const find = (view) =>
-        [...index[view].values()]
-          .filter((it) => matchesQuery(it, q) && !state.hidden[view].has(it.group))
-          .sort((a, b) => (a.start ?? -1e9) - (b.start ?? -1e9));
-      let view = state.view;
-      let hits = find(view);
-      if (!hits.length) {
-        view = view === "ot" ? "nt" : "ot";
-        hits = find(view);
-      }
+      // Enter를 누를 때마다 다음 검색 결과로 이동
+      const hits = visibleTimed().filter((it) => matchesQuery(it, q));
       if (!hits.length) return;
       const cur = hits.findIndex((h) => h.id === state.selected);
-      const next = hits[(cur + 1) % hits.length];
       state.query = q;
-      if (view !== state.view) switchView(view, next.id);
-      else select(next.id, { scroll: true });
+      select(hits[(cur + 1) % hits.length].id, { scroll: true });
     } else if (e.key === "Escape") {
       searchInput.value = "";
       state.query = "";
@@ -1040,7 +1056,6 @@
     state.mode = state.mode === "v" ? "h" : "v";
     try { localStorage.setItem("bible-timeline-mode", state.mode); } catch (e) { /* 무시 */ }
     updateModeBtn();
-    state.scrolled = { ot: false, nt: false };
     render();
     if (state.selected) scrollToItem(index[state.view].get(state.selected), false);
     else initialScroll();
@@ -1053,11 +1068,12 @@
   }
 
   function boot() {
-    const [view, id] = location.hash.replace(/^#/, "").split("/");
-    const v = view === "nt" ? "nt" : "ot";
-    state.view = v === "ot" ? "nt" : "ot"; // switchView가 렌더링하도록
-    switchView(v);
-    if (id && index[v].has(id)) select(id, { scroll: true });
+    renderLegend();
+    render();
+    initialScroll();
+    // 주소의 #항목id로 바로 열기 (예전 #ot/…, #nt/… 링크도 지원)
+    const id = location.hash.replace(/^#/, "").split("/").pop();
+    if (id && index.all.has(id)) select(id, { scroll: true });
   }
   boot();
 })();

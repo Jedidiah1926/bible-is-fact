@@ -56,6 +56,9 @@
     return e;
   }
 
+  // research.js의 상태 중 '논란 많음'·'논문 철회'는 따로 빨간색으로 표시
+  const isDisputed = (status) => /논란 많음|철회/.test(status);
+
   const isMobile = () => window.matchMedia("(max-width: 760px)").matches;
 
   // ───────── 데이터 색인 ─────────
@@ -83,7 +86,6 @@
     ot.items.forEach((i) => index.ot.set(i.id, { ...i, group: i.lane }));
     DATA.nt.items.forEach((i) => index.nt.set(i.id, { ...i, group: i.lane }));
 
-    // 성경 밖 자료로 확인된 내용 (js/evidence.js)
     // 역사 기록(js/history.js), 성경 밖 증거(js/evidence.js), 진행 중인 연구·논쟁(js/research.js, 미확인)
     [
       ["history", window.TIMELINE_HISTORY],
@@ -97,10 +99,22 @@
         });
       });
     });
+
+    // 논란 많은 주장(논란 많음·논문 철회)은 일반 연구와 따로 모음
+    ["ot", "nt"].forEach((v) =>
+      index[v].forEach((it) => {
+        if (!it.research) return;
+        const disputed = it.research.filter((r) => isDisputed(r.status));
+        const rest = it.research.filter((r) => !isDisputed(r.status));
+        it.disputed = disputed.length ? disputed : undefined;
+        it.research = rest.length ? rest : undefined;
+      })
+    );
   })();
 
-  // 제목 옆 표시(史 역사 기록, ✓ 확인됨, ○ 연구 중)의 폭
-  const markW = (it) => (it.history ? 18 : 0) + (it.evidence ? 18 : 0) + (it.research ? 14 : 0);
+  // 제목 옆 표시(史 역사 기록, ✓ 확인됨, ○ 연구 중, ▲ 논란 많음)의 폭
+  const markW = (it) =>
+    (it.history ? 18 : 0) + (it.evidence ? 18 : 0) + (it.research ? 14 : 0) + (it.disputed ? 16 : 0);
 
   // 제목 + 표시
   function titleNodes(it) {
@@ -108,7 +122,8 @@
     frag.append(it.title);
     if (it.history) frag.append(el("span", "hs-mark", { textContent: "史", title: "역사 기록으로 잘 알려진 사실" }));
     if (it.evidence) frag.append(el("span", "ev-mark", { textContent: "✓", title: "성경 밖 자료로 확인됨" }));
-    if (it.research) frag.append(el("span", "rs-mark", { title: "진행 중인 연구 (미확인)" }));
+    if (it.research) frag.append(el("span", "rs-mark", { title: "진행 중인 연구·논쟁 (미확인)" }));
+    if (it.disputed) frag.append(el("span", "dp-mark", { title: "논란 많은 주장" }));
     return frag;
   }
 
@@ -438,19 +453,15 @@
       detailBody.appendChild(box);
     }
 
-    if (it.research) {
-      const box = el("section", "d-research");
-      box.appendChild(el("h3", "", { textContent: "진행 중인 연구 · 논쟁 · 미확인" }));
-      box.appendChild(
-        el("p", "rs-note", {
-          textContent: `아래 내용은 확인된 사실이 아니라 조사·논쟁 중이거나 학계에서 받아들여지지 않은 주장도 포함합니다. (${window.TIMELINE_RESEARCH_DATE} 기준)`
-        })
-      );
-      it.research.forEach((r) => {
+    // 연구 카드 상자 (진행 중인 연구 / 논란 많음 공용)
+    const researchBox = (list, cls, heading, note) => {
+      const box = el("section", cls);
+      box.appendChild(el("h3", "", { textContent: heading }));
+      box.appendChild(el("p", "rs-note", { textContent: `${note} (${window.TIMELINE_RESEARCH_DATE} 기준)` }));
+      list.forEach((r) => {
         const card = el("div", "rs-card");
         const head = el("div", "rs-head");
-        const hot = /논란 많음|철회/.test(r.status);
-        head.append(el("span", "rs-status" + (hot ? " hot" : ""), { textContent: r.status }), el("span", "rs-title", { textContent: r.title }));
+        head.append(el("span", "rs-status", { textContent: r.status }), el("span", "rs-title", { textContent: r.title }));
         card.appendChild(head);
         if (r.who) card.appendChild(el("div", "ev-year", { textContent: r.who }));
         const t = el("p", "ev-text");
@@ -465,6 +476,24 @@
         box.appendChild(card);
       });
       detailBody.appendChild(box);
+    };
+
+    if (it.research) {
+      researchBox(
+        it.research,
+        "d-research",
+        "진행 중인 연구 · 논쟁 · 미확인",
+        "아래 내용은 확인된 사실이 아니라 조사·논쟁 중인 주장입니다."
+      );
+    }
+
+    if (it.disputed) {
+      researchBox(
+        it.disputed,
+        "d-research d-disputed",
+        "▲ 논란 많은 주장",
+        "학계 다수가 받아들이지 않거나, 진위·검증·연구 윤리에 큰 문제가 제기된 주장입니다."
+      );
     }
 
     if (it.link) {

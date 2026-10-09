@@ -20,6 +20,7 @@
   --hs: #2f6db5;
   --hs-bg: #edf3fb;
   --hot: #c0392b;
+  --hot-bg: #fbeceb;
   --it-s: 62%;
   --it-l: 40%;
   --it-bg-s: 70%;
@@ -49,6 +50,7 @@
     --hs: #7fb2ee;
     --hs-bg: #18222f;
     --hot: #f07a6a;
+    --hot-bg: #2e1a18;
     --it-s: 70%;
     --it-l: 72%;
     --it-bg-s: 30%;
@@ -78,6 +80,7 @@
   --hs: #7fb2ee;
   --hs-bg: #18222f;
   --hot: #f07a6a;
+  --hot-bg: #2e1a18;
   --it-s: 70%;
   --it-l: 72%;
   --it-bg-s: 30%;
@@ -622,7 +625,7 @@ h1 {
 .src ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; min-width: 0; }
 .src a { color: var(--muted); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--muted) 45%, transparent); text-underline-offset: 2px; overflow-wrap: anywhere; }
 .src a:hover { color: var(--text); }
-.d-evidence + .d-research, .d-history + .d-evidence, .d-history + .d-research { margin-top: 12px; }
+.d-evidence + .d-research, .d-history + .d-evidence, .d-history + .d-research, .d-research + .d-research { margin-top: 12px; }
 
 /* 진행 중인 연구 (미확인) */
 .rs-mark {
@@ -645,7 +648,6 @@ h1 {
 .rs-note { margin: 0 0 10px; font-size: 12px; color: var(--muted); line-height: 1.5; }
 .rs-card { padding: 10px 0; border-top: 1px solid color-mix(in srgb, var(--rs) 22%, transparent); }
 .rs-head { display: flex; gap: 8px; align-items: baseline; }
-.rs-status.hot { background: var(--hot); }
 .rs-status {
   flex: none;
   font-size: 11px;
@@ -658,6 +660,22 @@ h1 {
 .rs-title { font-size: 14.5px; font-weight: 800; }
 .ev-text b.rs-tag { background: color-mix(in srgb, var(--rs) 18%, transparent); color: var(--rs); }
 .ev-text b.rs-tag.view { background: var(--surface-2); color: var(--muted); }
+
+/* 논란 많은 주장 (빨간 세모) */
+.dp-mark {
+  display: inline-block;
+  width: 12px;
+  height: 11px;
+  margin-left: 4px;
+  background: var(--hot);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  vertical-align: 0;
+}
+.d-disputed {
+  --rs: var(--hot);
+  background: var(--hot-bg);
+  border-style: solid;
+}
 
 /* ───────── 하단 안내 ───────── */
 .hint {

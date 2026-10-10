@@ -1010,11 +1010,43 @@
         const h = state.hidden[state.view];
         h.has(g.id) ? h.delete(g.id) : h.add(g.id);
         b.setAttribute("aria-pressed", String(!h.has(g.id)));
+        updateFilterCount();
         rerenderKeepingCenter();
       });
       legend.appendChild(b);
     });
+    const all = el("button", "chip-all", { textContent: "모두 보기" });
+    all.addEventListener("click", () => {
+      if (!state.hidden[state.view].size) return;
+      state.hidden[state.view].clear();
+      legend.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", "true"));
+      updateFilterCount();
+      rerenderKeepingCenter();
+    });
+    legend.appendChild(all);
+    updateFilterCount();
   }
+
+  // 필터 버튼: 누르면 줄 목록이 아래로 펼쳐짐, 숨긴 줄 수를 배지로 표시
+  const filterBtn = $("#filter-btn");
+  const filterCount = $("#filter-count");
+  function updateFilterCount() {
+    const n = state.hidden[state.view].size;
+    filterCount.hidden = !n;
+    filterCount.innerHTML = n ? `${n}<span class="filter-text">개 숨김</span>` : ""; // 모바일은 숫자만
+    filterBtn.classList.toggle("active", n > 0);
+  }
+  function setFilterOpen(open) {
+    $("#legend").hidden = !open;
+    filterBtn.setAttribute("aria-expanded", String(open));
+  }
+  filterBtn.addEventListener("click", () => setFilterOpen($("#legend").hidden));
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".filter")) setFilterOpen(false);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !$("#legend").hidden) setFilterOpen(false);
+  });
 
   // ───────── 상세 패널 ─────────
   function showDetail() {

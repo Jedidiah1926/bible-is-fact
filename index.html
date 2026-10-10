@@ -42,10 +42,12 @@
         <button id="zoom-in" title="확대 (+)" aria-label="확대">+</button>
       </div>
       <button id="detail-toggle" class="detail-toggle" aria-pressed="false" aria-controls="detail" disabled title="고른 항목의 설명 보기">설명</button>
+      <div class="filter">
+        <button id="filter-btn" class="filter-btn" aria-expanded="false" aria-controls="legend" title="보일 줄 고르기"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12l-4.5 5.5V13l-3 1.5V8.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="filter-text">필터</span><span id="filter-count" class="filter-count" hidden></span></button>
+        <div id="legend" class="legend" role="group" aria-label="보일 줄 (눌러서 켜기/끄기)" hidden></div>
+      </div>
       <button id="theme" class="icon-btn" title="밝게/어둡게" aria-label="테마 전환"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
     </div>
-
-    <div id="legend" class="legend" aria-label="범례 (눌러서 숨기기/보이기)"></div>
   </header>
 
   <main class="stage">

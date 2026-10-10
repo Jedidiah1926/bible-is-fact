@@ -298,6 +298,7 @@
   function render() {
     document.body.classList.toggle("mode-v", state.mode === "v");
     if (state.mode === "v") return renderVertical();
+    state.ppy.all = Math.max(state.ppy.all, minPpy()); // 화면보다 좁아지지 않게 (창 크기 변경 등)
     const c = cfg();
     const totalW = Math.ceil(xOf(c.range[1])); // 마지막 연도에서 딱 끝남
     canvas.innerHTML = "";
@@ -388,6 +389,8 @@
           const inside = tw + (cont ? 22 : 0) <= w; // 이어짐(→) 표시 자리까지 고려
           // 막대 안에 이름이 안 들어가면 이름을 막대 왼쪽에 둠 (오른쪽은 타임라인 끝)
           if (cont && !inside) return { it, x, w, inside, cont, labelX: x - 6 - (tw - 18), left: x - 6 - tw, right: x + w };
+          // 막대 오른쪽 이름표가 타임라인 끝을 넘으면 왼쪽에 둠
+          if (!inside && x + w + 6 + tw > xOf(c.range[1])) return { it, x, w, inside, cont, labelX: x - 6 - (tw - 18), left: x - 6 - tw, right: x + w };
           return { it, x, w, inside, cont, left: x, right: inside ? x + w : x + w + 6 + tw };
         }
         // 타임라인 끝에 가까워 이름표가 넘치면 점 왼쪽에 둠
@@ -438,9 +441,12 @@
           bar.style.left = L.x + "px";
           bar.style.top = rowTop + "px";
           bar.style.width = L.w + "px";
-          const lbl = el("div", "bar-label fold-bar-label", { textContent: `${lane.name} ${foldCount(lane.fold, lane.id)}가지 · 눌러서 펼치기 ▸` });
+          const text = `${lane.name} ${foldCount(lane.fold, lane.id)}가지 · 눌러서 펼치기 ▸`;
+          const lbl = el("div", "bar-label fold-bar-label", { textContent: text });
           lbl.dataset.fold = lane.fold;
-          lbl.style.left = L.x + L.w + 6 + "px";
+          const lw = textWidth(text, 12.5, 800);
+          // 타임라인 끝을 넘으면 막대 왼쪽에
+          lbl.style.left = (L.x + L.w + 6 + lw > xOf(c.range[1]) ? L.x - 6 - lw : L.x + L.w + 6) + "px";
           lbl.style.top = rowTop + "px";
           canvas.append(bar, lbl);
           return;
@@ -452,7 +458,9 @@
         wrap.style.top = "0";
 
         if (it.end != null) {
-          const bar = el("div", "bar" + (it.approx ? " approx" : "") + (L.cont ? " cont" : ""));
+          // 이어짐(→) 표시는 막대가 충분히 넓을 때만
+          const bar = el("div", "bar" + (it.approx ? " approx" : "") + (L.cont && L.w >= 40 ? " cont" : ""));
+          if (L.w < 24) bar.style.padding = "0"; // 아주 좁은 막대는 안쪽 여백 때문에 실제 폭이 늘지 않게
           bar.style.left = L.x + "px";
           bar.style.top = rowTop + "px";
           bar.style.width = L.w + "px";
@@ -605,16 +613,18 @@
           const li = el("li", "item v-row");
           li.dataset.id = it.id;
           li.style.setProperty("--h", it.hue ?? lane.hue);
-          li.appendChild(el("div", "v-year", { textContent: vYear(it) }));
+          // 목록형: [세로선·점] [제목 / 연도 · 분류]
           const rail = el("div", "v-rail");
           rail.appendChild(el("span", "v-dot" + (it.approx ? " approx" : "") + (it.end != null ? " span" : "")));
           li.appendChild(rail);
-          const card = el("div", "v-card");
+          const body = el("div", "v-body");
           const t = el("div", "v-title");
           t.appendChild(titleNodes(it));
-          card.appendChild(t);
-          card.appendChild(el("div", "v-lane", { textContent: lane.name }));
-          li.appendChild(card);
+          body.appendChild(t);
+          const meta = el("div", "v-meta");
+          meta.append(el("span", "v-year", { textContent: vYear(it) }), el("span", "v-lane", { textContent: lane.name }));
+          body.appendChild(meta);
+          li.appendChild(body);
           ul.appendChild(li);
           nodes.set(it.id, li);
         });
@@ -904,11 +914,7 @@
       return;
     }
     const [a, b] = era === "all" ? all.range : all.eras[era];
-    const avail = viewport.clientWidth - originX() - 40;
-    const clamp = (v) => Math.min(all.zoom.max, Math.max(all.zoom.min, v));
-    state.ppy.all = clamp(avail / (b - a));
-    // 원역사(?) 구간은 최소 폭이 있어 비율이 달라지므로, 실제 폭을 재서 두 번 보정
-    for (let i = 0; i < 2; i++) state.ppy.all = clamp(state.ppy.all * (avail / (xOf(b) - xOf(a))));
+    state.ppy.all = Math.min(all.zoom.max, Math.max(minPpy(), fitPpy(a, b, viewport.clientWidth - originX())));
     render();
     viewport.scrollLeft = Math.max(0, xOf(a) - originX());
   }
@@ -918,10 +924,26 @@
   }
 
   // ───────── 확대/축소 ─────────
+  // a~b년이 avail 픽셀에 꼭 맞는 확대 비율
+  // (원역사 '?' 구간은 최소 폭이 있어 비율이 달라지므로 실제 폭을 재서 보정)
+  function fitPpy(a, b, avail) {
+    const save = state.ppy.all;
+    let p = avail / (b - a);
+    for (let i = 0; i < 3; i++) {
+      state.ppy.all = p;
+      p *= avail / (xOf(b) - xOf(a));
+    }
+    state.ppy.all = save;
+    return p;
+  }
+
+  // 최대 축소: 전체 기간이 화면 폭을 꽉 채우는 데서 멈춤 (오른쪽 빈 공간이 생기지 않게)
+  const minPpy = () => Math.max(cfg().zoom.min, fitPpy(cfg().range[0], cfg().range[1], viewport.clientWidth - originX()));
+
   function setZoom(newPpy, anchorClientX) {
     if (state.mode === "v") return;
     const z = cfg().zoom;
-    newPpy = Math.min(z.max, Math.max(z.min, newPpy));
+    newPpy = Math.min(z.max, Math.max(minPpy(), newPpy));
     if (Math.abs(newPpy - ppy()) < 1e-6) return;
     const vr = viewport.getBoundingClientRect();
     const ax = anchorClientX != null ? anchorClientX - vr.left : viewport.clientWidth / 2;

@@ -33,7 +33,11 @@
         <span class="sr-only">검색</span>
         <input id="search" type="search" placeholder="인물·사건·구절 검색" autocomplete="off">
       </label>
-      <button id="mode" class="mode-btn" title="세로/가로 보기 전환"></button>
+      <div id="modes" class="modes" role="group" aria-label="보기 방식">
+        <button data-mode="h" title="가로 타임라인">가로형</button>
+        <button data-mode="v" title="시대별 목록">카드형</button>
+        <button data-mode="t" title="세로 연표 (열 = 줄, 아래로 = 시간)">세로형</button>
+      </div>
       <div class="zoom" role="group" aria-label="확대/축소">
         <button id="zoom-out" title="축소 (-)" aria-label="축소">−</button>
         <button id="zoom-in" title="확대 (+)" aria-label="확대">+</button>

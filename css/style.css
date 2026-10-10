@@ -458,6 +458,160 @@ h1 {
   height: 24px;
 }
 
+/* ───────── 세로형 연표 (열 = 줄, 위→아래 = 시간) ───────── */
+.tcols { position: relative; }
+.t-head {
+  position: sticky;
+  top: 0;
+  height: 46px;
+  z-index: 12;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.t-corner {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: 58px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+}
+.t-col-head {
+  --c: hsl(var(--h) var(--it-s) var(--it-l));
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-top: 3px solid var(--c);
+  border-right: 1px solid var(--line);
+  color: var(--c);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.t-col-head > span { position: sticky; left: 66px; }
+.t-col-head.narrow { padding: 0; justify-content: center; font-size: 12px; }
+.t-col-head.narrow > span { position: static; }
+.t-period {
+  position: absolute;
+  border-radius: 6px;
+  background: hsl(var(--h) var(--it-bg-s) var(--it-bar-l));
+  border: 1px solid color-mix(in srgb, hsl(var(--h) var(--it-s) var(--it-l)) 45%, transparent);
+  cursor: pointer;
+  z-index: 2;
+}
+.t-vlabel {
+  position: absolute;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  line-height: 1;
+  color: var(--text);
+  cursor: pointer;
+  z-index: 3;
+  white-space: nowrap;
+}
+.item.selected .t-period { outline: 2px solid var(--guide); outline-offset: 1px; }
+.t-col-bg { position: absolute; top: 46px; background: var(--lane-alt); pointer-events: none; }
+.t-zone {
+  position: absolute;
+  left: 0;
+  background: repeating-linear-gradient(135deg, transparent 0 9px, var(--lane-alt) 9px 18px);
+  border-bottom: 2px dashed var(--line-strong);
+  pointer-events: none;
+}
+.t-axis-wrap { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 6; }
+.t-axis {
+  position: sticky;
+  left: 0;
+  width: 58px;
+  height: 100%;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  border-right: 1px solid var(--line);
+}
+.t-tick {
+  position: absolute;
+  right: 6px;
+  transform: translateY(-50%);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.t-tick.unknown { color: var(--accent); font-weight: 800; font-size: 13px; transform: none; }
+.t-tick.era { color: var(--accent); font-weight: 800; }
+.t-grid { position: absolute; left: 0; height: 0; border-top: 1px dashed var(--line); opacity: 0.6; pointer-events: none; }
+.t-scale {
+  position: absolute;
+  left: 0;
+  height: 0;
+  border-top: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+.t-scale span {
+  position: sticky;
+  left: 64px;
+  display: inline-block;
+  transform: translateY(-50%);
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 11px;
+  font-weight: 800;
+}
+.t-bar {
+  --c: hsl(var(--h) var(--it-s) var(--it-l));
+  --cbar: hsl(var(--h) var(--it-bg-s) var(--it-bar-l));
+  position: absolute;
+  width: 7px;
+  border-radius: 4px;
+  background: var(--c);
+  opacity: 0.8;
+  cursor: pointer;
+  z-index: 3;
+}
+.t-bar.approx { opacity: 0.45; }
+.t-bar.cont { -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent); mask-image: linear-gradient(to bottom, #000 70%, transparent); }
+.t-bar.fold-bar { background: repeating-linear-gradient(180deg, var(--c) 0 6px, transparent 6px 10px); opacity: 0.8; border: 0; }
+.t-label {
+  position: absolute;
+  height: 22px;
+  line-height: 22px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+  cursor: pointer;
+  z-index: 3;
+  border-radius: 5px;
+  padding: 0 3px;
+}
+.t-label.span { font-weight: 800; }
+.t-label:hover { background: var(--surface); box-shadow: var(--shadow); overflow: visible; width: auto !important; z-index: 7; }
+.item.selected .t-label { background: color-mix(in srgb, var(--guide) 18%, var(--surface)); outline: 2px solid var(--guide); }
+.item.match .t-label { background: color-mix(in srgb, var(--accent) 22%, var(--surface)); }
+.t-label.fold-bar-label { color: hsl(var(--h) var(--it-s) var(--it-l)); font-weight: 800; }
+.t-guide { position: absolute; left: 0; height: 0; border-top: 2px solid var(--guide); pointer-events: none; z-index: 2; }
+.t-guide-band { left: 0; }
+
 /* 접기/펼치기 (예수의 기적·공생애) */
 .lane-head { flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; }
 .fold-btn {
@@ -488,18 +642,21 @@ h1 {
 }
 
 /* ───────── 세로 보기 (모바일 기본) ───────── */
-.mode-btn {
-  border: 1px solid var(--line);
+/* 보기 방식: 가로형 / 카드형 / 세로형 */
+.modes { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex: none; }
+.modes button {
+  border: 0;
   background: var(--surface);
-  border-radius: 8px;
-  height: 34px;
-  padding: 0 11px;
+  height: 32px;
+  padding: 0 10px;
   font-size: 13px;
   font-weight: 700;
+  color: var(--muted);
   white-space: nowrap;
-  flex: none;
 }
-.mode-btn:hover { background: var(--surface-2); }
+.modes button + button { border-left: 1px solid var(--line); }
+.modes button:hover { background: var(--surface-2); }
+.modes button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
 body.mode-v .zoom { display: none; }
 body.mode-v .viewport { cursor: auto; }
 body.mode-v .hint > span:first-child { display: none; }
@@ -880,7 +1037,8 @@ body.mode-v .hint > span:first-child { display: none; }
   .v-row { padding: 0 12px 0 8px; }
   .v-head { padding: 9px 16px 8px; }
   .v-fold { margin-left: 46px; }
-  .mode-btn { padding: 0 9px; font-size: 12.5px; }
+  .modes button[data-mode="h"] { display: none; } /* 모바일은 카드형·세로형만 */
+  .modes button { padding: 0 9px; font-size: 12.5px; }
   .tools { gap: 6px; }
   h1 { font-size: 17px; }
   .hint > span:first-child { display: none; }

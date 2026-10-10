@@ -230,8 +230,17 @@
 
   function setFold(f, open) {
     if (state.expanded[f] === open) return;
-    state.expanded[f] = open;
-    rerenderKeepingCenter();
+    const inFold = (it) => it.fold === f;
+    if (open) {
+      state.expanded[f] = true;
+      rerenderKeepingCenter();
+      markEntering(inFold);
+    } else {
+      leaveThen(inFold, () => {
+        state.expanded[f] = false;
+        rerenderKeepingCenter();
+      });
+    }
   }
 
   function foldButton(f, long, lane) {
@@ -309,6 +318,44 @@
   // ───────── 렌더링 ─────────
   let cursorLine, cursorYear, axisEl;
   const nodes = new Map(); // id -> element
+
+  // ───────── 나타나기·사라지기 애니메이션 (css: .is-closing / .entering / .leaving) ─────────
+  const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function showEl(node) {
+    node.classList.remove("is-closing");
+    node.hidden = false;
+  }
+  // 닫힘 애니메이션이 끝난 뒤 숨김
+  function hideEl(node) {
+    if (node.hidden || node.classList.contains("is-closing")) return;
+    if (reduceMotion()) {
+      node.hidden = true;
+      return;
+    }
+    node.classList.add("is-closing");
+    const done = () => {
+      node.removeEventListener("animationend", onEnd);
+      if (!node.classList.contains("is-closing")) return;
+      node.classList.remove("is-closing");
+      node.hidden = true;
+    };
+    const onEnd = (e) => e.target === node && done();
+    node.addEventListener("animationend", onEnd);
+    setTimeout(done, 450);
+  }
+  const nodesOf = (test) => [...nodes].filter(([id]) => test(index[state.view].get(id))).map(([, n]) => n);
+  // 다시 그린 뒤 새로 보이는 항목에 등장 효과
+  function markEntering(test) {
+    if (reduceMotion()) return;
+    nodesOf((it) => it && test(it)).forEach((n) => n.classList.add("entering"));
+  }
+  // 사라질 항목에 퇴장 효과를 준 뒤 다시 그림
+  function leaveThen(test, fn) {
+    const out = reduceMotion() ? [] : nodesOf((it) => it && test(it));
+    if (!out.length) return fn();
+    out.forEach((n) => n.classList.add("leaving"));
+    setTimeout(fn, 170);
+  }
 
   function render() {
     document.body.classList.toggle("mode-v", state.mode === "v");
@@ -1008,20 +1055,34 @@
       b.setAttribute("aria-pressed", String(!state.hidden[state.view].has(g.id)));
       b.addEventListener("click", () => {
         const h = state.hidden[state.view];
-        h.has(g.id) ? h.delete(g.id) : h.add(g.id);
-        b.setAttribute("aria-pressed", String(!h.has(g.id)));
-        updateFilterCount();
-        rerenderKeepingCenter();
+        const show = h.has(g.id);
+        const inLane = (it) => it.group === g.id;
+        b.setAttribute("aria-pressed", String(show));
+        if (show) {
+          h.delete(g.id);
+          updateFilterCount();
+          rerenderKeepingCenter();
+          markEntering(inLane);
+        } else {
+          leaveThen(inLane, () => {
+            h.add(g.id);
+            updateFilterCount();
+            rerenderKeepingCenter();
+          });
+        }
       });
       legend.appendChild(b);
     });
     const all = el("button", "chip-all", { textContent: "모두 보기" });
     all.addEventListener("click", () => {
-      if (!state.hidden[state.view].size) return;
-      state.hidden[state.view].clear();
+      const h = state.hidden[state.view];
+      if (!h.size) return;
+      const was = new Set(h);
+      h.clear();
       legend.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", "true"));
       updateFilterCount();
       rerenderKeepingCenter();
+      markEntering((it) => was.has(it.group));
     });
     legend.appendChild(all);
     updateFilterCount();
@@ -1037,10 +1098,11 @@
     filterBtn.classList.toggle("active", n > 0);
   }
   function setFilterOpen(open) {
-    $("#legend").hidden = !open;
+    open ? showEl($("#legend")) : hideEl($("#legend"));
     filterBtn.setAttribute("aria-expanded", String(open));
   }
-  filterBtn.addEventListener("click", () => setFilterOpen($("#legend").hidden));
+  const isClosed = (node) => node.hidden || node.classList.contains("is-closing");
+  filterBtn.addEventListener("click", () => setFilterOpen(isClosed($("#legend"))));
   document.addEventListener("click", (e) => {
     if (!e.target.closest(".filter")) setFilterOpen(false);
   });
@@ -1054,7 +1116,7 @@
     detailToggle.disabled = !it;
     detailToggle.setAttribute("aria-pressed", String(!!it && state.panelOpen));
     if (!it) {
-      detail.hidden = true;
+      hideEl(detail);
       return;
     }
     const g = groupOf[state.view][it.group];
@@ -1208,8 +1270,8 @@
     }
 
     // 모바일 세로형은 '설명' 버튼을 눌렀을 때만 (위쪽에서 내려오는 패널), 그 밖에는 바로 열림
-    detail.hidden = panelByButton() && !state.panelOpen;
-    if (detail.hidden) return;
+    if (panelByButton() && !state.panelOpen) return hideEl(detail);
+    showEl(detail);
     if (window.showDetailAd) window.showDetailAd(); // 광고 (js/ads.js, 설정했을 때만)
     detail.scrollTop = 0;
   }
@@ -1392,11 +1454,11 @@
     );
   }
   function setThemeOpen(open) {
-    themePop.hidden = !open;
+    open ? showEl(themePop) : hideEl(themePop);
     themeBtn.setAttribute("aria-expanded", String(open));
     if (open) syncThemeMenu();
   }
-  themeBtn.addEventListener("click", () => setThemeOpen(themePop.hidden));
+  themeBtn.addEventListener("click", () => setThemeOpen(isClosed(themePop)));
   themePop.addEventListener("click", (e) => {
     const b = e.target.closest(".seg button");
     if (!b) return;

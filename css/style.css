@@ -1194,3 +1194,38 @@ body.mode-v .hint > span:first-child { display: none; }
   .hint .note { display: none; }
   .lane-head { width: 92px; font-size: 12px; padding: 0 6px 0 8px; }
 }
+
+/* ───────── 나타나기·사라지기 (기본 스타일: 짧은 페이드) ─────────
+ * 열 때: 요소가 보이게 되면 애니메이션이 자동 실행
+ * 닫을 때: js가 .is-closing을 붙이고 애니메이션이 끝나면 숨김
+ * 줄 켜기/끄기·접기/펼치기: 항목에 .entering / .leaving
+ */
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes fade-out { to { opacity: 0; } }
+@keyframes drop-in { from { opacity: 0; transform: translateY(-6px); } }
+@keyframes drop-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes panel-in { from { opacity: 0; transform: translateX(16px); } }
+@keyframes panel-out { to { opacity: 0; transform: translateX(16px); } }
+@keyframes sheet-up-in { from { transform: translateY(100%); } }
+@keyframes sheet-up-out { to { transform: translateY(100%); } }
+@keyframes sheet-down-in { from { transform: translateY(-100%); } }
+@keyframes sheet-down-out { to { transform: translateY(-100%); } }
+
+.legend, .pop { animation: drop-in 0.16s ease-out; }
+.legend.is-closing, .pop.is-closing { animation: drop-out 0.12s ease-in forwards; }
+.detail { animation: panel-in 0.2s ease-out; }
+.detail.is-closing { animation: panel-out 0.15s ease-in forwards; }
+.item.entering > * { animation: fade-in 0.25s ease-out; }
+.item.leaving > * { animation: fade-out 0.16s ease-in forwards; }
+.fold-btn, .chip, .seg button, .modes button, .tabs button { transition: background-color 0.15s, color 0.15s, box-shadow 0.15s; }
+
+@media (max-width: 760px) {
+  .detail { animation: sheet-up-in 0.24s ease-out; }
+  .detail.is-closing { animation: sheet-up-out 0.18s ease-in forwards; }
+  body.mode-t .detail { animation: sheet-down-in 0.24s ease-out; }
+  body.mode-t .detail.is-closing { animation: sheet-down-out 0.18s ease-in forwards; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

@@ -401,6 +401,21 @@ h1 {
   z-index: 3;
 }
 .bar.approx { border-style: dashed; }
+/* 타임라인 끝 뒤로 이어지는 기간: 오른쪽 끝을 흐리게 + 화살표 */
+.bar.cont {
+  border-right: 0;
+  border-radius: 6px 0 0 6px;
+  padding-right: 22px;
+  background: linear-gradient(to right, var(--cbar) calc(100% - 40px), transparent);
+}
+.bar.cont::after {
+  content: "→";
+  position: absolute;
+  right: 4px;
+  top: 0;
+  color: var(--c);
+  font-weight: 800;
+}
 .bar-label {
   position: absolute;
   font-size: 12.5px;

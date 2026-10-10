@@ -5,7 +5,9 @@
 
   // ───────── 구약·신약을 하나의 타임라인으로 합침 ─────────
   // 신약의 로마 황제·유대 통치자·사건 줄은 공통 줄로 옮기고, 색은 원래 줄 색을 유지함
-  const NT_LANE_MAP = { rome: "world", judea: "king", history: "world" };
+  // 주변 세계(제국·로마 황제·역사 사건)는 맨 위 '시대' 줄에 합침 → '시대·세계사'
+  const NT_LANE_MAP = { rome: "period", judea: "king", history: "period" };
+  const OT_LANE_MAP = { world: "period" };
   const RULER_LANES = new Set(["rome", "judea"]); // 세로 보기 구간 제목에 '그 시기 통치자'로 표시
   DATA.all = (() => {
     const { ot, nt } = DATA;
@@ -17,7 +19,7 @@
       zoom: { min: ot.zoom.min, max: nt.zoom.max, initial: ot.zoom.initial },
       eras: { ot: [ot.range[0], -4], nt: [-40, nt.range[1]] },
       lanes: [
-        otLane("period"),
+        { ...otLane("period"), name: "시대·세계사" },
         otLane("event"),
         otLane("people"),
         { ...otLane("king"), name: "왕·통치자" },
@@ -26,13 +28,14 @@
         ntLane("miracle"),
         ntLane("church"),
         ntLane("paul"),
-        ntLane("writings"),
-        { ...otLane("world"), name: "주변 세계·역사" }
+        ntLane("writings")
       ],
       periods: ot.periods,
       prologue: ot.prologue,
       items: [
-        ...ot.items,
+        ...ot.items.map((i) =>
+          OT_LANE_MAP[i.lane] ? { ...i, lane: OT_LANE_MAP[i.lane], hue: i.hue ?? otLane(i.lane).hue } : i
+        ),
         ...nt.items.map((i) =>
           NT_LANE_MAP[i.lane]
             ? { ...i, origLane: i.lane, lane: NT_LANE_MAP[i.lane], hue: i.hue ?? ntLane(i.lane).hue }
@@ -109,7 +112,7 @@
   (function buildIndex() {
     const all = DATA.all;
     all.lanes.forEach((l) => (groupOf.all[l.id] = l));
-    all.periods.forEach((p) => index.all.set(p.id, { ...p, lane: "period", group: "period" }));
+    all.periods.forEach((p) => index.all.set(p.id, { ...p, lane: "period", group: "period", isPeriod: true }));
     // 원역사: 연대 미상('?') 구간에 성경 순서대로 놓음 (위치는 순서만 의미)
     const [a, b] = [all.range[0], all.undatedBefore];
     all.prologue.forEach((p, i) =>
@@ -166,7 +169,7 @@
   const cfg = () => DATA[state.view];
   const ppy = () => state.ppy[state.view];
 
-  const originX = () => laneHeadW() + 40;
+  const originX = () => laneHeadW(); // 줄 이름 칸 바로 뒤에서 시작
   const laneHeadW = () => (isMobile() ? 92 : 128);
 
   // 연대 미상(?) 구간의 화면 폭: 연도 비율대로 그리되, 많이 축소해도 이름표가 들어갈 최소 폭은 유지
@@ -296,7 +299,7 @@
     document.body.classList.toggle("mode-v", state.mode === "v");
     if (state.mode === "v") return renderVertical();
     const c = cfg();
-    const totalW = Math.ceil(xOf(c.range[1]) + 80);
+    const totalW = Math.ceil(xOf(c.range[1])); // 마지막 연도에서 딱 끝남
     canvas.innerHTML = "";
     nodes.clear();
     canvas.className = `canvas ${state.view}`;
@@ -344,6 +347,7 @@
 
     for (let y = first; y <= c.range[1]; y += step) {
       const x = xOf(y);
+      if (x > xOf(c.range[1]) - 48) break; // 끝에 붙은 눈금 글자가 화면 밖으로 넘치지 않게
       const isEra = y === 0;
       const t = el("div", "tick" + (isEra ? " era" : y % major === 0 ? " major" : ""));
       t.style.left = x + "px";
@@ -369,7 +373,8 @@
       if (state.hidden[state.view].has(lane.id)) return;
       const items = [...index[state.view].values()]
         .filter((i) => i.lane === lane.id && isVisible(i))
-        .sort((a, b) => a.start - b.start || (b.end ?? b.start) - (a.end ?? a.start));
+        // 시대 막대를 먼저 배치해 줄 맨 위에 오게 하고, 세계사(제국·사건)는 그 아래
+        .sort((a, b) => (b.isPeriod ? 1 : 0) - (a.isPeriod ? 1 : 0) || a.start - b.start || (b.end ?? b.start) - (a.end ?? a.start));
 
       // 각 항목의 차지 영역 계산
       const layout = items.map((it) => {
@@ -377,11 +382,18 @@
         const ew = markW(it);
         const tw = textWidth(it.title, 12.5, 700) + 18 + ew;
         if (it.end != null) {
-          const w = Math.max(6, xOf(it.end) - x);
+          // 타임라인 끝(AD 105) 뒤로 이어지는 기간은 끝에서 자르고 '이어짐' 표시
+          const cont = it.end > c.range[1];
+          const w = Math.max(6, xOf(Math.min(it.end, c.range[1])) - x);
           const inside = tw <= w;
-          return { it, x, w, inside, left: x, right: inside ? x + w : x + w + 6 + tw };
+          // 막대 안에 이름이 안 들어가면 이름을 막대 왼쪽에 둠 (오른쪽은 타임라인 끝)
+          if (cont && !inside) return { it, x, w, inside, cont, labelX: x - 6 - (tw - 18), left: x - 6 - tw, right: x + w };
+          return { it, x, w, inside, cont, left: x, right: inside ? x + w : x + w + 6 + tw };
         }
-        return { it, x, left: x - 7, right: x + 8 + pointLabelW(it) };
+        // 타임라인 끝에 가까워 이름표가 넘치면 점 왼쪽에 둠
+        const lw = pointLabelW(it);
+        if (x + 8 + lw > xOf(c.range[1])) return { it, x, labelX: x - 8 - lw, left: x - 8 - lw, right: x + 7 };
+        return { it, x, left: x - 7, right: x + 8 + lw };
       });
       // 접힌 줄: 묶음 전체를 요약 막대 하나로 표시 (누르면 펼침)
       const fold = laneFold(lane);
@@ -390,7 +402,13 @@
         const [a, b] = FOLD_INFO[lane.fold].range;
         layout.push({ summary: true, x: xOf(a), w: Math.max(6, xOf(b) - xOf(a)), left: xOf(a), right: xOf(b) + 260 });
       }
-      const rows = packRows(layout);
+      // 시대 막대는 위쪽 행에만, 나머지(세계사 등)는 그 아래 행부터 배치
+      const isP = (L) => L.it && L.it.isPeriod;
+      const pRows = packRows(layout.filter(isP));
+      const pCount = pRows.length ? Math.max(...pRows) + 1 : 0;
+      const oRows = packRows(layout.filter((L) => !isP(L))).map((r) => r + pCount);
+      let pi = 0, oi = 0;
+      const rows = layout.map((L) => (isP(L) ? pRows[pi++] : oRows[oi++]));
       const rowCount = Math.max(1, items.length ? Math.max(...rows) + 1 : 1);
       const laneH = rowCount * ROW + 14;
 
@@ -434,7 +452,7 @@
         wrap.style.top = "0";
 
         if (it.end != null) {
-          const bar = el("div", "bar" + (it.approx ? " approx" : ""));
+          const bar = el("div", "bar" + (it.approx ? " approx" : "") + (L.cont ? " cont" : ""));
           bar.style.left = L.x + "px";
           bar.style.top = rowTop + "px";
           bar.style.width = L.w + "px";
@@ -444,7 +462,7 @@
           if (!L.inside) {
             const bl = el("div", "bar-label");
             bl.appendChild(titleNodes(it));
-            bl.style.left = L.x + L.w + 6 + "px";
+            bl.style.left = (L.labelX ?? L.x + L.w + 6) + "px";
             bl.style.top = rowTop + "px";
             wrap.appendChild(bl);
           }
@@ -453,7 +471,8 @@
           dot.style.left = L.x + "px";
           dot.style.top = rowTop + 12 + "px";
           const label = el("div", "label");
-          label.style.left = L.x + 8 + "px";
+          label.style.left = (L.labelX ?? L.x + 8) + "px";
+          if (L.labelX != null) label.classList.add("left");
           label.style.top = rowTop + "px";
           label.appendChild(titleNodes(it));
           label.title = fmtRange(it);
@@ -494,7 +513,7 @@
       // 같은 해에 시작하는 시대(북이스라엘·남유다)는 한 구간으로 합침
       const heads = [];
       [...index.all.values()]
-        .filter((p) => p.lane === "period")
+        .filter((p) => p.isPeriod)
         .sort((a, b) => a.start - b.start)
         .forEach((p) => {
           const prev = heads[heads.length - 1];
@@ -554,7 +573,7 @@
     canvas.style.height = "";
 
     const showPeriodsAsHeads = !state.hidden.all.has("period");
-    const items = visibleTimed().filter((it) => !(showPeriodsAsHeads && it.lane === "period"));
+    const items = visibleTimed().filter((it) => !(showPeriodsAsHeads && it.isPeriod));
     const sections = verticalSections(items).filter((s) => s.items.length || s.id);
 
     sections.forEach((s) => {

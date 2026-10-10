@@ -213,9 +213,9 @@
   border-radius: inherit;
   padding: 1px;
   background: var(--lg-rim);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask-composite: exclude;
   pointer-events: none;
 }
 /* 안쪽이 스크롤되는 패널·메뉴는 ::after 테두리가 같이 스크롤되므로 안쪽 그림자 테두리로 대신 */
@@ -337,19 +337,20 @@
 [data-skin="apple"] .axis,
 [data-skin="apple"] .t-head,
 [data-skin="apple"] .v-head {
-  background: var(--lg-spec), var(--lg-tint-strong);
+  background: var(--lg-spec), var(--lg-panel); /* 글씨 뒤로 색 덩어리가 비치지 않을 만큼 진하게 */
   -webkit-backdrop-filter: var(--lg-blur);
   backdrop-filter: var(--lg-blur);
   border-bottom: 0;
   box-shadow: inset 0 1px 0 var(--glass-edge), inset 0 -1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 var(--line), 0 6px 14px -8px rgba(0, 0, 0, 0.18);
 }
-[data-skin="apple"] .lane-head,
-[data-skin="apple"] .t-corner,
-[data-skin="apple"] .t-col-head {
-  background: var(--lg-spec), var(--lg-tint-strong);
+[data-skin="apple"] .lane-head {
+  background: var(--lg-spec), var(--lg-panel);
   -webkit-backdrop-filter: var(--lg-blur);
   backdrop-filter: var(--lg-blur);
 }
+/* 세로형 열 제목은 바깥 띠(.t-head)의 유리만 사용 — 유리 안에 유리를 겹치면 Safari에서 깨짐 */
+[data-skin="apple"] .t-col-head { background: transparent; }
+[data-skin="apple"] .t-corner { background: color-mix(in srgb, var(--surface) 94%, transparent); }
 [data-skin="apple"] .lane-head {
   border-right: 0;
   font-weight: 700;
@@ -388,7 +389,9 @@
 
 /* ───────── 모바일 ───────── */
 @media (max-width: 760px) {
-  [data-skin="apple"] .topbar { margin: 6px 6px 4px; padding: 9px 10px 10px 14px; border-radius: 24px; }
+  [data-skin="apple"] .topbar { margin: 4px 6px 4px; padding: 7px 8px 8px 12px; border-radius: 22px; gap: 7px 12px; }
+  [data-skin="apple"] .search input { height: 32px; padding: 6px 14px; }
+  [data-skin="apple"] h1 { font-size: 17px; }
   [data-skin="apple"] .hint { margin: 4px 6px 6px; padding: 7px 14px; border-radius: 18px; }
   [data-skin="apple"] .detail {
     position: absolute;
@@ -404,11 +407,13 @@
   }
   [data-skin="apple"] .detail::before { display: none; }
   [data-skin="apple"] body.mode-t .detail { top: 6px; bottom: auto; }
-  [data-skin="apple"] .modes button { padding: 0 11px; font-size: 13px; }
+  [data-skin="apple"] .tools { gap: 5px; }
+  [data-skin="apple"] .modes button { height: 30px; padding: 0 9px; font-size: 12.5px; }
   [data-skin="apple"] .tabs button { height: 30px; padding: 0 14px; }
-  [data-skin="apple"] .filter-btn { padding: 0 12px; }
-  [data-skin="apple"] .detail-toggle { padding: 0 13px; }
-  [data-skin="apple"] .zoom button { min-width: 36px; }
+  [data-skin="apple"] .zoom button { height: 34px; min-width: 32px; font-size: 17px; }
+  [data-skin="apple"] .icon-btn { width: 34px; height: 34px; }
+  [data-skin="apple"] .filter-btn,
+  [data-skin="apple"] .detail-toggle { height: 34px; padding: 0 10px; }
 }
 
 /* 투명도 줄이기를 켠 기기: 불투명하게 */
@@ -490,3 +495,8 @@
 @media (prefers-color-scheme: dark) {
   [data-skin="apple"]:not([data-theme="light"]) { --lg-panel: rgba(30, 30, 34, 0.86); }
 }
+
+/* 필터 배지: iOS 알림 배지처럼 스프링으로 튀어나옴 */
+[data-skin="apple"] .filter-count.badge-in { animation: badge-in 0.5s var(--ios-spring); }
+[data-skin="apple"] .filter-count.is-closing { animation: badge-out 0.25s cubic-bezier(0.4, 0, 1, 1) forwards; }
+[data-skin="apple"] .filter-count.bump { animation: badge-bump 0.45s var(--ios-spring); }

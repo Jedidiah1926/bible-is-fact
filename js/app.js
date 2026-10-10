@@ -231,16 +231,14 @@
   function setFold(f, open) {
     if (state.expanded[f] === open) return;
     const inFold = (it) => it.fold === f;
-    if (open) {
-      state.expanded[f] = true;
-      rerenderKeepingCenter();
-      markEntering(inFold);
-    } else {
-      leaveThen(inFold, () => {
-        state.expanded[f] = false;
+    animateChange({
+      itemsOut: open ? null : inFold,
+      itemsIn: open ? inFold : null,
+      mutate: () => {
+        state.expanded[f] = open;
         rerenderKeepingCenter();
-      });
-    }
+      }
+    });
   }
 
   function foldButton(f, long, lane) {
@@ -349,12 +347,74 @@
     if (reduceMotion()) return;
     nodesOf((it) => it && test(it)).forEach((n) => n.classList.add("entering"));
   }
-  // 사라질 항목에 퇴장 효과를 준 뒤 다시 그림
-  function leaveThen(test, fn) {
-    const out = reduceMotion() ? [] : nodesOf((it) => it && test(it));
-    if (!out.length) return fn();
-    out.forEach((n) => n.classList.add("leaving"));
-    setTimeout(fn, 170);
+  // 줄 켜기/끄기·접기/펼치기: 줄이 접히며 사라지고(위로/왼쪽으로), 나머지 줄은 새 자리로 미끄러짐 (FLIP)
+  //  기본 스타일은 짧고 담백하게, iOS 스타일은 iOS 시트 곡선·스프링으로
+  const motion = () =>
+    document.documentElement.dataset.skin === "apple"
+      ? { leave: 220, move: 520, moveEase: "cubic-bezier(0.32, 0.72, 0, 1)", enter: 560, enterEase: "cubic-bezier(0.34, 1.32, 0.55, 1)" }
+      : { leave: 150, move: 240, moveEase: "ease-out", enter: 220, enterEase: "ease-out" };
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const flipKey = (n) =>
+    n.dataset.lane
+      ? `L|${n.classList[0]}|${n.dataset.lane}|${n.dataset.col || ""}`
+      : `I|${n.parentElement.dataset.id}|${[...n.parentElement.children].indexOf(n)}`;
+  const flipTargets = () => canvas.querySelectorAll("[data-lane], .item > *");
+  function snapshot() {
+    const m = new Map();
+    flipTargets().forEach((n) => {
+      const r = n.getBoundingClientRect();
+      m.set(flipKey(n), { x: r.left, y: r.top });
+    });
+    return m;
+  }
+  function flip(before, m) {
+    const vr = viewport.getBoundingClientRect();
+    const near = (y, h) => y + h > vr.top - 300 && y < vr.bottom + 300;
+    flipTargets().forEach((n) => {
+      const b = before.get(flipKey(n));
+      if (!b) return;
+      const r = n.getBoundingClientRect();
+      const dx = b.x - r.left, dy = b.y - r.top;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+      if (!near(r.top, r.height) && !near(b.y, r.height)) return;
+      n.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "translate(0, 0)" }], {
+        duration: m.move,
+        easing: m.moveEase,
+        composite: "add"
+      });
+    });
+  }
+  // 줄(가로형 띠·세로형 열)이 접히거나 펼쳐짐
+  function foldLaneEls(ids, open, m) {
+    if (!ids.size) return;
+    const vert = state.mode !== "t"; // 가로형은 위로 접히고, 세로형(열)은 왼쪽으로 접힘
+    const sc = vert ? "scaleY" : "scaleX";
+    canvas.querySelectorAll("[data-lane]").forEach((n) => {
+      if (!ids.has(n.dataset.lane)) return;
+      n.style.transformOrigin = vert ? "top" : "left";
+      const frames = [{ transform: `${sc}(0)`, opacity: 0 }, { transform: `${sc}(1)`, opacity: 1 }];
+      if (!open) frames.reverse();
+      n.animate(frames, open
+        ? { duration: m.enter, easing: m.enterEase }
+        : { duration: m.leave, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" });
+    });
+  }
+  let animating = Promise.resolve();
+  function animateChange({ lanesOut = [], lanesIn = [], itemsOut, itemsIn, mutate }) {
+    animating = animating.then(async () => {
+      if (reduceMotion()) return mutate();
+      const m = motion();
+      if (itemsOut || lanesOut.length) {
+        if (itemsOut) nodesOf((it) => it && itemsOut(it)).forEach((n) => n.classList.add("leaving"));
+        foldLaneEls(new Set(lanesOut), false, m);
+        await wait(m.leave);
+      }
+      const before = snapshot();
+      mutate();
+      flip(before, m);
+      foldLaneEls(new Set(lanesIn), true, m);
+      if (itemsIn) markEntering(itemsIn);
+    });
   }
 
   function render() {
@@ -493,6 +553,7 @@
       const laneH = rowCount * ROW + 14;
 
       const band = el("div", "lane" + (alt ? " alt" : ""));
+      band.dataset.lane = lane.id;
       alt = !alt;
       band.style.top = y + "px";
       band.style.height = laneH + "px";
@@ -816,6 +877,8 @@
     head.appendChild(el("div", "t-corner", { textContent: "연도" }));
     colsData.forEach(({ col, lane, x, w }) => {
       const cell = el("div", "t-col-head" + (col.narrow ? " narrow" : ""));
+      cell.dataset.lane = lane.id;
+      cell.dataset.col = col.key;
       cell.style.left = x + "px";
       cell.style.width = w + "px";
       cell.style.setProperty("--h", lane.hue);
@@ -831,9 +894,11 @@
     canvas.appendChild(head);
 
     // 열 배경 줄무늬
-    colsData.forEach(({ x, w }, i) => {
+    colsData.forEach(({ col, lane, x, w }, i) => {
       if (i % 2) return;
       const bg = el("div", "t-col-bg");
+      bg.dataset.lane = lane.id;
+      bg.dataset.col = col.key;
       bg.style.left = x + "px";
       bg.style.width = w + "px";
       bg.style.height = totalH - T.HEAD_H + "px";
@@ -1058,18 +1123,17 @@
         const show = h.has(g.id);
         const inLane = (it) => it.group === g.id;
         b.setAttribute("aria-pressed", String(show));
-        if (show) {
-          h.delete(g.id);
-          updateFilterCount();
-          rerenderKeepingCenter();
-          markEntering(inLane);
-        } else {
-          leaveThen(inLane, () => {
-            h.add(g.id);
+        animateChange({
+          lanesOut: show ? [] : [g.id],
+          lanesIn: show ? [g.id] : [],
+          itemsOut: show ? null : inLane,
+          itemsIn: show ? inLane : null,
+          mutate: () => {
+            show ? h.delete(g.id) : h.add(g.id);
             updateFilterCount();
             rerenderKeepingCenter();
-          });
-        }
+          }
+        });
       });
       legend.appendChild(b);
     });
@@ -1078,11 +1142,16 @@
       const h = state.hidden[state.view];
       if (!h.size) return;
       const was = new Set(h);
-      h.clear();
       legend.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", "true"));
-      updateFilterCount();
-      rerenderKeepingCenter();
-      markEntering((it) => was.has(it.group));
+      animateChange({
+        lanesIn: [...was],
+        itemsIn: (it) => was.has(it.group),
+        mutate: () => {
+          h.clear();
+          updateFilterCount();
+          rerenderKeepingCenter();
+        }
+      });
     });
     legend.appendChild(all);
     updateFilterCount();
@@ -1091,11 +1160,32 @@
   // 필터 버튼: 누르면 줄 목록이 아래로 펼쳐짐, 숨긴 줄 수를 배지로 표시
   const filterBtn = $("#filter-btn");
   const filterCount = $("#filter-count");
+  let lastCount = 0;
+  // 숨긴 줄 수 배지: 버튼 폭은 부드럽게 늘고 줄며, 배지는 튀어나오거나(들어갈 때) 숫자가 바뀔 때 살짝 튐
   function updateFilterCount() {
     const n = state.hidden[state.view].size;
-    filterCount.hidden = !n;
-    filterCount.innerHTML = n ? `${n}<span class="filter-text">개 숨김</span>` : ""; // 모바일은 숫자만
+    const prev = lastCount;
+    lastCount = n;
+    const anim = prev !== n && !reduceMotion() && filterBtn.offsetParent;
+    const w0 = filterBtn.getBoundingClientRect().width;
     filterBtn.classList.toggle("active", n > 0);
+    filterCount.classList.remove("is-closing", "badge-in", "bump");
+    if (n) filterCount.innerHTML = `${n}<span class="filter-text">개 숨김</span>`; // 모바일은 숫자만
+    filterCount.hidden = !n;
+    if (!anim) return;
+    const w1 = filterBtn.getBoundingClientRect().width;
+    const m = motion();
+    void filterCount.offsetWidth; // 같은 효과를 다시 시작하게
+    if (!n) {
+      filterCount.hidden = false; // 줄어드는 동안 사라지는 모습을 보여 준 뒤 숨김
+      filterCount.classList.add("is-closing");
+      setTimeout(() => {
+        if (lastCount) return;
+        filterCount.classList.remove("is-closing");
+        filterCount.hidden = true;
+      }, m.move * 0.6);
+    } else filterCount.classList.add(prev ? "bump" : "badge-in");
+    filterBtn.animate([{ width: w0 + "px" }, { width: w1 + "px" }], { duration: m.move * 0.75, easing: m.enterEase });
   }
   function setFilterOpen(open) {
     open ? showEl($("#legend")) : hideEl($("#legend"));

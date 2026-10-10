@@ -1229,3 +1229,14 @@ body.mode-v .hint > span:first-child { display: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* 필터 배지 (숨긴 줄 수) */
+.filter-btn { overflow: hidden; }
+.filter-count { display: inline-block; }
+.filter-count[hidden] { display: none; }
+@keyframes badge-in { from { opacity: 0; transform: scale(0.5); } }
+@keyframes badge-out { to { opacity: 0; transform: scale(0.5); } }
+@keyframes badge-bump { 40% { transform: scale(1.25); } }
+.filter-count.badge-in { animation: badge-in 0.18s ease-out; }
+.filter-count.is-closing { animation: badge-out 0.14s ease-in forwards; }
+.filter-count.bump { animation: badge-bump 0.25s ease-out; }

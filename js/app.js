@@ -827,6 +827,7 @@
     }
 
     detail.hidden = false;
+    if (window.showDetailAd) window.showDetailAd(); // 광고 (js/ads.js, 설정했을 때만)
     detail.scrollTop = 0;
   }
 

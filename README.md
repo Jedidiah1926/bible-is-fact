@@ -88,6 +88,18 @@
 - [`vercel.json`](vercel.json): 깔끔한 주소(`cleanUrls`)와 기본 보안 헤더
 - [`.vercelignore`](.vercelignore): 배포에서 뺄 파일 (`CLAUDE.md`, `README.md`)
 
+## 광고 (Google AdSense)
+
+광고 설정은 [`js/ads.js`](js/ads.js) 한 곳에 모여 있으며, 게시자 ID가 비어 있으면 광고 스크립트를 불러오지 않습니다.
+
+- 광고 위치: 항목을 눌렀을 때 열리는 설명 패널 아래 (처음 열 때 한 번 만들고 계속 재사용 — 항목마다 새로 띄우지 않음)
+- 게시자 ID를 받으면 세 곳을 맞춥니다
+  1. `js/ads.js`의 `client`(게시자 ID)와 `detailSlot`(디스플레이 광고 단위 슬롯 ID)
+  2. `index.html`의 `google-adsense-account` 메타 태그 (사이트 확인용, 주석 해제)
+  3. 루트의 `ads.txt`: `google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0`
+- 개인정보처리방침: [`privacy.html`](privacy.html) (쿠키·광고 고지 포함, 하단에 링크)
+- 타임라인 화면은 고정 레이아웃이라 애드센스 **자동 광고의 본문 내 광고**는 끄고, 필요하면 앵커 광고만 켜는 것을 권장합니다.
+
 ## 파일
 
 ```
@@ -97,6 +109,8 @@ js/data.js      타임라인 데이터
 js/history.js   역사 기록 (史)
 js/evidence.js  성경 밖 자료로 확인된 내용 (✓)
 js/research.js  진행 중인 연구·논쟁 (○, 미확인)
+js/ads.js       Google AdSense 설정 (게시자 ID·광고 단위)
+privacy.html    개인정보처리방침
 img/favicon.svg 브라우저 탭 아이콘
 vercel.json     Vercel 배포 설정
 js/app.js       렌더링·인터랙션

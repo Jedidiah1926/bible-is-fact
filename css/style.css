@@ -810,6 +810,17 @@ body.mode-v .hint > span:first-child { display: none; }
   border-style: solid;
 }
 
+/* 광고 자리 (설명 패널 아래) */
+.ad-slot {
+  margin-top: 24px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  min-height: 100px;
+}
+.ad-slot[hidden] { display: none; }
+.ad-label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.privacy-link { color: var(--muted); }
+
 /* ───────── 하단 안내 ───────── */
 .hint {
   display: flex;

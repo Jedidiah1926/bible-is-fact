@@ -1,0 +1,317 @@
+/*
+ * Apple 스타일 (html[data-skin="apple"])
+ *  - 색: Apple Human Interface Guidelines의 시스템 색 (밝게/어둡게 값)
+ *    https://developer.apple.com/kr/design/human-interface-guidelines/color#Specifications
+ *  - 재질: Liquid Glass — 반투명 + 흐림(backdrop-filter) + 가장자리 하이라이트
+ *    떠 있는 요소(상단 바, 버튼, 메뉴, 설명 패널, 고정된 머리글)에만 사용
+ */
+
+/* ───────── 색 (밝게) ───────── */
+:root[data-skin="apple"] {
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Apple SD Gothic Neo", "Helvetica Neue", "Noto Sans KR", sans-serif;
+  --bg: #ffffff;                       /* systemBackground */
+  --surface: #ffffff;
+  --surface-2: #f2f2f7;                /* secondarySystemBackground */
+  --fill: rgba(120, 120, 128, 0.12);   /* tertiarySystemFill */
+  --lane-alt: rgba(120, 120, 128, 0.04);
+  --text: #000000;                     /* label */
+  --muted: rgba(60, 60, 67, 0.6);      /* secondaryLabel */
+  --line: #e5e5ea;                     /* systemGray5 */
+  --line-strong: #aeaeb2;              /* systemGray2 */
+  --accent: #007aff;                   /* systemBlue */
+  --guide: rgba(0, 122, 255, 0.85);
+  --guide-band: rgba(0, 122, 255, 0.08);
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.14);
+  --ok: #248a3d;                       /* systemGreen (고대비) */
+  --ok-bg: #eaf8ee;
+  --rs: #c93400;                       /* systemOrange (고대비) */
+  --rs-bg: #fff3e5;
+  --hs: #0040dd;                       /* systemBlue (고대비) */
+  --hs-bg: #e9f2ff;
+  --hot: #d70015;                      /* systemRed (고대비) */
+  --hot-bg: #ffeceb;
+  --it-s: 88%;
+  --it-l: 45%;
+  --it-bg-s: 90%;
+  --it-bg-l: 94%;
+  --it-bar-l: 84%;
+
+  /* Liquid Glass */
+  --glass: rgba(255, 255, 255, 0.62);
+  --glass-strong: rgba(255, 255, 255, 0.78);
+  --glass-edge: rgba(255, 255, 255, 0.9);
+  --glass-rim: rgba(0, 0, 0, 0.08);
+  --glass-blur: blur(24px) saturate(180%);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 46%);
+  --seg-on: #ffffff;
+}
+
+/* ───────── 색 (어둡게) ───────── */
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="apple"]:not([data-theme="light"]) {
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --surface-2: #2c2c2e;
+    --fill: rgba(118, 118, 128, 0.24);
+    --lane-alt: rgba(255, 255, 255, 0.035);
+    --text: #ffffff;
+    --muted: rgba(235, 235, 245, 0.6);
+    --line: #38383a;
+    --line-strong: #636366;
+    --accent: #0a84ff;
+    --guide: rgba(10, 132, 255, 0.9);
+    --guide-band: rgba(10, 132, 255, 0.12);
+    --shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    --ok: #30d158;
+    --ok-bg: #12261a;
+    --rs: #ff9f0a;
+    --rs-bg: #2b1f0b;
+    --hs: #409cff;
+    --hs-bg: #0f1e33;
+    --hot: #ff453a;
+    --hot-bg: #2e1311;
+    --it-s: 92%;
+    --it-l: 66%;
+    --it-bg-s: 45%;
+    --it-bg-l: 17%;
+    --it-bar-l: 30%;
+    --glass: rgba(40, 40, 44, 0.55);
+    --glass-strong: rgba(36, 36, 40, 0.74);
+    --glass-edge: rgba(255, 255, 255, 0.22);
+    --glass-rim: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+    --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 46%);
+    --seg-on: #636366;
+  }
+}
+:root[data-skin="apple"][data-theme="dark"] {
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --fill: rgba(118, 118, 128, 0.24);
+  --lane-alt: rgba(255, 255, 255, 0.035);
+  --text: #ffffff;
+  --muted: rgba(235, 235, 245, 0.6);
+  --line: #38383a;
+  --line-strong: #636366;
+  --accent: #0a84ff;
+  --guide: rgba(10, 132, 255, 0.9);
+  --guide-band: rgba(10, 132, 255, 0.12);
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  --ok: #30d158;
+  --ok-bg: #12261a;
+  --rs: #ff9f0a;
+  --rs-bg: #2b1f0b;
+  --hs: #409cff;
+  --hs-bg: #0f1e33;
+  --hot: #ff453a;
+  --hot-bg: #2e1311;
+  --it-s: 92%;
+  --it-l: 66%;
+  --it-bg-s: 45%;
+  --it-bg-l: 17%;
+  --it-bar-l: 30%;
+  --glass: rgba(40, 40, 44, 0.55);
+  --glass-strong: rgba(36, 36, 40, 0.74);
+  --glass-edge: rgba(255, 255, 255, 0.22);
+  --glass-rim: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 46%);
+  --seg-on: #636366;
+  color-scheme: dark;
+}
+
+[data-skin="apple"] body { letter-spacing: -0.01em; }
+
+/* ───────── Liquid Glass 재질 ───────── */
+[data-skin="apple"] .topbar,
+[data-skin="apple"] .hint,
+[data-skin="apple"] .zoom,
+[data-skin="apple"] .icon-btn,
+[data-skin="apple"] .filter-btn,
+[data-skin="apple"] .detail-toggle,
+[data-skin="apple"] .legend,
+[data-skin="apple"] .pop,
+[data-skin="apple"] .detail {
+  background: var(--glass-sheen), var(--glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* 떠 있는 유리: 가장자리 빛(위쪽 하이라이트) + 그림자 */
+[data-skin="apple"] .zoom,
+[data-skin="apple"] .icon-btn,
+[data-skin="apple"] .filter-btn,
+[data-skin="apple"] .detail-toggle,
+[data-skin="apple"] .legend,
+[data-skin="apple"] .pop,
+[data-skin="apple"] .detail {
+  border: 0.5px solid var(--glass-rim);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-edge), inset 0 0 0 0.5px var(--glass-edge);
+}
+
+/* 상단 바 */
+[data-skin="apple"] .topbar {
+  background: var(--glass-strong);
+  border-bottom: 0.5px solid var(--line);
+  padding: 10px 16px;
+}
+[data-skin="apple"] h1 { font-weight: 700; letter-spacing: -0.025em; }
+
+/* 세그먼트 컨트롤 (구약/신약, 보기 방식, 테마 메뉴) */
+[data-skin="apple"] .tabs,
+[data-skin="apple"] .modes,
+[data-skin="apple"] .seg {
+  background: var(--fill);
+  border: 0;
+  border-radius: 999px;
+  padding: 2px;
+  gap: 0;
+  overflow: visible;
+}
+[data-skin="apple"] .tabs button,
+[data-skin="apple"] .modes button,
+[data-skin="apple"] .seg button {
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  height: 30px;
+  padding: 0 14px;
+  font-weight: 600;
+  color: var(--text);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+[data-skin="apple"] .modes button + button { border-left: 0; }
+[data-skin="apple"] .modes button:hover,
+[data-skin="apple"] .tabs button:hover { background: var(--fill); }
+[data-skin="apple"] .tabs button[aria-selected="true"],
+[data-skin="apple"] .modes button[aria-pressed="true"],
+[data-skin="apple"] .seg button[aria-pressed="true"] {
+  background: var(--seg-on);
+  color: var(--text);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04), inset 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+}
+
+/* 검색 */
+[data-skin="apple"] .search input {
+  border: 0;
+  border-radius: 999px;
+  background: var(--fill);
+  padding: 8px 14px;
+  height: 34px;
+}
+[data-skin="apple"] .search input:focus { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 0; }
+
+/* 둥근 유리 버튼 */
+[data-skin="apple"] .zoom { border-radius: 999px; }
+[data-skin="apple"] .zoom button { background: transparent; height: 34px; min-width: 38px; font-weight: 500; font-size: 18px; }
+[data-skin="apple"] .zoom button + button { border-left: 0.5px solid var(--glass-rim); }
+[data-skin="apple"] .icon-btn { border-radius: 50%; width: 36px; height: 36px; }
+[data-skin="apple"] .filter-btn,
+[data-skin="apple"] .detail-toggle { border-radius: 999px; height: 36px; padding: 0 14px; font-weight: 600; }
+[data-skin="apple"] .zoom button:hover,
+[data-skin="apple"] .icon-btn:hover,
+[data-skin="apple"] .filter-btn:hover { background-color: var(--fill); }
+[data-skin="apple"] .filter-btn[aria-expanded="true"],
+[data-skin="apple"] .detail-toggle[aria-pressed="true"],
+[data-skin="apple"] .icon-btn[aria-expanded="true"] {
+  background: var(--glass-sheen), var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+[data-skin="apple"] .filter-btn.active:not([aria-expanded="true"]),
+[data-skin="apple"] .detail-toggle:not(:disabled):not([aria-pressed="true"]) { color: var(--accent); border-color: var(--glass-rim); }
+[data-skin="apple"] .filter-count { background: var(--accent); color: #fff; }
+[data-skin="apple"] .filter-btn[aria-expanded="true"] .filter-count { background: #fff; color: var(--accent); }
+
+/* 메뉴 (필터·테마) */
+[data-skin="apple"] .legend,
+[data-skin="apple"] .pop { border-radius: 22px; padding: 8px; top: calc(100% + 8px); }
+[data-skin="apple"] .chip { border-radius: 14px; padding: 9px 12px; font-weight: 500; }
+[data-skin="apple"] .chip:hover { background: var(--fill); }
+[data-skin="apple"] .chip::after { color: var(--accent); }
+[data-skin="apple"] .chip-all { border-top: 0.5px solid var(--line); font-weight: 600; }
+[data-skin="apple"] .pop .seg button { height: 28px; padding: 0 10px; }
+
+/* 고정 머리글: 내용이 아래로 지나가면 비쳐 보이는 유리 */
+[data-skin="apple"] .axis,
+[data-skin="apple"] .t-head,
+[data-skin="apple"] .v-head {
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 0.5px solid var(--line);
+}
+[data-skin="apple"] .lane-head,
+[data-skin="apple"] .t-corner,
+[data-skin="apple"] .t-col-head {
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+[data-skin="apple"] .lane-head { border-right: 0.5px solid var(--line); font-weight: 700; }
+
+/* 설명 패널: 화면 위에 떠 있는 유리 카드 */
+[data-skin="apple"] .detail {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  width: 380px;
+  max-width: calc(100% - 24px);
+  border-radius: 28px;
+  padding: 20px 22px 28px;
+  background: var(--glass-sheen), var(--glass-strong);
+}
+[data-skin="apple"] .detail-close {
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--fill);
+  font-size: 18px;
+  line-height: 1;
+}
+[data-skin="apple"] .d-chip { border-radius: 999px; }
+[data-skin="apple"] .d-nav button { border-radius: 999px; background: var(--fill); border: 0; }
+[data-skin="apple"] .d-evidence,
+[data-skin="apple"] .d-research,
+[data-skin="apple"] .d-history { border-radius: 16px; }
+
+/* 하단 안내 */
+[data-skin="apple"] .hint { border-top: 0.5px solid var(--line); background: var(--glass-strong); }
+
+/* 스크롤바 */
+[data-skin="apple"] { --sb-thumb: rgba(120, 120, 128, 0.45); }
+
+/* ───────── 모바일 ───────── */
+@media (max-width: 760px) {
+  [data-skin="apple"] .detail {
+    top: auto;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+    max-width: none;
+    max-height: 62%;
+    border: 0.5px solid var(--glass-rim);
+    border-radius: 28px;
+    padding: 16px 16px 24px;
+  }
+  [data-skin="apple"] body.mode-t .detail { top: 8px; bottom: auto; border-radius: 28px; }
+  [data-skin="apple"] .modes button { padding: 0 11px; font-size: 13px; }
+  [data-skin="apple"] .tabs button { height: 30px; padding: 0 14px; }
+  [data-skin="apple"] .filter-btn { padding: 0 11px; }
+  [data-skin="apple"] .detail-toggle { padding: 0 12px; }
+  [data-skin="apple"] .zoom button { min-width: 34px; }
+}
+
+/* 흐림 효과를 줄이도록 설정한 기기: 불투명하게 */
+@media (prefers-reduced-transparency: reduce) {
+  [data-skin="apple"] {
+    --glass: var(--surface);
+    --glass-strong: var(--surface);
+  }
+}

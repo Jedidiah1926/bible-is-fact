@@ -15,7 +15,9 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4099065432031117"
      crossorigin="anonymous"></script>
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <script src="js/theme-init.js"></script>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/apple.css">
 </head>
 <body>
   <header class="topbar">
@@ -46,7 +48,15 @@
         <button id="filter-btn" class="filter-btn" aria-expanded="false" aria-controls="legend" title="보일 줄 고르기"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12l-4.5 5.5V13l-3 1.5V8.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="filter-text">필터</span><span id="filter-count" class="filter-count" hidden></span></button>
         <div id="legend" class="legend" role="group" aria-label="보일 줄 (눌러서 켜기/끄기)" hidden></div>
       </div>
-      <button id="theme" class="icon-btn" title="밝게/어둡게" aria-label="테마 전환"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
+      <div class="menu">
+        <button id="theme" class="icon-btn" title="테마 (기본/Apple · 밝게/어둡게)" aria-label="테마" aria-expanded="false" aria-controls="theme-pop"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
+        <div id="theme-pop" class="pop" role="group" aria-label="테마" hidden>
+          <div class="pop-title">스타일</div>
+          <div class="seg" data-key="skin"><button data-v="default">기본</button><button data-v="apple">Apple</button></div>
+          <div class="pop-title">화면</div>
+          <div class="seg" data-key="theme"><button data-v="auto">자동</button><button data-v="light">밝게</button><button data-v="dark">어둡게</button></div>
+        </div>
+      </div>
     </div>
   </header>
 

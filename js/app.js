@@ -1381,18 +1381,45 @@
     showDetail();
   });
 
-  $("#theme").addEventListener("click", () => {
+  // 테마 메뉴: 스타일(기본/Apple)과 화면(자동/밝게/어둡게). 처음 적용은 js/theme-init.js
+  const themeBtn = $("#theme");
+  const themePop = $("#theme-pop");
+  function syncThemeMenu() {
     const root = document.documentElement;
-    const dark =
-      root.dataset.theme === "dark" ||
-      (!root.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    root.dataset.theme = dark ? "light" : "dark";
-    try { localStorage.setItem("bible-timeline-theme", root.dataset.theme); } catch (e) { /* 무시 */ }
+    const cur = { skin: root.dataset.skin || "default", theme: root.dataset.theme || "auto" };
+    themePop.querySelectorAll(".seg").forEach((seg) =>
+      seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === cur[seg.dataset.key])))
+    );
+  }
+  function setThemeOpen(open) {
+    themePop.hidden = !open;
+    themeBtn.setAttribute("aria-expanded", String(open));
+    if (open) syncThemeMenu();
+  }
+  themeBtn.addEventListener("click", () => setThemeOpen(themePop.hidden));
+  themePop.addEventListener("click", (e) => {
+    const b = e.target.closest(".seg button");
+    if (!b) return;
+    const key = b.parentElement.dataset.key;
+    const v = b.dataset.v;
+    const root = document.documentElement;
+    if (key === "skin") root.dataset.skin = v;
+    else if (v === "auto") delete root.dataset.theme;
+    else root.dataset.theme = v;
+    try {
+      if (key === "skin") localStorage.setItem("bible-timeline-skin", v);
+      else if (v === "auto") localStorage.removeItem("bible-timeline-theme");
+      else localStorage.setItem("bible-timeline-theme", v);
+    } catch (err) { /* 무시 */ }
+    syncThemeMenu();
+    rerenderKeepingCenter(); // 스타일마다 글자 폭이 달라 배치를 다시 계산
   });
-  try {
-    const t = localStorage.getItem("bible-timeline-theme");
-    if (t) document.documentElement.dataset.theme = t;
-  } catch (e) { /* 무시 */ }
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".menu")) setThemeOpen(false);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !themePop.hidden) setThemeOpen(false);
+  });
 
   let searchTimer;
   searchInput.addEventListener("input", () => {

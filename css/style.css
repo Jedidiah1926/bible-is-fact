@@ -241,7 +241,7 @@ h1 {
 .detail-toggle[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
 
 /* 필터: 버튼을 누르면 줄 목록이 아래로 펼쳐짐 */
-.filter { position: relative; flex: none; }
+.filter, .menu { position: relative; flex: none; }
 .filter-btn {
   display: inline-flex;
   align-items: center;
@@ -267,7 +267,7 @@ h1 {
   color: var(--bg);
 }
 
-.legend {
+.legend, .pop {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
@@ -284,7 +284,25 @@ h1 {
   border-radius: 10px;
   box-shadow: var(--shadow);
 }
-.legend[hidden] { display: none; }
+.legend[hidden], .pop[hidden] { display: none; }
+
+/* 테마 메뉴 (스타일 기본/Apple · 화면 자동/밝게/어둡게) */
+.pop { min-width: 220px; gap: 6px; padding: 10px; }
+.pop-title { font-size: 11.5px; font-weight: 700; color: var(--muted); padding: 2px 2px 0; }
+.pop-title + .seg { margin-bottom: 4px; }
+.seg { display: flex; background: var(--surface-2); border-radius: 8px; padding: 3px; gap: 2px; }
+.seg button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
 
 .chip {
   --c: hsl(var(--h) var(--it-s) var(--it-l));

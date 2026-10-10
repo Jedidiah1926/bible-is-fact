@@ -4,14 +4,15 @@
  * 1. client     : 애드센스 게시자 ID (예: "ca-pub-1234567890123456")
  * 2. detailSlot : 애드센스에서 만든 '디스플레이 광고' 단위의 슬롯 ID (예: "1234567890")
  *
- * client가 비어 있으면 광고 스크립트를 전혀 불러오지 않습니다.
- * 게시자 ID를 넣을 때는 index.html의 google-adsense-account 메타 태그와 루트의 ads.txt도 함께 맞춰야 합니다.
+ * 애드센스 스크립트는 사이트 확인을 위해 index.html의 <head>에 직접 들어 있습니다.
+ * 게시자 ID를 바꿀 때는 index.html(메타 태그·스크립트)과 루트의 ads.txt도 함께 맞춰야 합니다.
+ * detailSlot이 비어 있으면 설명 패널 광고는 표시하지 않습니다 (자동 광고는 애드센스 화면에서 켜고 끔).
  *
  * 광고 위치: 항목을 눌렀을 때 열리는 설명 패널 아래쪽에 한 번만 만들어 두고 계속 재사용합니다.
  * (항목을 바꿀 때마다 새 광고를 띄우면 '광고 새로고침' 정책에 걸릴 수 있어 그렇게 하지 않습니다)
  */
 window.ADSENSE_CONFIG = {
-  client: "",
+  client: "ca-pub-4099065432031117",
   detailSlot: ""
 };
 
@@ -22,6 +23,8 @@ window.ADSENSE_CONFIG = {
   let detailAdShown = false;
 
   function loadScript() {
+    // index.html <head>에 이미 있으면 다시 넣지 않음
+    if (document.querySelector('script[src*="adsbygoogle.js"]')) loaded = true;
     if (loaded || !cfg.client) return;
     loaded = true;
     const s = document.createElement("script");

@@ -51,7 +51,7 @@
   const canvas = $("#canvas");
   const detail = $("#detail");
   const detailBody = $("#detail-body");
-  const detailToggle = $("#detail-toggle");
+  const infoBtn = $("#info-btn");
   const searchInput = $("#search");
 
   const AXIS_H = 34;
@@ -65,8 +65,7 @@
     hidden: { all: new Set() },
     expanded: { jesus: false }, // 접기/펼치기 묶음 (예수의 기적·공생애 보충)
     mode: "h", // "h" 가로형, "v" 카드형(시대별 목록), "t" 세로형 연표
-    tz: 1, // 세로형 확대 배율
-    panelOpen: false // 모바일 세로형: 설명 패널은 상단 '설명' 버튼으로 열고 닫음 (아래쪽 앵커 광고와 겹치지 않게)
+    tz: 1 // 세로형 확대 배율
   };
 
   // ───────── 유틸 ─────────
@@ -109,8 +108,6 @@
   const isDisputed = (status) => /논란 많음|철회/.test(status);
 
   const isMobile = () => window.matchMedia("(max-width: 760px)").matches;
-  // 모바일 세로형: 설명 패널을 상단 '설명' 버튼으로 열고 위쪽에서 내림 (아래 앵커 광고와 겹치지 않게)
-  const panelByButton = () => isMobile() && state.mode === "t";
 
   // ───────── 데이터 색인 ─────────
   const index = { all: new Map() };
@@ -1203,8 +1200,6 @@
   // ───────── 상세 패널 ─────────
   function showDetail() {
     const it = state.selected && index[state.view].get(state.selected);
-    detailToggle.disabled = !it;
-    detailToggle.setAttribute("aria-pressed", String(!!it && state.panelOpen));
     if (!it) {
       hideEl(detail);
       return;
@@ -1359,8 +1354,6 @@
       });
     }
 
-    // 모바일 세로형은 '설명' 버튼을 눌렀을 때만 (위쪽에서 내려오는 패널), 그 밖에는 바로 열림
-    if (panelByButton() && !state.panelOpen) return hideEl(detail);
     showEl(detail);
     if (window.showDetailAd) window.showDetailAd(); // 광고 (js/ads.js, 설정했을 때만)
     detail.scrollTop = 0;
@@ -1520,17 +1513,38 @@
 
   $("#zoom-in").addEventListener("click", () => zoomBy(1.5));
   $("#zoom-out").addEventListener("click", () => zoomBy(1 / 1.5));
-  // 닫기: 모바일 세로형은 패널만 닫고 선택은 유지 (다시 '설명'으로 열 수 있게)
-  $("#detail-close").addEventListener("click", () => {
-    if (panelByButton() && state.selected) {
-      state.panelOpen = false;
-      showDetail();
-    } else select(null);
+  $("#detail-close").addEventListener("click", () => select(null));
+
+  // 모바일 세로형: 하단 안내(사용법·기호 설명·주의사항)를 숨기고 '설명' 버튼으로 위쪽에 펼침
+  //  (아래쪽 앵커 광고와 겹치지 않게)
+  const hint = $("#hint");
+  function setInfoOpen(open, animate = true) {
+    infoBtn.setAttribute("aria-pressed", String(open));
+    if (open) {
+      hint.style.top = $(".topbar").getBoundingClientRect().bottom + 6 + "px";
+      hint.classList.remove("is-closing");
+      hint.classList.add("open");
+      return;
+    }
+    if (!hint.classList.contains("open")) return;
+    const done = () => {
+      hint.classList.remove("open", "is-closing");
+      hint.style.top = "";
+    };
+    if (!animate || reduceMotion()) return done();
+    hint.classList.add("is-closing");
+    hint.addEventListener("animationend", function onEnd(e) {
+      if (e.target !== hint) return;
+      hint.removeEventListener("animationend", onEnd);
+      if (hint.classList.contains("is-closing")) done();
+    });
+  }
+  infoBtn.addEventListener("click", () => setInfoOpen(!hint.classList.contains("open") || hint.classList.contains("is-closing")));
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#hint, #info-btn")) setInfoOpen(false);
   });
-  detailToggle.addEventListener("click", () => {
-    if (!state.selected) return;
-    state.panelOpen = !state.panelOpen;
-    showDetail();
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") setInfoOpen(false);
   });
 
   // 테마 메뉴: 스타일(기본/Apple)과 화면(자동/밝게/어둡게). 처음 적용은 js/theme-init.js
@@ -1746,8 +1760,8 @@
       state.mode = b.dataset.mode;
       try { localStorage.setItem("bible-timeline-mode", state.mode); } catch (e) { /* 무시 */ }
       updateModeBtns();
+      setInfoOpen(false, false); // 펼친 안내는 세로형에서만 쓰므로 닫음
       render();
-      showDetail(); // 세로형은 설명 패널을 버튼으로 여닫으므로 보기 방식이 바뀌면 다시 맞춤
       if (state.selected) scrollToItem(index[state.view].get(state.selected), false);
       else initialScroll();
     })

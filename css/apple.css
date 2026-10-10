@@ -172,7 +172,7 @@
 [data-skin="apple"] .zoom,
 [data-skin="apple"] .icon-btn,
 [data-skin="apple"] .filter-btn,
-[data-skin="apple"] .detail-toggle,
+[data-skin="apple"] .info-btn,
 [data-skin="apple"] .legend,
 [data-skin="apple"] .pop,
 [data-skin="apple"] .seg,
@@ -199,7 +199,7 @@
 [data-skin="apple"] .zoom::after,
 [data-skin="apple"] .icon-btn::after,
 [data-skin="apple"] .filter-btn::after,
-[data-skin="apple"] .detail-toggle::after,
+[data-skin="apple"] .info-btn::after,
 [data-skin="apple"] .legend::after,
 [data-skin="apple"] .pop::after,
 [data-skin="apple"] .seg::after,
@@ -303,19 +303,17 @@
 [data-skin="apple"] .zoom button + button { border-left: 0; }
 [data-skin="apple"] .icon-btn { border-radius: 50%; width: 38px; height: 38px; }
 [data-skin="apple"] .filter-btn,
-[data-skin="apple"] .detail-toggle { border-radius: 999px; height: 38px; padding: 0 15px; font-weight: 600; }
+[data-skin="apple"] .info-btn { border-radius: 999px; height: 38px; padding: 0 15px; font-weight: 600; }
 [data-skin="apple"] .zoom button:hover,
 [data-skin="apple"] .icon-btn:hover,
 [data-skin="apple"] .filter-btn:hover { background-color: var(--lg-well); }
 [data-skin="apple"] .filter-btn[aria-expanded="true"],
-[data-skin="apple"] .detail-toggle[aria-pressed="true"],
+[data-skin="apple"] .info-btn[aria-pressed="true"],
 [data-skin="apple"] .icon-btn[aria-expanded="true"] {
   background: var(--lg-spec), color-mix(in srgb, var(--accent) 88%, transparent);
   color: #fff;
 }
 [data-skin="apple"] .filter-btn.active:not([aria-expanded="true"]),
-[data-skin="apple"] .detail-toggle:not(:disabled):not([aria-pressed="true"]) { color: var(--accent); }
-[data-skin="apple"] .detail-toggle:disabled { opacity: 0.5; }
 [data-skin="apple"] .filter-count { background: var(--accent); color: #fff; }
 [data-skin="apple"] .filter-btn[aria-expanded="true"] .filter-count { background: #fff; color: var(--accent); }
 
@@ -406,14 +404,14 @@
     padding: 16px 16px 24px;
   }
   [data-skin="apple"] .detail::before { display: none; }
-  [data-skin="apple"] body.mode-t .detail { top: 6px; bottom: auto; }
+  [data-skin="apple"] body.mode-t .hint.open { margin: 0; border-radius: 22px; padding: 12px 16px; background: var(--lg-spec), var(--lg-panel); }
   [data-skin="apple"] .tools { gap: 5px; }
   [data-skin="apple"] .modes button { height: 30px; padding: 0 9px; font-size: 12.5px; }
   [data-skin="apple"] .tabs button { height: 30px; padding: 0 14px; }
   [data-skin="apple"] .zoom button { height: 34px; min-width: 32px; font-size: 17px; }
   [data-skin="apple"] .icon-btn { width: 34px; height: 34px; }
   [data-skin="apple"] .filter-btn,
-  [data-skin="apple"] .detail-toggle { height: 34px; padding: 0 10px; }
+  [data-skin="apple"] .info-btn { height: 34px; padding: 0 10px; }
 }
 
 /* 투명도 줄이기를 켠 기기: 불투명하게 */
@@ -459,7 +457,7 @@
 [data-skin="apple"] .zoom button,
 [data-skin="apple"] .icon-btn,
 [data-skin="apple"] .filter-btn,
-[data-skin="apple"] .detail-toggle,
+[data-skin="apple"] .info-btn,
 [data-skin="apple"] .chip,
 [data-skin="apple"] .d-nav button,
 [data-skin="apple"] .fold-btn {
@@ -471,7 +469,7 @@
 [data-skin="apple"] .zoom button:active,
 [data-skin="apple"] .icon-btn:active,
 [data-skin="apple"] .filter-btn:active,
-[data-skin="apple"] .detail-toggle:active,
+[data-skin="apple"] .info-btn:active,
 [data-skin="apple"] .chip:active,
 [data-skin="apple"] .d-nav button:active,
 [data-skin="apple"] .fold-btn:active { transform: scale(0.92); transition-duration: 0.1s; }
@@ -479,8 +477,8 @@
 @media (max-width: 760px) {
   [data-skin="apple"] .detail { animation: sheet-up-in 0.5s var(--ios-sheet); }
   [data-skin="apple"] .detail.is-closing { animation: sheet-up-out 0.3s var(--ios-sheet) forwards; }
-  [data-skin="apple"] body.mode-t .detail { animation: sheet-down-in 0.5s var(--ios-sheet); }
-  [data-skin="apple"] body.mode-t .detail.is-closing { animation: sheet-down-out 0.3s var(--ios-sheet) forwards; }
+  [data-skin="apple"] body.mode-t .hint.open { transform-origin: calc(100% - 120px) -10px; animation: ios-pop-in 0.42s var(--ios-spring); }
+  [data-skin="apple"] body.mode-t .hint.open.is-closing { animation: ios-pop-out 0.2s cubic-bezier(0.4, 0, 1, 1) forwards; }
 }
 
 /* 글씨가 잘 보이도록: 글자가 많은 메뉴·설명 패널은 유리를 더 진하게(뒤 내용이 덜 비침) */

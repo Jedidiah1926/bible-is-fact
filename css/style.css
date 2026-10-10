@@ -223,8 +223,9 @@ h1 {
 }
 .icon-btn svg { width: 16px; height: 16px; }
 
-/* 모바일 전용 '설명' 버튼 (데스크톱은 패널이 항상 오른쪽에 열림) */
-.detail-toggle {
+/* 모바일 세로형 전용 '설명' 버튼: 하단 안내(조작법·범례·주의사항)를 위쪽에 펼쳐 보여 줌
+   (하단 안내는 숨겨서 아래쪽 앵커 광고와 겹치지 않게) */
+.info-btn {
   display: none;
   border: 1px solid var(--line);
   background: var(--surface);
@@ -236,9 +237,8 @@ h1 {
   white-space: nowrap;
   flex: none;
 }
-.detail-toggle:disabled { color: var(--muted); opacity: 0.55; cursor: default; }
-.detail-toggle:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-.detail-toggle[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+.info-btn:hover { background: var(--surface-2); }
+.info-btn[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
 
 /* 필터: 버튼을 누르면 줄 목록이 아래로 펼쳐짐 */
 .filter, .menu { position: relative; flex: none; }
@@ -1173,15 +1173,23 @@ body.mode-v .hint > span:first-child { display: none; }
     border-radius: 2px;
     background: var(--line-strong);
   }
-  /* 세로형: 설명 패널은 '설명' 버튼으로 열고 화면 위쪽에서 내려옴 — 아래쪽 앵커 광고와 겹치지 않게 */
-  body.mode-t .detail-toggle { display: inline-block; }
-  body.mode-t .detail {
-    top: 0; bottom: auto;
-    border-top: 0;
-    border-bottom: 1px solid var(--line);
-    border-radius: 0 0 16px 16px;
+  /* 세로형: 하단 안내는 숨기고 '설명' 버튼으로 위쪽에 펼침 (아래쪽 앵커 광고와 겹치지 않게) */
+  body.mode-t .info-btn { display: inline-block; }
+  body.mode-t .hint:not(.open) { display: none; }
+  body.mode-t .hint.open {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    z-index: 45;
+    padding: 12px 14px;
+    gap: 8px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    font-size: 12.5px;
+    line-height: 1.6;
   }
-  body.mode-t .detail::before { display: none; }
+  body.mode-t .hint.open .note { display: inline; }
   .v-row { padding: 0 12px 0 8px; }
   .v-head { padding: 9px 16px 8px; }
   .v-fold { margin-left: 46px; }
@@ -1208,8 +1216,6 @@ body.mode-v .hint > span:first-child { display: none; }
 @keyframes panel-out { to { opacity: 0; transform: translateX(16px); } }
 @keyframes sheet-up-in { from { transform: translateY(100%); } }
 @keyframes sheet-up-out { to { transform: translateY(100%); } }
-@keyframes sheet-down-in { from { transform: translateY(-100%); } }
-@keyframes sheet-down-out { to { transform: translateY(-100%); } }
 
 .legend, .pop { animation: drop-in 0.16s ease-out; }
 .legend.is-closing, .pop.is-closing { animation: drop-out 0.12s ease-in forwards; }
@@ -1222,8 +1228,8 @@ body.mode-v .hint > span:first-child { display: none; }
 @media (max-width: 760px) {
   .detail { animation: sheet-up-in 0.24s ease-out; }
   .detail.is-closing { animation: sheet-up-out 0.18s ease-in forwards; }
-  body.mode-t .detail { animation: sheet-down-in 0.24s ease-out; }
-  body.mode-t .detail.is-closing { animation: sheet-down-out 0.18s ease-in forwards; }
+  body.mode-t .hint.open { animation: drop-in 0.16s ease-out; }
+  body.mode-t .hint.open.is-closing { animation: drop-out 0.12s ease-in forwards; }
 }
 
 @media (prefers-reduced-motion: reduce) {

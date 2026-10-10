@@ -224,6 +224,23 @@ h1 {
 }
 .icon-btn svg { width: 16px; height: 16px; }
 
+/* 모바일 전용 '설명' 버튼 (데스크톱은 패널이 항상 오른쪽에 열림) */
+.detail-toggle {
+  display: none;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 8px;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex: none;
+}
+.detail-toggle:disabled { color: var(--muted); opacity: 0.55; cursor: default; }
+.detail-toggle:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.detail-toggle[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+
 .legend {
   flex-basis: 100%;
   display: flex;
@@ -1081,6 +1098,15 @@ body.mode-v .hint > span:first-child { display: none; }
     border-radius: 2px;
     background: var(--line-strong);
   }
+  /* 세로형: 설명 패널은 '설명' 버튼으로 열고 화면 위쪽에서 내려옴 — 아래쪽 앵커 광고와 겹치지 않게 */
+  body.mode-t .detail-toggle { display: inline-block; }
+  body.mode-t .detail {
+    top: 0; bottom: auto;
+    border-top: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0 0 16px 16px;
+  }
+  body.mode-t .detail::before { display: none; }
   .v-row { padding: 0 12px 0 8px; }
   .v-head { padding: 9px 16px 8px; }
   .v-fold { margin-left: 46px; }

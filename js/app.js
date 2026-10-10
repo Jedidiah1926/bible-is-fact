@@ -51,6 +51,7 @@
   const canvas = $("#canvas");
   const detail = $("#detail");
   const detailBody = $("#detail-body");
+  const detailToggle = $("#detail-toggle");
   const searchInput = $("#search");
 
   const AXIS_H = 34;
@@ -64,7 +65,8 @@
     hidden: { all: new Set() },
     expanded: { jesus: false }, // 접기/펼치기 묶음 (예수의 기적·공생애 보충)
     mode: "h", // "h" 가로형, "v" 카드형(시대별 목록), "t" 세로형 연표
-    tz: 1 // 세로형 확대 배율
+    tz: 1, // 세로형 확대 배율
+    panelOpen: false // 모바일 세로형: 설명 패널은 상단 '설명' 버튼으로 열고 닫음 (아래쪽 앵커 광고와 겹치지 않게)
   };
 
   // ───────── 유틸 ─────────
@@ -107,6 +109,8 @@
   const isDisputed = (status) => /논란 많음|철회/.test(status);
 
   const isMobile = () => window.matchMedia("(max-width: 760px)").matches;
+  // 모바일 세로형: 설명 패널을 상단 '설명' 버튼으로 열고 위쪽에서 내림 (아래 앵커 광고와 겹치지 않게)
+  const panelByButton = () => isMobile() && state.mode === "t";
 
   // ───────── 데이터 색인 ─────────
   const index = { all: new Map() };
@@ -1015,6 +1019,8 @@
   // ───────── 상세 패널 ─────────
   function showDetail() {
     const it = state.selected && index[state.view].get(state.selected);
+    detailToggle.disabled = !it;
+    detailToggle.setAttribute("aria-pressed", String(!!it && state.panelOpen));
     if (!it) {
       detail.hidden = true;
       return;
@@ -1169,7 +1175,9 @@
       });
     }
 
-    detail.hidden = false;
+    // 모바일 세로형은 '설명' 버튼을 눌렀을 때만 (위쪽에서 내려오는 패널), 그 밖에는 바로 열림
+    detail.hidden = panelByButton() && !state.panelOpen;
+    if (detail.hidden) return;
     if (window.showDetailAd) window.showDetailAd(); // 광고 (js/ads.js, 설정했을 때만)
     detail.scrollTop = 0;
   }
@@ -1328,7 +1336,18 @@
 
   $("#zoom-in").addEventListener("click", () => zoomBy(1.5));
   $("#zoom-out").addEventListener("click", () => zoomBy(1 / 1.5));
-  $("#detail-close").addEventListener("click", () => select(null));
+  // 닫기: 모바일 세로형은 패널만 닫고 선택은 유지 (다시 '설명'으로 열 수 있게)
+  $("#detail-close").addEventListener("click", () => {
+    if (panelByButton() && state.selected) {
+      state.panelOpen = false;
+      showDetail();
+    } else select(null);
+  });
+  detailToggle.addEventListener("click", () => {
+    if (!state.selected) return;
+    state.panelOpen = !state.panelOpen;
+    showDetail();
+  });
 
   $("#theme").addEventListener("click", () => {
     const root = document.documentElement;
@@ -1517,6 +1536,7 @@
       try { localStorage.setItem("bible-timeline-mode", state.mode); } catch (e) { /* 무시 */ }
       updateModeBtns();
       render();
+      showDetail(); // 세로형은 설명 패널을 버튼으로 여닫으므로 보기 방식이 바뀌면 다시 맞춤
       if (state.selected) scrollToItem(index[state.view].get(state.selected), false);
       else initialScroll();
     })

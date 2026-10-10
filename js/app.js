@@ -16,7 +16,9 @@
     return {
       range: [ot.range[0], nt.range[1]],
       undatedBefore: ot.undatedBefore,
-      zoom: { min: ot.zoom.min, max: nt.zoom.max, initial: ot.zoom.initial },
+      // 신약 시대는 축척이 10배라, 최대 확대는 구약 기준 1/10 (신약 시대 기준으로는 원래 최대치)
+      // (최소 확대는 '전체'가 넓은 화면에도 들어가도록 낮게 — 실제 한계는 화면을 꽉 채우는 지점)
+      zoom: { min: 0.05, max: nt.zoom.max / 10, initial: ot.zoom.initial },
       eras: { ot: [ot.range[0], -4], nt: [-40, nt.range[1]] },
       lanes: [
         { ...otLane("period"), name: "시대·세계사" },
@@ -185,25 +187,32 @@
     return Math.max((u - c.range[0]) * ppy(), widest + 60);
   }
 
-  // 연도 → 화면 x (연대 미상 구간은 따로 늘이거나 줄여서 붙임)
+  // 신약 시대(BC 40~)는 항목이 촘촘해 축척을 10배로 키움 (가로형·세로형 공통, 축에 표시)
+  const NT_SCALE = 10;
+  const ntStart = () => DATA.all.eras.nt[0];
+
+  // 연도 → 화면 x (연대 미상 구간은 따로 늘이거나 줄여서 붙이고, 신약 시대는 10배)
   function xOf(y) {
     const c = cfg();
     const u = c.undatedBefore;
-    if (u == null) return originX() + (y - c.range[0]) * ppy();
+    const n = ntStart();
     const zw = undatedW();
     if (y < u) return originX() + ((y - c.range[0]) / (u - c.range[0])) * zw;
-    return originX() + zw + (y - u) * ppy();
+    if (y <= n) return originX() + zw + (y - u) * ppy();
+    return originX() + zw + (n - u) * ppy() + (y - n) * ppy() * NT_SCALE;
   }
 
   // 화면 x → 연도 (xOf의 역함수)
   function yearAt(px) {
     const c = cfg();
     const u = c.undatedBefore;
-    if (u == null) return c.range[0] + (px - originX()) / ppy();
+    const n = ntStart();
     const zw = undatedW();
     const d = px - originX();
     if (d < zw) return c.range[0] + (d / zw) * (u - c.range[0]);
-    return u + (d - zw) / ppy();
+    const ot = (n - u) * ppy();
+    if (d - zw <= ot) return u + (d - zw) / ppy();
+    return n + (d - zw - ot) / (ppy() * NT_SCALE);
   }
 
   const isVisible = (it) => !state.hidden[state.view].has(it.group) && !(it.fold && !state.expanded[it.fold]);
@@ -325,19 +334,17 @@
     applyHighlights();
   }
 
-  function tickStep() {
+  function tickStep(pxPerYear = ppy()) {
     const steps = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500];
-    return steps.find((s) => s * ppy() >= 64) || 1000;
+    return steps.find((s) => s * pxPerYear >= 64) || 1000;
   }
 
   function renderAxis(totalW) {
     const c = cfg();
     const axis = el("div", "axis");
     axis.style.width = totalW + "px";
-    const step = tickStep();
-    const major = step * 5;
     const u = c.undatedBefore;
-    const first = Math.ceil((u ?? c.range[0]) / step) * step;
+    const n = ntStart();
 
     if (u != null) {
       // 원역사(연대 미상) 구간 표시
@@ -350,11 +357,20 @@
       axis.appendChild(t);
     }
 
-    for (let y = first; y <= c.range[1]; y += step) {
+    // 눈금: 구약 시대와 신약 시대(10배)를 각자의 간격으로
+    const ticks = [];
+    const so = tickStep(ppy());
+    for (let y = Math.ceil(u / so) * so; y < n; y += so) ticks.push([y, so]);
+    const sn = tickStep(ppy() * NT_SCALE);
+    for (let y = Math.ceil(n / sn) * sn; y <= c.range[1]; y += sn) ticks.push([y, sn]);
+    // 구약 마지막 눈금이 신약 시작 눈금과 너무 붙으면 생략
+    const xn = xOf(n);
+    for (const [y, step] of ticks) {
       const x = xOf(y);
       if (x > xOf(c.range[1]) - 48) break; // 끝에 붙은 눈금 글자가 화면 밖으로 넘치지 않게
+      if (y < n && x > xn - 56) continue;
       const isEra = y === 0;
-      const t = el("div", "tick" + (isEra ? " era" : y % major === 0 ? " major" : ""));
+      const t = el("div", "tick" + (isEra ? " era" : y % (step * 5) === 0 ? " major" : ""));
       t.style.left = x + "px";
       t.textContent = isEra ? "BC | AD" : fmtYear(y);
       axis.appendChild(t);
@@ -363,6 +379,12 @@
       g.style.left = x + "px";
       canvas.appendChild(g);
     }
+    // 축척이 바뀌는 지점 표시
+    const sm = el("div", "scale-mark");
+    sm.style.left = xn + "px";
+    sm.appendChild(el("span", "", { textContent: "신약 시대부터 축척 10배 →" }));
+    canvas.appendChild(sm);
+
     canvas.appendChild(axis);
     axisEl = axis;
   }
@@ -647,7 +669,7 @@
     HEAD_H: 46,
     ROW: 26,
     OT: 3, // 구약 시대 1년당 px
-    NT: 30, // 신약 시대 1년당 px
+    NT: 3 * NT_SCALE, // 신약 시대 1년당 px
     cols: new Map(),
     subW: () => (isMobile() ? 118 : 150),
     spanLabels: [],

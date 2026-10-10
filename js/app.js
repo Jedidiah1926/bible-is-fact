@@ -118,8 +118,8 @@
     all.prologue.forEach((p, i) =>
       index.all.set(p.id, {
         ...p,
-        lane: "event",
-        group: "event",
+        lane: p.lane || "event",
+        group: p.lane || "event",
         undated: true,
         start: a + ((b - a) * (i + 0.5)) / all.prologue.length
       })
@@ -275,7 +275,8 @@
   function posX(it) {
     if (!it.undated || it.end != null) return xOf(it.start);
     const c = cfg();
-    const list = [...index[state.view].values()].filter((u) => u.undated && u.end == null);
+    // 같은 줄에 있는 연대 미상 항목끼리 나눠 배치
+    const list = [...index[state.view].values()].filter((u) => u.undated && u.end == null && u.lane === it.lane);
     const left = xOf(c.range[0]) + 16;
     const right = xOf(c.undatedBefore) - 10;
     // 각 항목이 차지하는 폭(점 + 이름표)을 빼고 남는 공간을 사이 간격으로 고르게 나눔

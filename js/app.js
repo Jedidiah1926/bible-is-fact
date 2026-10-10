@@ -1515,7 +1515,7 @@
   $("#zoom-out").addEventListener("click", () => zoomBy(1 / 1.5));
   $("#detail-close").addEventListener("click", () => select(null));
 
-  // 모바일 세로형: 하단 안내(사용법·기호 설명·주의사항)를 숨기고 '설명' 버튼으로 위쪽에 펼침
+  // 모바일(세로형·카드형): 하단 안내(사용법·기호 설명·주의사항)를 숨기고 '설명' 버튼으로 위쪽에 펼침
   //  (아래쪽 앵커 광고와 겹치지 않게)
   const hint = $("#hint");
   function setInfoOpen(open, animate = true) {
@@ -1760,7 +1760,7 @@
       state.mode = b.dataset.mode;
       try { localStorage.setItem("bible-timeline-mode", state.mode); } catch (e) { /* 무시 */ }
       updateModeBtns();
-      setInfoOpen(false, false); // 펼친 안내는 세로형에서만 쓰므로 닫음
+      setInfoOpen(false, false); // 보기 방식이 바뀌면 펼친 안내는 닫음
       render();
       if (state.selected) scrollToItem(index[state.view].get(state.selected), false);
       else initialScroll();

@@ -223,7 +223,7 @@ h1 {
 }
 .icon-btn svg { width: 16px; height: 16px; }
 
-/* 모바일 세로형 전용 '설명' 버튼: 하단 안내(조작법·범례·주의사항)를 위쪽에 펼쳐 보여 줌
+/* 모바일 전용 '설명' 버튼: 하단 안내(조작법·범례·주의사항)를 위쪽에 펼쳐 보여 줌
    (하단 안내는 숨겨서 아래쪽 앵커 광고와 겹치지 않게) */
 .info-btn {
   display: none;
@@ -1173,10 +1173,10 @@ body.mode-v .hint > span:first-child { display: none; }
     border-radius: 2px;
     background: var(--line-strong);
   }
-  /* 세로형: 하단 안내는 숨기고 '설명' 버튼으로 위쪽에 펼침 (아래쪽 앵커 광고와 겹치지 않게) */
-  body.mode-t .info-btn { display: inline-block; }
-  body.mode-t .hint:not(.open) { display: none; }
-  body.mode-t .hint.open {
+  /* 모바일(세로형·카드형): 하단 안내는 숨기고 '설명' 버튼으로 위쪽에 펼침 (아래쪽 앵커 광고와 겹치지 않게) */
+  body .info-btn { display: inline-block; }
+  body .hint:not(.open) { display: none; }
+  body .hint.open {
     position: fixed;
     left: 8px;
     right: 8px;
@@ -1189,7 +1189,7 @@ body.mode-v .hint > span:first-child { display: none; }
     font-size: 12.5px;
     line-height: 1.6;
   }
-  body.mode-t .hint.open .note { display: inline; }
+  body .hint.open .note { display: inline; }
   .v-row { padding: 0 12px 0 8px; }
   .v-head { padding: 9px 16px 8px; }
   .v-fold { margin-left: 46px; }
@@ -1228,8 +1228,8 @@ body.mode-v .hint > span:first-child { display: none; }
 @media (max-width: 760px) {
   .detail { animation: sheet-up-in 0.24s ease-out; }
   .detail.is-closing { animation: sheet-up-out 0.18s ease-in forwards; }
-  body.mode-t .hint.open { animation: drop-in 0.16s ease-out; }
-  body.mode-t .hint.open.is-closing { animation: drop-out 0.12s ease-in forwards; }
+  body .hint.open { animation: drop-in 0.16s ease-out; }
+  body .hint.open.is-closing { animation: drop-out 0.12s ease-in forwards; }
 }
 
 @media (prefers-reduced-motion: reduce) {

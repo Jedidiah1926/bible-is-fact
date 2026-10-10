@@ -404,7 +404,7 @@
     padding: 16px 16px 24px;
   }
   [data-skin="apple"] .detail::before { display: none; }
-  [data-skin="apple"] body.mode-t .hint.open { margin: 0; border-radius: 22px; padding: 12px 16px; background: var(--lg-spec), var(--lg-panel); }
+  [data-skin="apple"] body .hint.open { margin: 0; border-radius: 22px; padding: 12px 16px; background: var(--lg-spec), var(--lg-panel); }
   [data-skin="apple"] .tools { gap: 5px; }
   [data-skin="apple"] .modes button { height: 30px; padding: 0 9px; font-size: 12.5px; }
   [data-skin="apple"] .tabs button { height: 30px; padding: 0 14px; }
@@ -477,8 +477,8 @@
 @media (max-width: 760px) {
   [data-skin="apple"] .detail { animation: sheet-up-in 0.5s var(--ios-sheet); }
   [data-skin="apple"] .detail.is-closing { animation: sheet-up-out 0.3s var(--ios-sheet) forwards; }
-  [data-skin="apple"] body.mode-t .hint.open { transform-origin: calc(100% - 120px) -10px; animation: ios-pop-in 0.42s var(--ios-spring); }
-  [data-skin="apple"] body.mode-t .hint.open.is-closing { animation: ios-pop-out 0.2s cubic-bezier(0.4, 0, 1, 1) forwards; }
+  [data-skin="apple"] body .hint.open { transform-origin: calc(100% - 120px) -10px; animation: ios-pop-in 0.42s var(--ios-spring); }
+  [data-skin="apple"] body .hint.open.is-closing { animation: ios-pop-out 0.2s cubic-bezier(0.4, 0, 1, 1) forwards; }
 }
 
 /* 글씨가 잘 보이도록: 글자가 많은 메뉴·설명 패널은 유리를 더 진하게(뒤 내용이 덜 비침) */

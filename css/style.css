@@ -1,17 +1,17 @@
 :root {
   --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Segoe UI", Roboto, sans-serif;
-  --bg: #f6f3ee;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #efeae2;
-  --lane-alt: rgba(120, 100, 70, 0.045);
-  --text: #2a2620;
-  --muted: #7b7366;
-  --line: #d9d1c4;
-  --line-strong: #a89d8b;
-  --accent: #8a5a12;
-  --guide: rgba(196, 120, 20, 0.85);
-  --guide-band: rgba(230, 160, 40, 0.13);
-  --shadow: 0 6px 24px rgba(40, 30, 10, 0.14);
+  --surface-2: #f3f4f6;
+  --lane-alt: rgba(0, 0, 0, 0.022);
+  --text: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --line-strong: #a1a7b0;
+  --accent: #2563eb;
+  --guide: rgba(37, 99, 235, 0.85);
+  --guide-band: rgba(37, 99, 235, 0.08);
+  --shadow: 0 6px 24px rgba(15, 23, 42, 0.12);
   /* 항목 색: hsl(var(--h) S L) */
   --ok: #2f7d4f;
   --ok-bg: #edf6ef;
@@ -21,8 +21,8 @@
   --hs-bg: #edf3fb;
   --hot: #c0392b;
   --hot-bg: #fbeceb;
-  --it-s: 62%;
-  --it-l: 40%;
+  --it-s: 68%;
+  --it-l: 43%;
   --it-bg-s: 70%;
   --it-bg-l: 93%;
   --it-bar-l: 82%;
@@ -31,26 +31,26 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #17150f;
-    --surface: #221f18;
-    --surface-2: #2b271e;
-    --lane-alt: rgba(255, 240, 210, 0.035);
-    --text: #ece6da;
-    --muted: #a39a8a;
-    --line: #3b362b;
-    --line-strong: #6c6353;
-    --accent: #e3b062;
-    --guide: rgba(240, 180, 80, 0.9);
-    --guide-band: rgba(240, 180, 80, 0.1);
+    --bg: #1e1f22;
+    --surface: #26272b;
+    --surface-2: #313238;
+    --lane-alt: rgba(255, 255, 255, 0.03);
+    --text: #e6e7ea;
+    --muted: #9a9ca3;
+    --line: #393a40;
+    --line-strong: #62646c;
+    --accent: #6ea8ff;
+    --guide: rgba(110, 168, 255, 0.9);
+    --guide-band: rgba(110, 168, 255, 0.1);
     --shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     --ok: #6fcf97;
-    --ok-bg: #1b2a1f;
+    --ok-bg: #1c2a22;
     --rs: #f0b45a;
-    --rs-bg: #2b2416;
+    --rs-bg: #2a2519;
     --hs: #7fb2ee;
-    --hs-bg: #18222f;
+    --hs-bg: #1c2533;
     --hot: #f07a6a;
-    --hot-bg: #2e1a18;
+    --hot-bg: #2f1f1f;
     --it-s: 70%;
     --it-l: 72%;
     --it-bg-s: 30%;
@@ -61,26 +61,26 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #17150f;
-  --surface: #221f18;
-  --surface-2: #2b271e;
-  --lane-alt: rgba(255, 240, 210, 0.035);
-  --text: #ece6da;
-  --muted: #a39a8a;
-  --line: #3b362b;
-  --line-strong: #6c6353;
-  --accent: #e3b062;
-  --guide: rgba(240, 180, 80, 0.9);
-  --guide-band: rgba(240, 180, 80, 0.1);
+  --bg: #1e1f22;
+  --surface: #26272b;
+  --surface-2: #313238;
+  --lane-alt: rgba(255, 255, 255, 0.03);
+  --text: #e6e7ea;
+  --muted: #9a9ca3;
+  --line: #393a40;
+  --line-strong: #62646c;
+  --accent: #6ea8ff;
+  --guide: rgba(110, 168, 255, 0.9);
+  --guide-band: rgba(110, 168, 255, 0.1);
   --shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
   --ok: #6fcf97;
-  --ok-bg: #1b2a1f;
+  --ok-bg: #1c2a22;
   --rs: #f0b45a;
-  --rs-bg: #2b2416;
+  --rs-bg: #2a2519;
   --hs: #7fb2ee;
-  --hs-bg: #18222f;
+  --hs-bg: #1c2533;
   --hot: #f07a6a;
-  --hot-bg: #2e1a18;
+  --hot-bg: #2f1f1f;
   --it-s: 70%;
   --it-l: 72%;
   --it-bg-s: 30%;

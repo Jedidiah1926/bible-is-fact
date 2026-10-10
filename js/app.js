@@ -944,6 +944,15 @@
 
     // 항목
     colsData.forEach(({ col, lane, layout, subs, x, SW }) => {
+      const nSub = subs.length ? Math.max(...subs) + 1 : 1;
+      // 이름표 폭: 오른쪽 칸들이 그 높이에서 비어 있으면 그만큼 넓게 (화면이 넉넉한데 … 으로 줄지 않게)
+      const freeSubs = (i) => {
+        let next = nSub;
+        layout.forEach((M, j) => {
+          if (subs[j] > subs[i] && subs[j] < next && M.top < layout[i].bottom && M.bottom > layout[i].top) next = subs[j];
+        });
+        return next - subs[i];
+      };
       layout.forEach((L, i) => {
         const sx = x + (col.narrow ? 3 : 6) + subs[i] * SW;
         if (col.narrow) {
@@ -986,7 +995,7 @@
           lbl.style.setProperty("--h", lane.hue);
           lbl.style.left = sx + 16 + "px";
           lbl.style.top = L.y1 - 3 + "px";
-          lbl.style.width = SW - 20 + "px";
+          lbl.style.maxWidth = freeSubs(i) * SW - 20 + "px";
           canvas.append(bar, lbl);
           return;
         }
@@ -999,7 +1008,7 @@
         const label = el("div", "t-label" + (it.end != null ? " span" : ""));
         label.appendChild(titleNodes(it));
         label.title = `${it.title} (${fmtRange(it)})`;
-        label.style.width = SW - 22 + "px";
+        label.style.maxWidth = freeSubs(i) * SW - 22 + "px";
         if (it.end != null) {
           const bar = el("div", "t-bar" + (it.approx ? " approx" : "") + (L.cont ? " cont" : ""));
           bar.style.left = sx + 4 + "px";

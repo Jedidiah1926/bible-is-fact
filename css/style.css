@@ -742,7 +742,7 @@ h1 {
   padding: 0 3px;
 }
 .t-label.span { font-weight: 800; }
-.t-label:hover { background: var(--surface); box-shadow: var(--shadow); overflow: visible; width: auto !important; z-index: 7; }
+.t-label:hover { background: var(--surface); box-shadow: var(--shadow); overflow: visible; width: auto !important; max-width: none !important; z-index: 7; }
 .item.selected .t-label { background: color-mix(in srgb, var(--guide) 18%, var(--surface)); outline: 2px solid var(--guide); }
 .item.match .t-label { background: color-mix(in srgb, var(--accent) 22%, var(--surface)); }
 .t-label.fold-bar-label { color: hsl(var(--h) var(--it-s) var(--it-l)); font-weight: 800; }

@@ -1161,7 +1161,7 @@ body.mode-v .hint > span:first-child { display: none; }
     border-top: 1px solid var(--line);
     border-radius: 16px 16px 0 0;
     box-shadow: var(--shadow);
-    padding: 16px 16px 24px;
+    padding: 16px 16px calc(110px + env(safe-area-inset-bottom)); /* 아래쪽 앵커 광고에 가려지지 않게 끝에 여백 */
   }
   .d-title { font-size: 19px; }
   .detail::before {

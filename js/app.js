@@ -382,10 +382,10 @@
         const ew = markW(it);
         const tw = textWidth(it.title, 12.5, 700) + 18 + ew;
         if (it.end != null) {
-          // 타임라인 끝(AD 105) 뒤로 이어지는 기간은 끝에서 자르고 '이어짐' 표시
+          // 타임라인 끝(AD 110) 뒤로 이어지는 기간은 끝에서 자르고 '이어짐' 표시
           const cont = it.end > c.range[1];
           const w = Math.max(6, xOf(Math.min(it.end, c.range[1])) - x);
-          const inside = tw <= w;
+          const inside = tw + (cont ? 22 : 0) <= w; // 이어짐(→) 표시 자리까지 고려
           // 막대 안에 이름이 안 들어가면 이름을 막대 왼쪽에 둠 (오른쪽은 타임라인 끝)
           if (cont && !inside) return { it, x, w, inside, cont, labelX: x - 6 - (tw - 18), left: x - 6 - tw, right: x + w };
           return { it, x, w, inside, cont, left: x, right: inside ? x + w : x + w + 6 + tw };

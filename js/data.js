@@ -153,7 +153,7 @@ window.TIMELINE_DATA = {
 
   nt: {
     name: "신약",
-    range: [-40, 105],
+    range: [-40, 110],
     zoom: { min: 6, max: 160, initial: 30 },
     concurrentPad: 1,
 

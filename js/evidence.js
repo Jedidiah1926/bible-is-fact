@@ -21,7 +21,10 @@ window.TIMELINE_EVIDENCE = {
       title: "메르넵타 석비",
       year: "1896년 발견 (이집트 테베, 플린더스 피트리) · BC 1208년경 기록",
       text: "이집트 파라오 메르넵타의 승전비에 '이스라엘은 황폐하여 그 씨가 없다'는 구절이 있음. 성경 밖에서 '이스라엘'이라는 이름이 나오는 가장 오래된 기록으로, BC 13세기 말 가나안에 이스라엘이라는 백성이 있었음을 보여 줌. (대다수 학자가 '이스라엘'로 읽으며, 다른 읽기는 널리 받아들여지지 않음)",
-      sources: [W("Merneptah_Stele")]
+      sources: [
+        { label: "Encyclopaedia Britannica – Israel Stela", url: "https://www.britannica.com/topic/Israel-Stela" },
+        { label: "Biblical Archaeology Review 35:6 – How Did Israel Become a People?", url: "https://old.biblicalarchaeology.org/biblical-archaeology-review/35/6/28" }
+      ]
     }
   ],
   "david-king": [
@@ -30,7 +33,11 @@ window.TIMELINE_EVIDENCE = {
       year: "1993–94년 발견 (이스라엘 북부 텔 단, 아브라함 비란) · BC 9세기 기록",
       doubt: "1990년대 초까지 일부 학자들은 성경 밖 증거가 없다는 이유로 다윗을 후대에 만들어진 전설적 인물로 보았음.",
       text: "아람 왕(하사엘로 추정)의 승전 비문에 '다윗의 집(bytdwd)', 곧 다윗 왕조라는 표현이 나옴. 성경 밖에서 다윗을 유다 왕조의 시조로 언급한 가장 이른 기록으로 널리 인정됨. (소수 학자는 다른 읽기를 제안함)",
-      sources: [W("Tel_Dan_stele")]
+      sources: [
+        { label: "Biran & Naveh, IEJ 43 (1993) – An Aramaic Stele Fragment from Tel Dan", url: "https://syri.ac/node/5109" },
+        { label: "The Jewish Museum (loan from Israel Antiquities Authority) – Tel Dan Stele", url: "https://thejewishmuseum.org/exhibitions/tel-dan-stele/" },
+        { label: "Bible Odyssey (SBL) – The Tel Dan Inscription", url: "https://www.bibleodyssey.org/articles/the-tel-dan-inscription/" }
+      ]
     }
   ],
   "division": [
@@ -38,7 +45,11 @@ window.TIMELINE_EVIDENCE = {
       title: "카르나크 신전의 시삭(쇼셴크 1세) 원정 기록",
       year: "이집트 카르나크 신전 '부바스티스 문' 부조 · BC 925년경",
       text: "르호보암 5년에 애굽 왕 시삭이 올라왔다는 기록(왕상 14:25)과 맞는 이집트 측 원정 기록. 므깃도 등 가나안·이스라엘 지역의 정복 도시 목록이 새겨져 있음. (예루살렘은 목록에 없음)",
-      sources: [W("Bubastite_Portal"), W("Shishak")]
+      sources: [
+        { label: "Encyclopaedia Britannica – Sheshonk I", url: "https://www.britannica.com/biography/Sheshonk-I" },
+        { label: "Biblical Archaeology Society – Shishak's Campaign", url: "https://www.biblicalarchaeology.org/daily/people-cultures-in-the-bible/people-in-the-bible/shishaks-campaign-a-meeting-of-archaeology-and-the-bible/" },
+        { label: "Clancy, JSOT 24 (1999) – Shishak/Shoshenq's Travels", url: "https://doi.org/10.1177/030908929902408601" }
+      ]
     }
   ],
   "ahab": [
@@ -46,13 +57,19 @@ window.TIMELINE_EVIDENCE = {
       title: "쿠르흐 석비 (살만에셀 3세)",
       year: "1861년 발견 (터키 쿠르흐) · BC 853년 카르카르 전투 기록",
       text: "앗시리아 왕이 맞서 싸운 연합군 가운데 '이스라엘 사람 아합'이 전차 2,000대를 이끌었다고 기록함. 성경 밖에서 아합을 언급한 가장 이른 기록.",
-      sources: [W("Kurkh_Monoliths")]
+      sources: [
+        { label: "British Museum – Kurkh stela of Shalmaneser III (1863,0619.2)", url: "https://www.britishmuseum.org/collection/object/W_1863-0619-2" }
+      ]
     },
     {
       title: "메사 석비 (모압 비문)",
       year: "1868년 발견 (요르단 디반) · BC 840년경 기록",
       text: "모압 왕 메사가 '이스라엘 왕 오므리'와 그 아들이 모압을 오랫동안 억압했으나 자신이 벗어났다고 기록. 아합 사후 모압이 이스라엘을 배반했다는 왕하 3:4–5와 일치함.",
-      sources: [W("Mesha_Stele")]
+      sources: [
+        { label: "Louvre – Stèle de Mesha (AO 5066)", url: "https://collections.louvre.fr/en/ark:/53355/cl010120339" },
+        { label: "Encyclopaedia Britannica – Moabite Stone", url: "https://www.britannica.com/topic/Moabite-Stone" },
+        { label: "Biblical Archaeology Society – What Does the Mesha Stele Say?", url: "https://www.biblicalarchaeology.org/daily/biblical-artifacts/inscriptions/what-does-the-mesha-stele-say/" }
+      ]
     }
   ],
   "jehu": [
@@ -60,7 +77,9 @@ window.TIMELINE_EVIDENCE = {
       title: "살만에셀 3세의 검은 오벨리스크",
       year: "1846년 발견 (이라크 님루드, 레이어드) · BC 841년경",
       text: "'오므리의 아들(오므리 왕가) 예후'가 앗시리아 왕 앞에 엎드려 조공하는 장면이 새겨져 있음. 고대 근동 미술에 남은 이스라엘·유다 왕의 유일한 모습으로 알려짐. (일부 학자는 요람 왕으로 보기도 함)",
-      sources: [W("Black_Obelisk_of_Shalmaneser_III")]
+      sources: [
+        { label: "British Museum – Black Obelisk of Shalmaneser III (1848,1104.1)", url: "https://www.britishmuseum.org/collection/object/W_1848-1104-1" }
+      ]
     }
   ],
   "samaria-fall": [
@@ -69,7 +88,11 @@ window.TIMELINE_EVIDENCE = {
       year: "1843년부터 발굴 (이라크 코르사바드, 폴에밀 보타)",
       doubt: "'사르곤'이라는 이름은 성경에서 이사야 20:1에만 나오고 고전 문헌에도 드물어, 초기 아시리아학자들은 다른 왕의 별명으로 여기기도 했음.",
       text: "사르곤 2세의 궁전과 비문이 발굴되어 실제 앗시리아의 대왕이었음이 확인됨. 비문에는 사마리아에서 27,290명을 끌고 갔다는 기록이 있음. (바벨론 연대기는 사마리아 정복을 살만에셀 5세의 일로 기록해, 왕하 17:3–6의 기록처럼 두 왕에 걸친 사건으로 봄)",
-      sources: [W("Sargon_II"), W("Rediscovery_of_Sargon_II")]
+      sources: [
+        { label: "Posen Library – Sargon II, Khorsabad Summary Inscription", url: "https://www.posenlibrary.com/node/698" },
+        { label: "Encyclopaedia Britannica – Dur Sharrukin", url: "https://www.britannica.com/place/Dur-Sharrukin" },
+        { label: "Metropolitan Museum of Art – Early Excavations in Assyria", url: "https://metmuseum.org/TOAH/hd/rdas/hd_rdas.htm" }
+      ]
     }
   ],
   "hezekiah": [
@@ -77,13 +100,19 @@ window.TIMELINE_EVIDENCE = {
       title: "실로암 터널과 실로암 비문",
       year: "1880년 비문 발견 (예루살렘)",
       text: "기혼 샘의 물을 성 안 실로암 못으로 끌어온 약 533m의 암반 수로. 양쪽에서 파 들어가 가운데서 만난 순간을 기록한 히브리어 비문이 터널 안에서 발견됨. 히스기야가 '수도를 만들어 물을 성으로 끌어들였다'(왕하 20:20; 대하 32:30)는 기록과 연결됨. (2011년 발굴 결과로 이보다 이른 BC 9세기 말–8세기 초에 시작되었다는 견해도 있음)",
-      sources: [W("Siloam_tunnel")]
+      sources: [
+        { label: "Biblical Archaeology Society – Hezekiah's Tunnel Reexamined", url: "https://www.biblicalarchaeology.org/daily/biblical-sites-places/jerusalem/hezekiahs-tunnel-reexamined/" },
+        { label: "Biblical Archaeology Society – On Recent Suggestions Redating the Siloam Tunnel", url: "https://www.biblicalarchaeology.org/daily/biblical-sites-places/jerusalem/regarding-recent-suggestions-redating-the-siloam-tunnel/" }
+      ]
     },
     {
       title: "히스기야 왕의 인장 자국(불라)",
       year: "2015년 발표 (예루살렘 오벨 발굴, 에일랏 마자르)",
       text: "'유다 왕 아하스의 아들 히스기야의 것'이라고 새겨진 점토 인장 자국. 이스라엘·유다 왕의 인장 자국이 정식 발굴 현장에서 나온 첫 사례.",
-      sources: [W("King_Hezekiah_bulla")]
+      sources: [
+        { label: "ScienceDaily (Hebrew University release, 2015) – Impression of King Hezekiah's royal seal", url: "https://www.sciencedaily.com/releases/2015/12/151202132519.htm" },
+        { label: "Biblical Archaeology Society – Royal Seal of Hezekiah Comes to Light", url: "https://www.biblicalarchaeology.org/daily/news/king-hezekiah-in-the-bible-royal-seal-of-hezekiah-comes-to-light/comment-page-3/" }
+      ]
     }
   ],
   "sennacherib": [
@@ -91,13 +120,20 @@ window.TIMELINE_EVIDENCE = {
       title: "산헤립 연대기 (테일러 프리즘 등)",
       year: "1830년경 입수 (니느웨) · BC 691–689년 기록",
       text: "산헤립이 유다의 성읍들을 점령하고 '히스기야를 새장 속의 새처럼 예루살렘에 가두었다'고 기록함. 예루살렘을 함락했다는 말은 없으며, 성경도 예루살렘이 함락되지 않았다고 기록함(왕하 19:32–36).",
-      sources: [W("Sennacherib's_Annals")]
+      sources: [
+        { label: "British Museum – Prism of Sennacherib (Taylor Prism, 1855,1003.1)", url: "https://www.britishmuseum.org/collection/object/W_1855-1003-1" },
+        { label: "British Museum – Assyria: Lion hunts, Siege of Lachish and Khorsabad (gallery)", url: "https://www.britishmuseum.org/collection/galleries/assyria-lion-hunts" }
+      ]
     },
     {
       title: "라기스 부조와 공성 경사로",
       year: "1840년대 발굴 (니느웨 산헤립 궁전, 레이어드)",
       text: "산헤립이 유다의 요새 도시 라기스를 포위·함락하는 장면을 새긴 대형 부조. 텔 라기스 발굴에서도 앗시리아군의 공성 경사로가 확인됨. 산헤립이 라기스에 있었다는 왕하 18:14, 17과 일치함.",
-      sources: [W("Siege_of_Lachish")]
+      sources: [
+        { label: "British Museum – Lachish relief panel (1856,0909.14.7)", url: "https://www.britishmuseum.org/collection/object/W_1856-0909-14_7" },
+        { label: "British Museum – Assyria: Lion hunts, Siege of Lachish and Khorsabad (gallery)", url: "https://www.britishmuseum.org/collection/galleries/assyria-lion-hunts" },
+        { label: "Israel Nature and Parks Authority – Tel Lachish National Park", url: "https://en.parks.org.il/reserve-park/tel-lachish-national-park/" }
+      ]
     }
   ],
   "book-of-law": [
@@ -105,7 +141,9 @@ window.TIMELINE_EVIDENCE = {
       title: "케텝 힌놈 은 두루마리",
       year: "1979년 발견 (예루살렘, 가브리엘 바르카이) · BC 7세기 말–6세기 초",
       text: "작은 은판 두루마리 두 개에 민수기 6:24–26의 제사장 축복과 거의 같은 문구가 새겨져 있음. 현존하는 가장 오래된 성경 본문일 가능성이 큼. (민수기 전체가 이때 이미 완성되었다는 증거는 아니라는 지적이 있음)",
-      sources: [W("Ketef_Hinnom_scrolls")]
+      sources: [
+        { label: "Israel Ministry of Foreign Affairs – Jerusalem: Silver Plaques (Ketef Hinnom)", url: "https://embassies.gov.il/MFA/IsraelExperience/history/Pages/Archaeological Sites in Israel - Jerusalem - Silve.aspx" }
+      ]
     }
   ],
   "jeremiah": [
@@ -113,7 +151,9 @@ window.TIMELINE_EVIDENCE = {
       title: "예레미야서 인물들과 같은 이름의 인장 자국",
       year: "1980년대(이갈 실로) · 2005년 · 2008년(에일랏 마자르) 예루살렘 다윗성 발굴",
       text: "'사반의 아들 그마랴'(렘 36:10), '셀레먀의 아들 여후갈'과 '바스훌의 아들 그다랴'(렘 38:1)의 이름이 새겨진 점토 인장 자국이 정식 발굴에서 나옴. 특히 여후갈과 그다랴는 같은 구절에 함께 나오는 두 관리의 인장이 몇 미터 거리에서 함께 발견됨. (흔한 이름이어서 동명이인일 가능성을 지적하는 학자도 있음)",
-      sources: [W("Jeremiah_36"), W("List_of_biblical_figures_identified_in_extra-biblical_sources")]
+      sources: [
+        { label: "Posen Library – Four Bullas from the City of David", url: "https://www.posenlibrary.com/node/685" }
+      ]
     }
   ],
   "nineveh-fall": [
@@ -121,7 +161,10 @@ window.TIMELINE_EVIDENCE = {
       title: "바벨론 연대기 (니느웨 함락 연대기)",
       year: "1923년 출판 (대영박물관)",
       text: "바벨론과 메대 연합군이 BC 612년에 니느웨를 함락했다는 바벨론 측 기록. 나훔의 예언이 성취된 시점을 확인해 줌.",
-      sources: [W("Battle_of_Nineveh_(612_BC)"), W("Babylonian_Chronicles")]
+      sources: [
+        { label: "British Museum – Chronicle tablet 616–609 BC, fall of Nineveh (1896,0409.6)", url: "https://www.britishmuseum.org/collection/object/W_1896-0409-6" },
+        { label: "Livius.org – ABC 3 (Fall of Nineveh Chronicle)", url: "https://www.livius.org/sources/content/mesopotamian-chronicles-content/abc-3-fall-of-nineveh-chronicle/" }
+      ]
     }
   ],
   "exile2": [
@@ -129,7 +172,10 @@ window.TIMELINE_EVIDENCE = {
       title: "느부갓네살 연대기 (바벨론 연대기)",
       year: "1896년 입수 · 1956년 출판 (도널드 와이즈먼, 대영박물관)",
       text: "느부갓네살이 아달월 2일(BC 597년 3월 16일경)에 '유다의 성'을 점령하고 왕을 사로잡은 뒤 자기 마음에 드는 왕을 세웠다고 기록. 여호야긴을 잡아가고 시드기야를 세웠다는 왕하 24:10–17과 일치함.",
-      sources: [W("Nebuchadnezzar_Chronicle")]
+      sources: [
+        { label: "British Museum – Chronicle tablet 605–594 BC (1896,0409.51)", url: "https://www.britishmuseum.org/collection/object/W_1896-0409-51" },
+        { label: "Livius.org – ABC 5 (Jerusalem Chronicle)", url: "https://www.livius.org/sources/content/mesopotamian-chronicles-content/abc-5-jerusalem-chronicle/" }
+      ]
     },
     {
       title: "여호야긴 배급 점토판",
@@ -160,7 +206,9 @@ window.TIMELINE_EVIDENCE = {
       title: "고레스 원통",
       year: "1879년 발견 (바벨론) · 대영박물관 소장",
       text: "고레스가 바벨론을 점령한 뒤 끌려온 여러 민족을 고향으로 돌려보내고 신전을 복구하게 했다고 기록. 유대인을 직접 언급하지는 않지만, 성전 재건과 귀환을 허락한 고레스 칙령(스 1:1–4)과 같은 정책을 보여 줌.",
-      sources: [W("Cyrus_Cylinder"), W("Edict_of_Cyrus")]
+      sources: [
+        { label: "British Museum – The Cyrus Cylinder (1880,0617.1941)", url: "https://www.britishmuseum.org/collection/object/W_1880-0617-1941" }
+      ]
     }
   ],
   "isaiah": [
@@ -168,7 +216,11 @@ window.TIMELINE_EVIDENCE = {
       title: "사해 사본의 이사야 대두루마리 (1QIsaᵃ)",
       year: "1947년 발견 (쿰란 제1동굴) · BC 2세기경 필사",
       text: "이사야서 전체가 담긴 두루마리. 그전까지 가장 오래된 히브리어 구약 사본(AD 10세기경)보다 약 1,000년 앞서는데, 철자 등 작은 차이를 빼면 본문이 거의 같아 구약 본문이 정확하게 전해졌음을 보여 줌.",
-      sources: [W("Isaiah_Scroll"), W("Dead_Sea_Scrolls")]
+      sources: [
+        { label: "Israel Museum – Great Isaiah Scroll (Digital Dead Sea Scrolls)", url: "http://dss.collections.imj.org.il/isaiah" },
+        { label: "Israel Museum – Dead Sea Scrolls: Nature and Significance", url: "http://dss.collections.imj.org.il/significance" },
+        { label: "Encyclopaedia Britannica – Dead Sea Scrolls", url: "https://www.britannica.com/topic/Dead-Sea-Scrolls" }
+      ]
     }
   ],
   "nehemiah": [
@@ -176,7 +228,10 @@ window.TIMELINE_EVIDENCE = {
       title: "엘레판티네 파피루스",
       year: "20세기 초 발견 (이집트 엘레판티네) · BC 407년 기록",
       text: "이집트의 유대인 공동체가 보낸 편지에 '사마리아 총독 산발랏'의 아들 들라야와 셀레먀, 예루살렘 대제사장 요하난이 언급됨. 느헤미야를 방해한 '호론 사람 산발랏'(느 2:10)이 실제 사마리아의 유력자였음을 보여 줌.",
-      sources: [W("Elephantine_papyri_and_ostraca"), W("Sanballat_the_Horonite")]
+      sources: [
+        { label: "Ägyptisches Museum Berlin – Pap. Berlin P. 13495 (Petition to Bagohi)", url: "https://elephantine.smb.museum/objects/object.php?o=100282" },
+        { label: "Biblical Archaeology Society – 53 People in the Bible Confirmed Archaeologically", url: "https://biblicalarchaeology.org/daily/people-cultures-in-the-bible/people-in-the-bible/50-people-in-the-bible-confirmed-archaeologically/comment-page-1" }
+      ]
     }
   ],
 
@@ -186,7 +241,11 @@ window.TIMELINE_EVIDENCE = {
       title: "성전 경고 비문 (소렉 비문)",
       year: "1871년 발견 (예루살렘)",
       text: "'이방인은 성소 주위의 난간 안으로 들어오지 말라. 붙잡히는 자는 죽게 되리니'라는 헬라어 경고문. 헤롯 성전의 구조가 요세푸스와 신약의 기록대로였음을 보여 줌.",
-      sources: [W("Temple_Warning_inscription")]
+      sources: [
+        { label: "Israel Museum – 'No foreigner shall enter...' Temple warning inscription", url: "https://www.imj.org.il/en/collections/191538" },
+        { label: "Bickerman, JQR 1947 – The Warning Inscriptions of Herod's Temple", url: "https://www.jstor.org/stable/1452641" },
+        { label: "Encyclopaedia Britannica – Temple of Jerusalem", url: "https://www.britannica.com/topic/Temple-of-Jerusalem" }
+      ]
     }
   ],
   "flight-egypt": [
@@ -195,7 +254,11 @@ window.TIMELINE_EVIDENCE = {
       year: "2009년 발표 (이스라엘 고고학청, 야르데나 알렉산드레) · 2020년 보고서 출판",
       doubt: "1세기 나사렛에 대한 성경 밖 문헌 기록이 없어, 예수 시대에는 나사렛이라는 마을이 없었다는 주장이 제기되기도 했음.",
       text: "수태고지 교회 옆에서 초기 로마 시대(1–2세기) 토기가 나온 주거 건물이 발굴됨. 발굴자는 '유대인 마을 나사렛의 집이 처음으로 드러났다'고 평가함. 함께 발견된 무덤 등과 함께 당시 나사렛이 작은 유대인 마을로 존재했음을 보여 줌. (토기 연대 범위가 1–2세기로 넓다는 지적이 있음)",
-      sources: [W("Nazareth")]
+      sources: [
+        { label: "Israel MFA – Residential building from the time of Jesus exposed in Nazareth (IAA)", url: "https://embassies.gov.il/MFA/IsraelExperience/history/Pages/Residential_building_time_Jesus_Nazareth_21-Dec-2009.aspx" },
+        { label: "NBC News (AP) – First Jesus-era house found in Nazareth", url: "https://www.nbcnews.com/id/wbna34511072" },
+        { label: "The Jerusalem Post – Archeologists uncover house in Nazareth dating to time of Jesus", url: "https://www.jpost.com/Israel/Archeologists-uncover-house-in-Nazareth-dating-to-time-of-Jesus" }
+      ]
     }
   ],
   "ministry": [
@@ -204,13 +267,21 @@ window.TIMELINE_EVIDENCE = {
       year: "19세기 말–20세기 발굴 (예루살렘 성 안나 교회 부근)",
       doubt: "요한복음 5:2의 '행각 다섯이 있는' 베데스다 못은 다른 고대 기록에서 확인되지 않아, 상징적으로 지어낸 장소라는 견해가 있었음.",
       text: "두 개의 큰 저수조와 그 사이의 둑으로 이루어진 못이 발굴되어, 요한복음의 묘사와 맞는 장소로 평가됨.",
-      sources: [W("Pool_of_Bethesda")]
+      sources: [
+        { label: "Biblical Archaeology Society – The Bethesda Pool, Site of One of Jesus' Miracles", url: "https://www.biblicalarchaeology.org/daily/biblical-sites-places/jerusalem/the-bethesda-pool-site-of-one-of-jesus-miracles/" },
+        { label: "New Testament Studies 71 (2025) – 'There is in Jerusalem… a pool… five porticoes'", url: "https://www.cambridge.org/core/journals/new-testament-studies/article/pre70-ce-dating-of-the-gospel-of-john-there-is-in-jerusalem-a-pool-which-has-five-porticoes-52/6EB521B72901E535E1BB31A1A1473C94" },
+        { label: "BAS Library – The Puzzling Pool of Bethesda", url: "https://library.biblicalarchaeology.org/article/the-puzzling-pool-of-bethesda/" }
+      ]
     },
     {
       title: "실로암 못",
       year: "2004년 발견 · 2005년 발표 (예루살렘, 로니 라이히·엘리 슈크론)",
       text: "하수관 공사 중 제2성전 시대의 계단식 대형 못이 발견됨. 예수께서 맹인에게 '실로암 못에 가서 씻으라'고 하신 장소(요 9:7)로 여겨짐.",
-      sources: [W("Pool_of_Siloam")]
+      sources: [
+        { label: "Israel Government (IAA) – Ancient Pool of Siloam to be excavated and opened to the public", url: "https://www.gov.il/en/departments/news/pool-of-siloam-to-be-excavated-and-opened-to-the-public-27-dec-2022" },
+        { label: "Biblical Archaeology Society – The Siloam Pool: Where Jesus Healed the Blind Man", url: "https://www.biblicalarchaeology.org/daily/biblical-sites-places/biblical-archaeology-sites/the-siloam-pool-where-jesus-healed-the-blind-man/" },
+        { label: "Palestine Exploration Quarterly 140 (2008) – The Siloam Pool… was a Swimming Pool", url: "https://www.tandfonline.com/doi/abs/10.1179/003103208x269114" }
+      ]
     }
   ],
   "john-death": [
@@ -218,7 +289,10 @@ window.TIMELINE_EVIDENCE = {
       title: "요세푸스 『유대 고대사』 18.5.2",
       year: "AD 93–94년경 기록",
       text: "유대 역사가 요세푸스가 '세례자라 불린 요한'이 사람들에게 의롭게 살도록 가르치고 세례를 베풀었으며, 헤롯 안티파스가 그를 가두고 처형했다고 기록함. 거의 모든 현대 학자가 원문으로 인정하는 구절. (처형 이유 등 세부 내용은 복음서와 차이가 있음)",
-      sources: [W("Josephus_on_Jesus"), W("Sources_for_the_historicity_of_Jesus")]
+      sources: [
+        { label: "Josephus, Antiquities 18.5.2 (Whiston tr., Perseus)", url: "https://www.perseus.tufts.edu/hopper/text?doc=J.+AJ+18.5.2" },
+        { label: "BAS Library – Machaerus: Where Salome Danced and John the Baptist Was Beheaded", url: "https://library.biblicalarchaeology.org/article/machaerus-where-salome-danced-and-john-the-baptist-was-beheaded/" }
+      ]
     }
   ],
   "caiaphas": [
@@ -226,7 +300,11 @@ window.TIMELINE_EVIDENCE = {
       title: "가야바 유골함",
       year: "1990년 발견 (예루살렘 남쪽 무덤)",
       text: "화려하게 장식된 유골함에 '가야바의 아들 요셉(Yehosef bar Qayafa)'이라는 이름이 새겨져 있음. 요세푸스가 대제사장의 이름을 '가야바라 하는 요셉'으로 기록한 것과 맞아, 많은 학자들이 대제사장 가야바 가문의 무덤으로 봄. (철자와 대제사장 칭호가 없다는 점 등을 들어 이의를 제기하는 학자도 있음)",
-      sources: [W("Caiaphas_ossuary")]
+      sources: [
+        { label: "Israel Museum – Ossuary of Caiaphas, the High Priest (18–36 CE)", url: "https://www.imj.org.il/en/exhibitions/ossuary-caiaphas-high-priest-18-36-ce" },
+        { label: "BAS Library – Caiaphas' Name Inscribed on Bone Boxes", url: "https://library.biblicalarchaeology.org/article/caiaphas-name-inscribed-on-bone-boxes/" },
+        { label: "BAS Library – The Tomb of Caiaphas", url: "https://library.biblicalarchaeology.org/sidebar/the-tomb-of-caiaphas/" }
+      ]
     }
   ],
   "pilate": [
@@ -235,7 +313,11 @@ window.TIMELINE_EVIDENCE = {
       year: "1961년 발견 (가이사랴 마리티마 로마 극장 부근)",
       doubt: "빌라도는 요세푸스·필론·타키투스의 문헌에는 나오지만, 그가 다스린 시기의 고고학 유물은 발견되지 않았었음.",
       text: "'…티베리에움… 유대 총독(praefectus) 본디오 빌라도가…'라고 새겨진 석판이 발견됨. 빌라도에 대한 현존 유일의 동시대 비문으로, 그의 정식 직함이 '총독(prefect)'이었음도 확인됨.",
-      sources: [W("Pilate_stone"), W("Pontius_Pilate")]
+      sources: [
+        { label: "BAS Library – Pontius Pilate: Recalled and Recycled", url: "https://library.biblicalarchaeology.org/sidebar/pontius-pilate-recalled-and-recycled/" },
+        { label: "Israel Museum – The Cradle of Christianity (Pilate inscription)", url: "https://www.imj.org.il/en/exhibitions/cradle-christianity" },
+        { label: "Biblical Archaeology Society – 30 People in the New Testament Confirmed", url: "https://www.biblicalarchaeology.org/daily/people-cultures-in-the-bible/people-in-the-bible/new-testament-political-figures-the-evidence/" }
+      ]
     }
   ],
   "cross": [
@@ -243,14 +325,22 @@ window.TIMELINE_EVIDENCE = {
       title: "타키투스 『연대기』 15.44",
       year: "AD 116년경 기록",
       text: "로마 역사가 타키투스가 '그리스도인'이라는 이름은 '티베리우스 황제 때 총독 본디오 빌라도에게 처형당한 그리스도(Christus)'에게서 나왔다고 기록함. 기독교에 적대적인 로마 측 사료로, 타키투스 연구자들은 원문으로 봄.",
-      sources: [W("Tacitus_on_Jesus"), W("Sources_for_the_historicity_of_Jesus")]
+      sources: [
+        { label: "Tacitus, Annals 15.44 (Church & Brodribb tr., Perseus)", url: "https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.02.0078%3Abook%3D15%3Achapter%3D44" },
+        { label: "Tacitus, Annales 15.44 (Latin, Perseus)", url: "https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.02.0077%3Abook%3D15%3Achapter%3D44" },
+        { label: "Biblical Archaeology Society – Did Jesus Exist? Searching for Evidence Beyond the Bible", url: "https://www.biblicalarchaeology.org/daily/people-cultures-in-the-bible/jesus-historical-jesus/did-jesus-exist/?mqsc=E4128121&dk=ZE1130ZF0" }
+      ]
     },
     {
       title: "십자가형 희생자 여호하난의 뼈",
       year: "1968년 발견 (예루살렘 기브앗 하미브타르)",
       doubt: "로마 시대 십자가형 희생자는 무덤에 묻히지 못하고 버려졌으므로 예수의 매장 기록은 사실이 아닐 것이라는 주장이 있었음.",
       text: "쇠못이 박힌 채인 발뒤꿈치 뼈가 가족 무덤의 유골함에서 발견됨. 1세기 예루살렘에서 십자가에 못 박혀 처형된 사람도 유대 관습대로 무덤에 장사될 수 있었음을 보여 줌.",
-      sources: [W("Jehohanan")]
+      sources: [
+        { label: "Biblical Archaeology Society – A Tomb in Jerusalem Reveals the History of Crucifixion", url: "https://www.biblicalarchaeology.org/daily/biblical-topics/crucifixion/a-tomb-in-jerusalem-reveals-the-history-of-crucifixion-and-roman-crucifixion-methods/" },
+        { label: "New Testament Studies – Crucifixion and Burial", url: "https://www.cambridge.org/core/journals/new-testament-studies/article/abs/crucifixion-and-burial/ABDE509ED99779E09AD59AC274E378A3" },
+        { label: "Smithsonian Magazine – Unearthing the World of Jesus", url: "https://www.smithsonianmag.com/history/unearthing-world-jesus-180957515/" }
+      ]
     }
   ],
   "agrippa1": [
@@ -258,7 +348,10 @@ window.TIMELINE_EVIDENCE = {
       title: "요세푸스 『유대 고대사』 19.343–350",
       year: "AD 93–94년경 기록",
       text: "헤롯 아그립바 1세가 가이사랴의 경기 대회에서 화려한 옷을 입고 나타나자 백성이 그를 신이라 불렀고, 그 직후 심한 복통으로 며칠 만에 죽었다고 기록함. 사도행전 12:21–23과 핵심 내용이 일치함.",
-      sources: [W("Herod_Agrippa"), W("Acts_12")]
+      sources: [
+        { label: "Josephus, Antiquities 19.8.2 (Whiston tr., LacusCurtius)", url: "http://penelope.uchicago.edu/josephus/ant-19.html" },
+        { label: "Josephus, Antiquities of the Jews (Whiston tr., Project Gutenberg)", url: "https://www.gutenberg.org/files/2848/2848-h/2848-h.htm" }
+      ]
     }
   ],
   "journey2": [
@@ -266,14 +359,22 @@ window.TIMELINE_EVIDENCE = {
       title: "갈리오 비문 (델피 비문)",
       year: "20세기 초 발견 (그리스 델피)",
       text: "글라우디오 황제가 델피에 보낸 서신에 '나의 친구이자 아가야 총독 갈리오'가 언급됨. 글라우디오의 26번째 칭호 시기(AD 51년 1월–52년 8월)로 연대가 정해져, 바울이 고린도에서 갈리오 앞에 끌려간 사건(행 18:12)과 바울 연대기의 기준점이 됨.",
-      sources: [W("Delphi_Inscription"), W("Lucius_Junius_Gallio_Annaeanus")]
+      sources: [
+        { label: "Encyclopaedia Britannica – Biblical literature: Gallio inscription and Pauline chronology", url: "https://www.britannica.com/topic/biblical-literature/The-life-of-Jesus" },
+        { label: "Biblical Archaeology Society – 30 People in the New Testament Confirmed", url: "https://www.biblicalarchaeology.org/daily/people-cultures-in-the-bible/people-in-the-bible/new-testament-political-figures-the-evidence/" },
+        { label: "Harvard Theological Review – Paul and the Pagan Cults at Isthmia", url: "https://www.cambridge.org/core/journals/harvard-theological-review/article/abs/paul-and-the-pagan-cults-at-isthmia/DC3F6F2E32B260FCF741A8A3717C765B" }
+      ]
     },
     {
       title: "데살로니가의 '읍장(politarchs)' 비문",
       year: "19세기 이후 발견 (데살로니가 바르다르 문 비문 등)",
       doubt: "누가가 데살로니가의 관리를 '폴리타르케스(읍장)'라고 부른 것(행 17:6, 8)은 고전 그리스 문헌에 없는 직함이어서 부정확한 표현이라는 비판이 있었음.",
       text: "데살로니가 등 마케도니아 도시에서 '폴리타르케스'라는 직함이 새겨진 비문이 여럿 발견되어, 1세기 데살로니가의 관리를 실제로 그렇게 불렀음이 확인됨.",
-      sources: [W("Politarch"), W("Acts_17")]
+      sources: [
+        { label: "British Museum – Inscribed block from a Roman gateway at Thessalonika (politarchs)", url: "https://www.britishmuseum.org/collection/object/G_1877-0511-1" },
+        { label: "Burton, American Journal of Theology 1898 – The Politarchs", url: "https://www.jstor.org/stable/3153438" },
+        { label: "Biblical Archaeology Society – Underground Thessalonica", url: "https://www.biblicalarchaeology.org/daily/biblical-sites-places/underground-thessalonica/" }
+      ]
     }
   ],
   "arrest": [
@@ -281,7 +382,10 @@ window.TIMELINE_EVIDENCE = {
       title: "성전 경고 비문 (소렉 비문)",
       year: "1871년 발견 (예루살렘)",
       text: "이방인이 성전 안뜰에 들어오면 죽음을 면치 못한다는 헬라어 경고문. 바울이 이방인 드로비모를 성전에 데리고 들어갔다는 모함만으로 군중이 그를 죽이려 한 이유(행 21:28–31)를 보여 줌.",
-      sources: [W("Temple_Warning_inscription")]
+      sources: [
+        { label: "Israel Museum – 'No foreigner shall enter...' Temple warning inscription", url: "https://www.imj.org.il/en/collections/191538" },
+        { label: "Bickerman, JQR 1947 – The Warning Inscriptions of Herod's Temple", url: "https://www.jstor.org/stable/1452641" }
+      ]
     }
   ],
   "james-brother": [
@@ -289,7 +393,10 @@ window.TIMELINE_EVIDENCE = {
       title: "요세푸스 『유대 고대사』 20.9.1",
       year: "AD 93–94년경 기록",
       text: "대제사장 아나누스가 총독 베스도의 사망 후 공백기에 산헤드린을 소집해 '그리스도라 불리는 예수의 형제, 이름이 야고보인 자'를 돌로 쳐 죽게 했다고 기록함. 현대 학자들이 거의 만장일치로 원문으로 인정하는 구절.",
-      sources: [W("James,_brother_of_Jesus"), W("Josephus_on_Jesus")]
+      sources: [
+        { label: "Josephus, Antiquities 20.9.1 (Whiston tr., Perseus)", url: "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.01.0146:book%3D20:whiston+chapter%3D9:whiston+section%3D1" },
+        { label: "BAS Library – The Last Days of James", url: "https://library.biblicalarchaeology.org/sidebar/the-last-days-of-james/" }
+      ]
     }
   ],
   "h-expulsion": [
@@ -297,7 +404,11 @@ window.TIMELINE_EVIDENCE = {
       title: "수에토니우스 『황제전』 글라우디오 25.4",
       year: "AD 121년경 기록",
       text: "'크레스투스의 선동으로 계속 소란을 일으키는 유대인들을 글라우디오가 로마에서 추방했다'고 기록. 아굴라와 브리스길라가 이 명령으로 로마를 떠났다는 사도행전 18:2와 같은 사건으로 봄(AD 49–50년경). ('크레스투스'가 그리스도를 가리키는지는 학자들 사이에 의견이 갈림)",
-      sources: [W("Suetonius_on_Christians"), W("Claudius'_expulsion_of_Jews_from_Rome")]
+      sources: [
+        { label: "Suetonius, Life of Claudius 25 (Rolfe tr., LacusCurtius)", url: "https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Suetonius/12Caesars/Claudius*.html" },
+        { label: "Cambridge Companion to the Age of Nero – Burning Rome, Burning Christians", url: "https://www.cambridge.org/core/books/cambridge-companion-to-the-age-of-nero/burning-rome-burning-christians/174BE1274DF70D5C6088BDAFC163F837/core-reader" },
+        { label: "New Testament Studies – The Circumcision and the Uncircumcision in Rome", url: "https://www.cambridge.org/core/journals/new-testament-studies/article/abs/circumcision-and-the-uncircumcision-in-rome/AEA25DA986B09504EAB3C00E2ADCB1B5" }
+      ]
     }
   ],
   "h-fire": [
@@ -305,7 +416,11 @@ window.TIMELINE_EVIDENCE = {
       title: "타키투스 『연대기』 15.44",
       year: "AD 116년경 기록",
       text: "네로가 로마 대화재의 책임을 '그리스도인이라 불리는 자들'에게 돌리고 짐승 가죽을 씌워 개에게 찢기게 하거나 십자가에 달아 불태우는 등 잔혹하게 처형했다고 기록함.",
-      sources: [W("Tacitus_on_Jesus")]
+      sources: [
+        { label: "Tacitus, Annals 15.33–47 (Loeb tr., LacusCurtius)", url: "https://penelope.uchicago.edu/thayer/e/roman/texts/tacitus/annals/15b*.html" },
+        { label: "Tacitus, Annals 15.44 (Church & Brodribb tr., Perseus)", url: "https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.02.0078%3Abook%3D15%3Achapter%3D44" },
+        { label: "Classical Quarterly – Tacitus and Nero's Persecution of the Christians", url: "https://www.cambridge.org/core/journals/classical-quarterly/article/abs/tacitus-and-neros-persecution-of-the-christians/72A648B7C52F7914ED7274F0B297FB31" }
+      ]
     }
   ],
   "h-jerusalem": [
@@ -313,7 +428,11 @@ window.TIMELINE_EVIDENCE = {
       title: "티투스 개선문과 '불탄 집'",
       year: "AD 81년경 건립 (로마) · 1970년 발굴 (예루살렘, 나흐만 아비가드)",
       text: "티투스 개선문에는 예루살렘 성전에서 빼앗아 온 일곱 가지 등잔대(메노라)와 나팔 등을 로마 병사들이 운반하는 장면이 새겨져 있음. 예루살렘 윗도시의 제사장 가문 저택 '불탄 집'에서는 AD 67–69년 동전과 함께 AD 70년 화재로 무너진 흔적이 확인됨.",
-      sources: [W("Arch_of_Titus"), W("Burnt_House"), W("Siege_of_Jerusalem_(70_CE)")]
+      sources: [
+        { label: "Parco archeologico del Colosseo – Arch of Titus", url: "https://colosseo.it/en/marvels/arch-of-titus/" },
+        { label: "Yeshiva University – Arch of Titus Project", url: "https://www.yu.edu/cis/activities/arch-of-titus" },
+        { label: "Avigad, BAR 1983 – Jerusalem in Flames: The Burnt House", url: "https://library.biblicalarchaeology.org/article/jerusalem-in-flames-the-burnt-house-captures-a-moment-in-time/" }
+      ]
     }
   ]
 };

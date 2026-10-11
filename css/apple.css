@@ -498,3 +498,12 @@
 [data-skin="apple"] .filter-count.badge-in { animation: badge-in 0.5s var(--ios-spring); }
 [data-skin="apple"] .filter-count.is-closing { animation: badge-out 0.25s cubic-bezier(0.4, 0, 1, 1) forwards; }
 [data-skin="apple"] .filter-count.bump { animation: badge-bump 0.45s var(--ios-spring); }
+
+/* 공유 버튼·알림 */
+[data-skin="apple"] .d-share { border: 0; background: var(--lg-well); box-shadow: var(--lg-sunk); color: var(--accent); height: 28px; }
+[data-skin="apple"] .toast {
+  background: var(--lg-spec), var(--lg-panel); color: var(--text);
+  -webkit-backdrop-filter: var(--lg-blur); backdrop-filter: var(--lg-blur);
+  box-shadow: var(--lg-lift), var(--lg-depth);
+  transition: opacity 0.3s, transform 0.5s var(--ios-spring);
+}

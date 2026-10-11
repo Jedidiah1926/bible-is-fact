@@ -253,8 +253,20 @@
       .sort((a, b) => a.start - b.start || (a.end ?? a.start) - (b.end ?? b.start));
   }
 
+  // 초성: "ㅇㅂㄹㅎ" → 아브라함
+  const CHO = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
+  const toChosung = (str) =>
+    [...str].map((c) => {
+      const code = c.charCodeAt(0) - 0xac00;
+      return code >= 0 && code < 11172 ? CHO[Math.floor(code / 588)] : c;
+    }).join("");
+  const isChosungQuery = (q) => /^[ㄱ-ㅎ\s]+$/.test(q);
   function matchesQuery(it, q) {
     if (!q) return false;
+    if (isChosungQuery(q)) {
+      const want = q.replace(/\s/g, "");
+      return toChosung(it.title.replace(/\s/g, "")).includes(want);
+    }
     const hay = `${it.title} ${it.ref || ""} ${it.desc || ""}`.toLowerCase();
     return hay.includes(q);
   }
@@ -1207,6 +1219,36 @@
   });
 
   // ───────── 상세 패널 ─────────
+  async function shareItem(it) {
+    const url = `${location.origin}${location.pathname}#${it.id}`;
+    const data = { title: `${it.title} · 성경 타임라인`, text: `${it.title} (${it.undated ? "연대 미상" : fmtRange(it)})`, url };
+    if (navigator.share && isMobile()) {
+      try {
+        await navigator.share(data);
+      } catch (e) {
+        /* 취소 */
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast("링크를 복사했습니다");
+    } catch (e) {
+      window.prompt("이 링크를 복사하세요", url);
+    }
+  }
+  let toastTimer;
+  function toast(msg) {
+    let t = $(".toast");
+    if (!t) document.body.appendChild((t = el("div", "toast", { role: "status" })));
+    t.textContent = msg;
+    t.classList.remove("show");
+    void t.offsetWidth;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+  }
+
   function showDetail() {
     const it = state.selected && index[state.view].get(state.selected);
     if (!it) {
@@ -1219,10 +1261,22 @@
 
     const chip = el("span", "d-chip", { textContent: g.name });
     chip.style.setProperty("--h", hue);
-    detailBody.appendChild(chip);
+    // 공유: 모바일은 기기 공유 창(카카오톡 등), 그 밖에는 링크 복사
+    const share = el("button", "d-share", { type: "button", title: "이 항목 링크 공유", innerHTML: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 4.5 8 1.5l3 3M4 7H3v7h10V7h-1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>공유</span>' });
+    share.addEventListener("click", () => shareItem(it));
+    const head = el("div", "d-head");
+    head.append(chip, share);
+    detailBody.appendChild(head);
     detailBody.appendChild(el("div", "d-year", { textContent: it.undated ? "? (연대 미상)" : fmtRange(it) }));
     detailBody.appendChild(el("h2", "d-title", { textContent: it.title }));
-    if (it.ref) detailBody.appendChild(el("div", "d-ref", { textContent: "📖 " + it.ref }));
+    if (it.ref) {
+      // 성경 구절 → 성경 본문 링크 (js/bible-ref.js)
+      const ref = el("div", "d-ref", { textContent: "📖 " });
+      (window.BibleRef ? window.BibleRef.split(it.ref) : [{ text: it.ref }]).forEach((p) =>
+        ref.append(p.url ? el("a", "", { textContent: p.text, href: p.url, target: "_blank", rel: "noopener", title: "성경 본문 보기" }) : p.text)
+      );
+      detailBody.appendChild(ref);
+    }
     if (it.desc) detailBody.appendChild(el("p", "d-desc", { textContent: it.desc }));
 
     // 출처 링크 목록
@@ -1792,4 +1846,9 @@
     if (id && index.all.has(id)) select(id, { scroll: true });
   }
   boot();
+
+  // 홈 화면에 추가했을 때 오프라인에서도 열리게 (sw.js)
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+  }
 })();

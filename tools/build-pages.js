@@ -22,6 +22,7 @@ const SITE = "https://bible-is-fact.vercel.app"; // 실제 배포 주소 (도메
 const SITE_NAME = "성경 타임라인";
 const ADSENSE_CLIENT = "ca-pub-4099065432031117";
 const ROOT = path.join(__dirname, "..");
+const BibleRef = require("../js/bible-ref.js");
 
 // ───────── 데이터 읽기 (브라우저처럼 전역 window에 올림) ─────────
 const ctx = {};
@@ -90,6 +91,11 @@ const dated = pages.filter((p) => !p.undated);
 dated.forEach((p) => p.items.sort((a, b) => a.start - b.start || (a.end ?? a.start) - (b.end ?? b.start)));
 
 // ───────── HTML 조각 ─────────
+// 성경 구절 → 성경 본문 링크
+const refHtml = (ref) =>
+  BibleRef.split(ref)
+    .map((p) => (p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.text)}</a>` : esc(p.text)))
+    .join("");
 function sources(list) {
   if (!list || !list.length) return "";
   return `<p class="src"><span>출처</span>${list
@@ -131,7 +137,7 @@ function itemHtml(it) {
   const lane = laneName[it.lane] || "";
   return `<article id="${esc(it.id)}">
 <h3>${esc(it.title)}</h3>
-<p class="meta"><span class="when">${esc(fmtRange(it))}</span>${lane ? ` · ${esc(lane)}` : ""}${it.ref ? ` · <span class="ref">${esc(it.ref)}</span>` : ""}</p>
+<p class="meta"><span class="when">${esc(fmtRange(it))}</span>${lane ? ` · ${esc(lane)}` : ""}${it.ref ? ` · <span class="ref">${refHtml(it.ref)}</span>` : ""}</p>
 ${it.desc ? `<p>${esc(it.desc)}</p>` : ""}${extras(it.id)}
 <p class="open"><a href="/#${esc(it.id)}">타임라인에서 보기 →</a></p>
 </article>`;
@@ -162,6 +168,8 @@ function layout({ title, desc, url, body }) {
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}" crossorigin="anonymous"></script>
   <script src="/js/theme-init.js"></script>
   <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/img/icon-180.png">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/apple.css">
   <link rel="stylesheet" href="/css/page.css">
@@ -191,7 +199,7 @@ pages.forEach((p, i) => {
   const periodExtras = p.periodIds.map((id) => extras(id)).join("");
   const body = `<nav class="crumb"><a href="/era">시대 목록</a> › ${esc(p.title)}</nav>
 <h1>${esc(p.title)}</h1>
-<p class="lead-meta">${esc(pageRange(p))}${p.ref ? ` · <span class="ref">${esc(p.ref)}</span>` : ""}</p>
+<p class="lead-meta">${esc(pageRange(p))}${p.ref ? ` · <span class="ref">${refHtml(p.ref)}</span>` : ""}</p>
 <p class="lead">${esc(p.desc)}</p>
 ${periodExtras}
 <p class="open"><a href="/#${esc(p.periodIds[0])}">이 시대를 타임라인에서 보기 →</a></p>

@@ -957,6 +957,7 @@
 
     // 항목
     colsData.forEach(({ col, lane, layout, subs, x, SW }) => {
+      const narrowOcc = {}; // 시대 띠: 칸별로 막대·바깥 이름표가 차지한 범위
       const nSub = subs.length ? Math.max(...subs) + 1 : 1;
       // 이름표 폭: 오른쪽 칸들이 그 높이에서 비어 있으면 그만큼 넓게 (화면이 넉넉한데 … 으로 줄지 않게)
       const freeSubs = (i) => {
@@ -991,7 +992,21 @@
           // 이름이 막대 안에 들어갈 때만 표시하고, 긴 막대는 스크롤을 따라 내려오게
           // (updateSpanLabels는 위치를 y2 - 22까지 내리므로, 이름 길이만큼 미리 빼 둠)
           if (L.y2 - L.y1 > lh + 8) T.spanLabels.push({ label, y1: L.y1 + 4, y2: L.y2 - lh + 22 - 4 });
-          else label.style.display = "none";
+          else {
+            // 막대가 짧아 이름이 안 들어가면: 같은 칸의 위나 아래가 비어 있으면 거기에, 아니면 막대 위에 가로 이름표로
+            const occ = (narrowOcc[subs[i]] ||= layout.filter((M, j) => subs[j] === subs[i]).map((M) => [M.y1, M.y2]));
+            const free = (a, b) => a >= T.HEAD_H && occ.every(([p, q]) => b <= p || a >= q);
+            const above = [L.y1 - lh - 6, L.y1 - 2], below = [L.y2 + 2, L.y2 + lh + 6];
+            const spot = free(...above) ? above : free(...below) ? below : null;
+            if (spot) {
+              label.classList.add("out");
+              label.style.top = spot[0] + 2 + "px";
+              occ.push(spot);
+            } else {
+              label.classList.add("pill");
+              label.style.top = (L.y1 + L.y2) / 2 - 9 + "px";
+            }
+          }
           canvas.appendChild(wrap);
           nodes.set(it.id, wrap);
           return;

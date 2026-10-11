@@ -661,6 +661,22 @@ h1 {
   z-index: 3;
   white-space: nowrap;
 }
+/* 짧은 시대: 이름을 막대 위·아래에, 자리가 없으면 막대 위 가로 이름표 */
+.t-vlabel.out { color: color-mix(in srgb, hsl(var(--h) var(--it-s) var(--it-l)) 70%, var(--text)); }
+.t-vlabel.pill {
+  writing-mode: horizontal-tb;
+  width: auto !important;
+  white-space: nowrap;
+  font-size: 11px;
+  letter-spacing: 0;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, hsl(var(--h) var(--it-s) var(--it-l)) 55%, transparent);
+  color: hsl(var(--h) var(--it-s) var(--it-l));
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  z-index: 5;
+}
 .item.selected .t-period { outline: 2px solid var(--guide); outline-offset: 1px; }
 .t-col-bg { position: absolute; top: 46px; background: var(--lane-alt); pointer-events: none; }
 .t-zone {

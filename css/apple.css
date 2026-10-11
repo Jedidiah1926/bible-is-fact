@@ -521,3 +521,11 @@
   box-shadow: inset 0 1px 0.5px var(--glass-edge), inset 0 -1px 0.5px rgba(255, 255, 255, 0.2), inset 0 0 0 0.5px var(--glass-rim), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 [data-skin="apple"] .item.selected .t-label.on-guide { box-sizing: border-box; border-radius: 999px; padding: 0 8px; margin-left: -3px; box-shadow: inset 0 0 0 2px var(--guide), inset 0 1px 0.5px var(--glass-edge); }
+
+[data-skin="apple"] .t-vlabel.pill {
+  background: var(--lg-spec), color-mix(in srgb, var(--surface) 70%, transparent);
+  -webkit-backdrop-filter: blur(6px) saturate(180%);
+  backdrop-filter: blur(6px) saturate(180%);
+  box-shadow: inset 0 1px 0.5px var(--glass-edge), inset 0 0 0 0.5px var(--glass-rim), 0 2px 8px rgba(0, 0, 0, 0.12);
+  border: 0;
+}

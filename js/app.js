@@ -1079,9 +1079,16 @@
       canvas.appendChild(band);
     }
     const g = el("div", "t-guide");
-    g.style.top = (sel.end != null ? T.yOf(sel.start) : T.posY(sel)) + "px";
+    const gy = sel.end != null ? T.yOf(sel.start) : T.posY(sel);
+    g.style.top = gy + "px";
     g.style.width = w + "px";
     canvas.appendChild(g);
+    // 기준선이 지나가는 이름표는 바탕을 깔아 선이 글자 뒤로 지나가게 (글자와 겹치지 않게)
+    const lines = [gy, ...altDates(sel).map((c) => T.yOf(c.start))];
+    canvas.querySelectorAll(".t-label").forEach((lb) => {
+      const top = parseFloat(lb.style.top);
+      lb.classList.toggle("on-guide", lines.some((y) => y >= top - 1 && y <= top + 23));
+    });
     altDates(sel).forEach((c) => {
       const a = el("div", "t-guide alt-guide");
       a.style.top = T.yOf(c.start) + "px";
@@ -1094,6 +1101,7 @@
   const altDates = (sel) => (sel.chronology || []).filter((c) => !c.current && c.start != null);
 
   function renderGuide() {
+    canvas.querySelectorAll(".on-guide").forEach((n) => n.classList.remove("on-guide"));
     const sel = state.selected && index[state.view].get(state.selected);
     if (!sel || state.mode === "v") return;
     if (state.mode === "t") return renderGuideT(sel);

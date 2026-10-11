@@ -507,3 +507,17 @@
   box-shadow: var(--lg-lift), var(--lg-depth);
   transition: opacity 0.3s, transform 0.5s var(--ios-spring);
 }
+
+/* 세로형: 기준선이 지나가는 이름표는 작은 유리 알약 — 선이 유리 뒤에서 흐리게 비침 */
+[data-skin="apple"] .t-label.on-guide:not(:hover) {
+  -webkit-mask-image: none;
+  mask-image: none;
+  margin-left: -3px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--lg-spec), color-mix(in srgb, var(--surface) 58%, transparent);
+  -webkit-backdrop-filter: blur(5px) saturate(180%);
+  backdrop-filter: blur(5px) saturate(180%);
+  box-shadow: inset 0 1px 0.5px var(--glass-edge), inset 0 -1px 0.5px rgba(255, 255, 255, 0.2), inset 0 0 0 0.5px var(--glass-rim), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+[data-skin="apple"] .item.selected .t-label.on-guide { box-sizing: border-box; border-radius: 999px; padding: 0 8px; margin-left: -3px; box-shadow: inset 0 0 0 2px var(--guide), inset 0 1px 0.5px var(--glass-edge); }

@@ -1236,23 +1236,118 @@
   });
 
   // ───────── 상세 패널 ─────────
+  // ───────── 공유: 연도~요약 부분만 이미지로 (현재 테마·스타일 색 그대로) ─────────
+  const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  // 글자 폭에 맞춰 줄 나눔 (띄어쓰기 단위, 너무 긴 낱말은 글자 단위)
+  function wrapText(ctx, text, maxW) {
+    const lines = [];
+    String(text).split("\n").forEach((para) => {
+      let line = "";
+      para.split(/(\s+)/).forEach((tok) => {
+        if (!tok) return;
+        if (ctx.measureText(line + tok).width <= maxW) return void (line += tok);
+        if (line.trim()) lines.push(line.trimEnd());
+        line = tok.trimStart();
+        while (ctx.measureText(line).width > maxW) {
+          let k = line.length - 1;
+          while (k > 1 && ctx.measureText(line.slice(0, k)).width > maxW) k--;
+          lines.push(line.slice(0, k));
+          line = line.slice(k);
+        }
+      });
+      if (line.trim()) lines.push(line.trimEnd());
+    });
+    return lines;
+  }
+  async function shareImage(it) {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const ios = document.documentElement.dataset.skin === "apple";
+    const family = getComputedStyle(document.body).fontFamily;
+    const W = 1080;
+    const M = ios ? 56 : 0; // iOS: 배경 위에 떠 있는 둥근 카드
+    const P = M + 88; // 글자 시작 위치
+    const maxW = W - P * 2;
+    const blocks = [
+      { text: it.undated ? "? (연대 미상)" : fmtRange(it), font: `700 36px ${family}`, lh: 48, color: cssVar("--accent"), gap: 18 },
+      { text: it.title, font: `800 66px ${family}`, lh: 86, color: cssVar("--text"), gap: 18 },
+      it.ref && { text: "📖 " + it.ref, font: `600 32px ${family}`, lh: 46, color: cssVar("--muted"), gap: 36 },
+      it.desc && { text: it.desc, font: `400 38px ${family}`, lh: 64, color: cssVar("--text"), gap: 0 }
+    ].filter(Boolean);
+    const c = document.createElement("canvas");
+    const ctx = c.getContext("2d");
+    let h = P;
+    blocks.forEach((bl) => {
+      ctx.font = bl.font;
+      bl.lines = wrapText(ctx, bl.text, maxW);
+      h += bl.lines.length * bl.lh + bl.gap;
+    });
+    const H = Math.max(h + P, ios ? 700 : 600);
+    c.width = W;
+    c.height = H;
+    const hue = it.hue ?? groupOf[state.view][it.group].hue;
+    const laneColor = `hsl(${hue} ${cssVar("--it-s")} ${cssVar("--it-l")})`;
+    if (ios) {
+      const g = ctx.createLinearGradient(0, 0, W, H);
+      g.addColorStop(0, `hsl(${hue} 70% ${cssVar("--it-bg-l")})`);
+      g.addColorStop(1, cssVar("--surface-2"));
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+      ctx.save();
+      ctx.shadowColor = "rgba(0, 0, 0, 0.18)";
+      ctx.shadowBlur = 60;
+      ctx.shadowOffsetY = 18;
+      ctx.beginPath();
+      ctx.roundRect(M, M, W - M * 2, H - M * 2, 56);
+      ctx.fillStyle = cssVar("--surface");
+      ctx.fill();
+      ctx.restore();
+      ctx.lineWidth = 2;
+      const rim = ctx.createLinearGradient(M, M, W - M, H - M);
+      rim.addColorStop(0, "rgba(255, 255, 255, 0.7)");
+      rim.addColorStop(0.5, "rgba(128, 128, 128, 0.12)");
+      rim.addColorStop(1, "rgba(255, 255, 255, 0.35)");
+      ctx.strokeStyle = rim;
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = cssVar("--surface");
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = laneColor; // 위쪽에 그 줄 색 띠
+      ctx.fillRect(0, 0, W, 14);
+    }
+    let y = P;
+    ctx.textBaseline = "top";
+    blocks.forEach((bl) => {
+      ctx.font = bl.font;
+      ctx.fillStyle = bl.color;
+      bl.lines.forEach((line) => {
+        ctx.fillText(line, P, y + (bl.lh - parseInt(bl.font.split(" ")[1])) / 2);
+        y += bl.lh;
+      });
+      y += bl.gap;
+    });
+    return new Promise((res) => c.toBlob(res, "image/png"));
+  }
+
   async function shareItem(it) {
-    const url = `${location.origin}${location.pathname}#${it.id}`;
-    const data = { title: `${it.title} · 성경 타임라인`, text: `${it.title} (${it.undated ? "연대 미상" : fmtRange(it)})`, url };
-    if (navigator.share && isMobile()) {
+    const blob = await shareImage(it);
+    if (!blob) return toast("이미지를 만들지 못했습니다");
+    const file = new File([blob], `${it.title.replace(/[\\/:*?"<>|]/g, "")}.png`, { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share(data);
+        await navigator.share({ files: [file] }); // 이미지만 공유
       } catch (e) {
         /* 취소 */
       }
       return;
     }
-    try {
-      await navigator.clipboard.writeText(url);
-      toast("링크를 복사했습니다");
-    } catch (e) {
-      window.prompt("이 링크를 복사하세요", url);
-    }
+    // 공유를 지원하지 않는 브라우저: 이미지 파일로 저장
+    const a = el("a", "", { href: URL.createObjectURL(blob) });
+    a.setAttribute("download", file.name);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast("이미지를 저장했습니다");
   }
   let toastTimer;
   function toast(msg) {
@@ -1279,7 +1374,7 @@
     const chip = el("span", "d-chip", { textContent: g.name });
     chip.style.setProperty("--h", hue);
     // 공유: 모바일은 기기 공유 창(카카오톡 등), 그 밖에는 링크 복사
-    const share = el("button", "d-share", { type: "button", title: "이 항목 링크 공유", innerHTML: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 4.5 8 1.5l3 3M4 7H3v7h10V7h-1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>공유</span>' });
+    const share = el("button", "d-share", { type: "button", title: "연도·제목·구절·요약을 이미지로 공유", innerHTML: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 4.5 8 1.5l3 3M4 7H3v7h10V7h-1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>공유</span>' });
     share.addEventListener("click", () => shareItem(it));
     const head = el("div", "d-head");
     head.append(chip, share);

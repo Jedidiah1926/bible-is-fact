@@ -1,0 +1,50 @@
+/* 글로 읽는 페이지 (era/*.html — tools/build-pages.js가 생성) */
+body.page { display: block; overflow: auto; height: auto; }
+.page-top {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 12px 16px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  font-weight: 700; font-size: 14px;
+}
+.page-top a { color: var(--text); text-decoration: none; }
+.page-top .home { color: var(--accent); }
+.page .doc { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; line-height: 1.75; font-size: 15.5px; }
+.page h1 { font-size: 28px; line-height: 1.3; margin: 8px 0 4px; letter-spacing: -0.02em; }
+.page h2 { font-size: 20px; margin: 40px 0 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+.page h2 small, .page h4 small { color: var(--muted); font-weight: 500; font-size: 13px; }
+.page h3 { font-size: 18px; margin: 0 0 2px; }
+.page a { color: var(--accent); }
+.page .crumb { font-size: 13px; color: var(--muted); }
+.page .lead-meta, .page .meta { color: var(--muted); font-size: 13.5px; margin: 0 0 6px; }
+.page .when { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.page .ref::before { content: "📖 "; }
+.page .lead { font-size: 16.5px; }
+.page article { padding: 18px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 60px; }
+.page article p { margin: 4px 0; }
+.page .open { font-size: 13.5px; font-weight: 700; }
+.page .open a { text-decoration: none; }
+.page .box { margin: 12px 0; padding: 10px 14px; border-radius: 10px; font-size: 14.5px; }
+.page .box h4 { margin: 0 0 6px; font-size: 14px; }
+.page .box h5 { margin: 0 0 2px; font-size: 14.5px; }
+.page .box .card + .card { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.page .box .note { color: var(--muted); font-size: 13px; }
+.page .box.hs { background: var(--hs-bg); } .page .box.hs h4 { color: var(--hs); }
+.page .box.ev { background: var(--ok-bg); } .page .box.ev h4 { color: var(--ok); }
+.page .box.rs { background: var(--rs-bg); } .page .box.rs h4 { color: var(--rs); }
+.page .box.dp { background: var(--hot-bg); } .page .box.dp h4 { color: var(--hot); }
+.page .status { font-size: 12px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--surface); color: var(--muted); }
+.page .src { font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.page .src span { font-weight: 700; margin-right: 6px; }
+.page .src a { color: var(--muted); }
+.page .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 32px; font-weight: 700; }
+.page .era-list { list-style: none; padding: 0; margin: 24px 0; display: grid; gap: 12px; }
+.page .era-list li { padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.page .era-list a { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; text-decoration: none; color: var(--text); font-size: 17px; }
+.page .era-list a span { color: var(--muted); font-size: 13.5px; }
+.page .era-list p { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+.page-foot { max-width: 760px; margin: 0 auto; padding: 16px 16px 40px; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); }
+.page-foot a { color: var(--muted); }
+[data-skin="apple"] .page .box, [data-skin="apple"] .page .era-list li { border-radius: 18px; }

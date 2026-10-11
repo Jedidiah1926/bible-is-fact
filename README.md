@@ -114,6 +114,20 @@
 - 개인정보처리방침: [`privacy.html`](privacy.html) (쿠키·광고 고지 포함, 하단에 링크)
 - 타임라인 화면은 고정 레이아웃이라 애드센스 **자동 광고의 본문 내 광고**는 끄고, 필요하면 앵커 광고만 켜는 것을 권장합니다.
 
+## 시대별 읽기 페이지 (검색엔진·애드센스용)
+
+타임라인 화면은 JavaScript로 그려져 검색 봇에는 내용이 거의 보이지 않으므로, 같은 내용을 글로 읽는 페이지로도 내보냅니다.
+`/era`(시대 목록)와 `/era/patriarchs` 같은 시대별 페이지에 각 항목의 설명·성경 구절·역사 기록·성경 밖 자료·연구·출처가 들어갑니다.
+
+데이터를 고친 뒤에는 다시 생성해서 함께 커밋하세요:
+
+```
+node tools/build-pages.js
+```
+
+배포 주소가 바뀌면 `tools/build-pages.js`의 `SITE`와 `index.html`의 `og:url`·`og:image`·`canonical`도 바꿉니다.
+Google Search Console에 사이트를 등록하고 `sitemap.xml`을 제출하면 검색 노출이 빨라집니다.
+
 ## 파일
 
 ```
@@ -121,6 +135,11 @@ index.html      페이지
 css/style.css   스타일 (라이트/다크 모드)
 css/apple.css   iOS 스타일 (HIG 시스템 색 + Liquid Glass 재질 + iOS식 애니메이션)
 js/theme-init.js 테마를 화면 그리기 전에 적용 (<head>에서 불러옴)
+css/page.css    시대별 읽기 페이지 스타일
+era/            시대별 읽기 페이지 (자동 생성 — 직접 고치지 말 것)
+tools/build-pages.js  era/·sitemap.xml·robots.txt 생성기
+img/og.png      링크 공유 미리보기 이미지 (1200×630)
+sitemap.xml, robots.txt  검색엔진용
 js/data.js      타임라인 데이터
 js/history.js   역사 기록 (史)
 js/evidence.js  성경 밖 자료로 확인된 내용 (✓)

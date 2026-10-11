@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bible-is-fact.vercel.app/sitemap.xml

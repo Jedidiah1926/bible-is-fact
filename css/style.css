@@ -1263,3 +1263,24 @@ body.mode-v .hint > span:first-child { display: none; }
 .filter-count.badge-in { animation: badge-in 0.18s ease-out; }
 .filter-count.is-closing { animation: badge-out 0.14s ease-in forwards; }
 .filter-count.bump { animation: badge-bump 0.25s ease-out; }
+
+/* 연대 학설 비교 (js/chronology.js) */
+.d-chrono { margin-top: 14px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); }
+.d-chrono h3 { margin: 0 0 4px; font-size: 13.5px; }
+.chrono-row { padding: 8px 0 2px; border-top: 1px dashed var(--line); }
+.chrono-row:first-of-type { border-top: 0; }
+.chrono-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 13.5px; }
+.chrono-when { color: var(--muted); font-variant-numeric: tabular-nums; }
+.chrono-tag { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: var(--guide); color: #fff; }
+.chrono-row:not(.current) .chrono-head b::before { content: "┄ "; color: var(--muted); }
+/* 다른 학설의 연대: 점선 */
+.guide.alt-guide { border-left: 2px dashed color-mix(in srgb, var(--muted) 80%, transparent); }
+.guide.alt-guide span, .t-guide.alt-guide span {
+  position: sticky; top: 40px;
+  display: inline-block; margin: 6px 0 0 4px; padding: 1px 7px;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+  border-radius: 999px; background: var(--surface); color: var(--muted);
+  border: 1px dashed var(--line-strong);
+}
+.t-guide.alt-guide { border-top: 2px dashed color-mix(in srgb, var(--muted) 80%, transparent); }
+.t-guide.alt-guide span { position: sticky; left: 62px; top: auto; margin: -11px 0 0 0; }

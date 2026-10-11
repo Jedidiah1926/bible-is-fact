@@ -28,7 +28,7 @@ const BibleRef = require("../js/bible-ref.js");
 const ctx = {};
 ctx.window = ctx;
 vm.createContext(ctx);
-for (const f of ["data", "evidence", "research", "history"]) {
+for (const f of ["data", "evidence", "research", "history", "chronology", "genealogy"]) {
   vm.runInContext(fs.readFileSync(path.join(ROOT, "js", f + ".js"), "utf8"), ctx, { filename: f + ".js" });
 }
 const D = ctx.TIMELINE_DATA;
@@ -36,10 +36,13 @@ const EVIDENCE = ctx.TIMELINE_EVIDENCE || {};
 const RESEARCH = ctx.TIMELINE_RESEARCH || {};
 const HISTORY = ctx.TIMELINE_HISTORY || {};
 const RESEARCH_DATE = ctx.TIMELINE_RESEARCH_DATE || "";
+const CHRONO = ctx.TIMELINE_CHRONOLOGY || {};
+const GENEALOGY = ctx.TIMELINE_GENEALOGY || [];
 
 const laneName = {};
 D.ot.lanes.forEach((l) => (laneName[l.id] = l.name));
 D.nt.lanes.forEach((l) => (laneName[l.id] = l.name));
+laneName.writings = "성경 기록";
 const isDisputed = (status) => /논란 많음|철회/.test(status);
 
 // ───────── 형식 ─────────
@@ -124,9 +127,16 @@ function researchBox(list, disputed) {
     )
     .join("")}</div>`;
 }
+function chronoBox(list) {
+  if (!list) return "";
+  return `<div class="box ch"><h4>📅 연대 학설 비교</h4>${list
+    .map((c) => `<div class="card"><h5>${esc(c.label)} <small>${esc(c.when)}${c.current ? " · 타임라인 표시" : ""}</small></h5><p>${esc(c.note)}</p>${sources(c.sources)}</div>`)
+    .join("")}</div>`;
+}
 function extras(id) {
   const rs = RESEARCH[id] || [];
   return (
+    chronoBox(CHRONO[id]) +
     historyBox(HISTORY[id]) +
     evidenceBox(EVIDENCE[id]) +
     researchBox(rs.filter((r) => !isDisputed(r.status)), false) +
@@ -176,7 +186,7 @@ function layout({ title, desc, url, body }) {
 </head>
 <body class="page">
 <!-- 자동 생성 파일: tools/build-pages.js 로 다시 만드세요 (직접 고치지 말 것) -->
-<header class="page-top"><a class="home" href="/">← ${SITE_NAME}</a><a href="/era">시대 목록</a></header>
+<header class="page-top"><a class="home" href="/">← ${SITE_NAME}</a><nav><a href="/era">시대 목록</a><a href="/era/genealogy">족보</a><a href="/era/discoveries">발견 연표</a></nav></header>
 <main class="doc">
 ${body}
 </main>
@@ -212,6 +222,7 @@ ${p.items.map(itemHtml).join("\n")}
 
 const indexBody = `<h1>시대별로 읽기</h1>
 <p class="lead">창조부터 사도 시대까지, 성경의 사건과 인물을 시대별로 정리했습니다. 각 항목에는 성경 구절, 성경 밖 자료(고고학·고대 문헌), 진행 중인 연구와 출처가 함께 있습니다. 한눈에 보려면 <a href="/">인터랙티브 타임라인</a>을 이용하세요.</p>
+<p class="more-links"><a href="/era/genealogy">📜 족보: 아담에서 예수까지</a><a href="/era/discoveries">🏺 성경 밖 자료 발견 연표</a></p>
 <ol class="era-list">
 ${pages
   .map((p) => `<li><a href="/era/${p.slug}"><b>${esc(p.title)}</b><span>${esc(pageRange(p))} · ${p.items.length}개</span></a><p>${esc(p.desc)}</p></li>`)
@@ -222,9 +233,94 @@ fs.writeFileSync(
   layout({ title: `시대별로 읽기 · ${SITE_NAME}`, desc: "창조부터 사도 시대까지 성경의 사건·인물을 시대별로 — 성경 구절, 성경 밖 자료, 연구와 출처 포함", url: "/era", body: indexBody })
 );
 
+// ───────── 족보 ─────────
+// 항목 id → 시대 페이지 (링크용)
+const pageOf = {};
+pages.forEach((p) => {
+  p.items.forEach((it) => (pageOf[it.id] = p.slug));
+  p.periodIds.forEach((id) => (pageOf[id] = p.slug));
+});
+{
+  let am = 0, lastAt = 0; // 창조 후 연수 (창 5·11장 숫자를 그대로 더함)
+  const sections = GENEALOGY.map((sec, si) => {
+    const rows = sec.people
+      .map((p) => {
+        let amText = "";
+        if (si < 2) {
+          am = p.am ?? (p.name === "아담" ? 0 : am + lastAt);
+          lastAt = p.at;
+          amText = `<span class="g-am">창조 후 ${am.toLocaleString()}년</span>`;
+        }
+        const nums = [p.at != null ? `${p.at}세에 아들` : "", p.life != null ? `향년 ${p.life}세` : ""].filter(Boolean).join(" · ");
+        const name = p.id ? `<a href="/#${esc(p.id)}">${esc(p.name)}</a>` : esc(p.name);
+        return `<li><div class="g-name">${name}${amText}</div><div class="g-meta">${nums ? `${esc(nums)} · ` : ""}<span class="ref">${refHtml(p.ref)}</span></div>${p.note ? `<p>${esc(p.note)}</p>` : ""}</li>`;
+      })
+      .join("\n");
+    return `<section class="g-sec"><h2>${esc(sec.title)} <small>${refHtml(sec.ref)}</small></h2><p>${esc(sec.note)}</p><ol class="g-list">${rows}</ol></section>`;
+  });
+  const body = `<nav class="crumb"><a href="/era">시대 목록</a> › 족보</nav>
+<h1>아담에서 예수까지 — 족보</h1>
+<p class="lead">창세기 5장·11장, 룻기 4장, 마태복음 1장의 계보를 한 줄로 이었습니다. 나이와 수명은 히브리어 마소라 본문(개역한글)의 숫자이며, 70인역은 숫자가 다른 곳이 많습니다. ‘창조 후 연수’는 성경의 숫자를 그대로 더한 값으로, 실제 연대에 대해서는 여러 해석이 있습니다. 이름을 누르면 타임라인에서 볼 수 있습니다.</p>
+${sections.join("\n")}`;
+  fs.writeFileSync(
+    path.join(outDir, "genealogy.html"),
+    layout({ title: `족보: 아담에서 예수까지 · ${SITE_NAME}`, desc: "아담부터 노아, 아브라함, 다윗을 거쳐 예수까지 — 창세기 5·11장, 룻기 4장, 마태복음 1장의 계보와 나이·수명", url: "/era/genealogy", body })
+  );
+}
+
+// ───────── 고고학·고대 문헌 발견 연표 ─────────
+{
+  const byTitle = new Map();
+  Object.entries(EVIDENCE).forEach(([id, list]) =>
+    list.forEach((e) => {
+      const k = e.title;
+      if (!byTitle.has(k)) byTitle.set(k, { ...e, ids: [] });
+      byTitle.get(k).ids.push(id);
+    })
+  );
+  // 발견 연도 읽기: "1896년 발견", "1840년대", "20세기 초" … / "AD 93–94년경 기록"은 고대 문헌
+  const yearOf = (s) => {
+    s = s || "";
+    if (/^AD \d+/.test(s)) return { ancient: +s.match(/^AD (\d+)/)[1] };
+    let m = s.match(/(\d{4})(?=\s*(?:년|–|-))/); // "1896년", "1993–94년", "1840년대"
+    if (m) return { y: +m[1] };
+    m = s.match(/(\d{1,2})세기\s*(초|말|이후)?/);
+    if (m) return { y: (m[1] - 1) * 100 + ({ 초: 5, 말: 90, 이후: 50 }[m[2]] ?? 50) };
+    return {};
+  };
+  const all = [...byTitle.values()].map((e) => ({ ...e, ...yearOf(e.year) }));
+  const found = all.filter((e) => e.y != null).sort((a, b) => a.y - b.y);
+  const ancient = all.filter((e) => e.ancient != null).sort((a, b) => a.ancient - b.ancient);
+  const other = all.filter((e) => e.y == null && e.ancient == null);
+  const title = (id) => {
+    for (const p of pages) {
+      if (p.periodIds.includes(id)) return p.title;
+      const it = p.items.find((x) => x.id === id);
+      if (it) return it.title;
+    }
+    return id;
+  };
+  const row = (e) => `<li><div class="d-when">${esc(e.year)}</div><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p><p class="meta">관련 항목: ${e.ids
+    .map((id) => `<a href="/era/${pageOf[id] || ""}#${esc(id)}">${esc(title(id))}</a>`)
+    .join(" · ")}</p>${sources(e.sources)}</li>`;
+  const body = `<nav class="crumb"><a href="/era">시대 목록</a> › 발견 연표</nav>
+<h1>성경 밖 자료 발견 연표</h1>
+<p class="lead">성경의 인물·사건을 뒷받침하는 비문·문서·유적이 언제 발견됐는지 순서대로 모았습니다 (총 ${all.length}건). 각 자료가 무엇을 보여 주는지와 출처, 관련 항목을 함께 적었습니다.</p>
+<h2>발견된 순서 <small>${found.length}건</small></h2>
+<ol class="disc-list">${found.map(row).join("\n")}</ol>
+<h2>고대 문헌 <small>${ancient.length}건 · 기록된 순서</small></h2>
+<p>로마 시대 역사가들의 기록. 사본으로 전해져 왔으며 ‘발견’된 것은 아님.</p>
+<ol class="disc-list">${ancient.map(row).join("\n")}</ol>
+${other.length ? `<h2>발견 연도가 따로 적히지 않은 자료 <small>${other.length}건</small></h2><ol class="disc-list">${other.map(row).join("\n")}</ol>` : ""}`;
+  fs.writeFileSync(
+    path.join(outDir, "discoveries.html"),
+    layout({ title: `성경 밖 자료 발견 연표 · ${SITE_NAME}`, desc: "메르넵타 석비, 텔 단 비문, 사해 사본, 빌라도 비문 등 성경의 인물·사건을 뒷받침하는 고고학 자료가 발견된 순서", url: "/era/discoveries", body })
+  );
+}
+
 // sitemap.xml · robots.txt
 const today = new Date().toISOString().slice(0, 10);
-const urls = ["/", "/era", ...pages.map((p) => `/era/${p.slug}`), "/privacy"];
+const urls = ["/", "/era", ...pages.map((p) => `/era/${p.slug}`), "/era/genealogy", "/era/discoveries", "/privacy"];
 fs.writeFileSync(
   path.join(ROOT, "sitemap.xml"),
   `<?xml version="1.0" encoding="UTF-8"?>
@@ -235,4 +331,4 @@ ${urls.map((u) => `  <url><loc>${SITE}${u === "/" ? "/" : u}</loc><lastmod>${tod
 );
 fs.writeFileSync(path.join(ROOT, "robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
 
-console.log(`era/ 페이지 ${pages.length + 1}개, 항목 ${pages.reduce((n, p) => n + p.items.length, 0)}개, sitemap.xml·robots.txt 생성`);
+console.log(`era/ 페이지 ${pages.length + 3}개, 항목 ${pages.reduce((n, p) => n + p.items.length, 0)}개, sitemap.xml·robots.txt 생성`);

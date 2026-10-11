@@ -30,7 +30,7 @@
         ntLane("miracle"),
         ntLane("church"),
         ntLane("paul"),
-        ntLane("writings")
+        { ...ntLane("writings"), name: "성경 기록" } // 구약 각 권 + 신약 기록
       ],
       periods: ot.periods,
       prologue: ot.prologue,
@@ -133,6 +133,7 @@
     // 역사 기록(js/history.js), 성경 밖 증거(js/evidence.js), 진행 중인 연구·논쟁(js/research.js, 미확인)
     [
       ["history", window.TIMELINE_HISTORY],
+      ["chronology", window.TIMELINE_CHRONOLOGY],
       ["evidence", window.TIMELINE_EVIDENCE],
       ["research", window.TIMELINE_RESEARCH]
     ].forEach(([key, map]) => {
@@ -1081,7 +1082,16 @@
     g.style.top = (sel.end != null ? T.yOf(sel.start) : T.posY(sel)) + "px";
     g.style.width = w + "px";
     canvas.appendChild(g);
+    altDates(sel).forEach((c) => {
+      const a = el("div", "t-guide alt-guide");
+      a.style.top = T.yOf(c.start) + "px";
+      a.style.width = w + "px";
+      a.appendChild(el("span", "", { textContent: `${c.label} · ${c.when}` }));
+      canvas.appendChild(a);
+    });
   }
+  // 다른 학설의 연대 (선택했을 때 점선으로)
+  const altDates = (sel) => (sel.chronology || []).filter((c) => !c.current && c.start != null);
 
   function renderGuide() {
     const sel = state.selected && index[state.view].get(state.selected);
@@ -1103,6 +1113,13 @@
       g.style.left = x + "px";
       g.style.height = h + "px";
       canvas.appendChild(g);
+    });
+    altDates(sel).forEach((c) => {
+      const a = el("div", "guide alt-guide");
+      a.style.left = xOf(c.start) + "px";
+      a.style.height = h + "px";
+      a.appendChild(el("span", "", { textContent: `${c.label} · ${c.when}` }));
+      canvas.appendChild(a);
     });
   }
 
@@ -1292,6 +1309,23 @@
       wrap.appendChild(ul);
       return wrap;
     };
+
+    // 연대 학설 비교 (js/chronology.js)
+    if (it.chronology) {
+      const box = el("section", "d-chrono");
+      box.appendChild(el("h3", "", { textContent: "📅 연대 학설 비교" }));
+      box.appendChild(el("p", "rs-note", { textContent: "학자마다 연대가 갈리는 항목입니다. 다른 학설의 연대는 타임라인에 점선으로 함께 표시됩니다." }));
+      it.chronology.forEach((c) => {
+        const row = el("div", "chrono-row" + (c.current ? " current" : ""));
+        const head = el("div", "chrono-head");
+        head.append(el("b", "", { textContent: c.label }), el("span", "chrono-when", { textContent: c.when }));
+        if (c.current) head.append(el("span", "chrono-tag", { textContent: "타임라인 표시" }));
+        row.append(head, el("p", "ev-text", { textContent: c.note }));
+        if (c.sources) row.appendChild(sourceList(c.sources));
+        box.appendChild(row);
+      });
+      detailBody.appendChild(box);
+    }
 
     if (it.history) {
       const box = el("section", "d-history");
